@@ -1,0 +1,35 @@
+{
+  "name": "TIVE Performance",
+  "short_name": "TIVE",
+  "start_url": "/",
+  "id": "tive-app",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait",
+  "categories": [
+    "fitness",
+    "health",
+    "lifestyle"
+  ],
+  "description": "Minimalist high-performance workout tracking.",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

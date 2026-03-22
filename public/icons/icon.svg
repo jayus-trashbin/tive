@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#09090b"/>
+  
+  <!-- Dumbbell Bar -->
+  <rect x="96" y="240" width="320" height="32" fill="#BEF264"/>
+  
+  <!-- Left Weight Plates -->
+  <rect x="96" y="176" width="48" height="160" fill="#BEF264"/>
+  <rect x="48" y="192" width="48" height="128" fill="#a3e635"/>
+  
+  <!-- Right Weight Plates -->
+  <rect x="368" y="176" width="48" height="160" fill="#BEF264"/>
+  <rect x="416" y="192" width="48" height="128" fill="#a3e635"/>
+  
+  <!-- Corner Accent -->
+  <rect x="0" y="0" width="64" height="8" fill="#BEF264"/>
+  <rect x="0" y="0" width="8" height="64" fill="#BEF264"/>
+  
+  <rect x="448" y="504" width="64" height="8" fill="#BEF264"/>
+  <rect x="504" y="448" width="8" height="64" fill="#BEF264"/>
+</svg>

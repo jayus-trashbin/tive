@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sat: env(safe-area-inset-top, 20px);
+    --sab: env(safe-area-inset-bottom, 20px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+  }
+
+  html,
+  body {
+    @apply bg-black text-zinc-100 h-full overflow-hidden antialiased;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation; /* Disable double-tap zoom */
+  }
+
+  /* Tech-Brutalist Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700 hover:bg-brand-primary;
+    border-radius: 0;
+  }
+
+  /* Mobile: 16px base size prevents iOS zoom on focus */
+  input,
+  select,
+  textarea {
+    @apply bg-zinc-900 border border-zinc-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none text-base text-zinc-100 rounded-none px-3 py-3;
+  }
+}
+
+@layer components {
+
+  /* --- Card System --- */
+  .card-elevated {
+    @apply bg-zinc-900 border border-zinc-800 shadow-card;
+    border-radius: 4px;
+  }
+
+  .card-elevated:hover {
+    @apply shadow-card-hover border-zinc-700;
+  }
+
+  .card-subtle {
+    @apply bg-zinc-900/50 border border-zinc-800/60;
+    border-radius: 4px;
+  }
+
+  /* --- Typography --- */
+  .section-title {
+    @apply text-[10px] font-heading font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2;
+  }
+
+  .page-title {
+    @apply text-3xl font-heading font-black text-white uppercase tracking-tight leading-none;
+  }
+
+  .data-label {
+    @apply text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider;
+  }
+
+  /* --- Legacy Utilities --- */
+  .glass-panel {
+    @apply bg-zinc-900/90 border border-zinc-800 backdrop-blur-md;
+  }
+
+  .tech-card {
+    @apply bg-zinc-950 border border-zinc-800 hover:border-brand-primary/50 transition-colors duration-200 relative;
+  }
+
+  .tech-border {
+    @apply border border-zinc-800;
+  }
+
+  .btn-tech {
+    @apply px-4 py-2 bg-brand-primary text-black font-mono font-bold uppercase tracking-wider hover:bg-brand-primaryHover transition-all active:translate-y-[1px];
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  }
+}
+
+/* Safe Area Utilities */
+.pb-safe {
+  padding-bottom: calc(1.5rem + var(--sab));
+}
+
+.pt-safe {
+  padding-top: calc(1rem + var(--sat));
+}
+
+.px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
