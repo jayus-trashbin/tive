@@ -48,11 +48,19 @@ const Dashboard: React.FC = () => {
         try {
             if (routines.length === 0) return null;
             if (history.length === 0) return routines[0];
-            const lastRoutineSession = history.slice().reverse().find(s =>
-                routines.some(r => r.name === s.name || (s.plannedExerciseIds && s.plannedExerciseIds.length > 0))
+
+            // history is newest first. Find the most recent session from a routine.
+            const lastRoutineSession = history.find(s => 
+                s.routineId ? routines.some(r => r.id === s.routineId) : routines.some(r => r.name === s.name)
             );
+
             if (!lastRoutineSession) return routines[0];
-            const lastIndex = routines.findIndex(r => r.name === lastRoutineSession.name);
+
+            const lastIndex = routines.findIndex(r => 
+                (lastRoutineSession.routineId && r.id === lastRoutineSession.routineId) || 
+                r.name === lastRoutineSession.name
+            );
+
             if (lastIndex === -1 || lastIndex === routines.length - 1) return routines[0];
             return routines[lastIndex + 1];
         } catch (e) { console.error("[Dashboard] Next routine logic failed", e); return routines[0] || null; }

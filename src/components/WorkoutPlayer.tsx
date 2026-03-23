@@ -7,6 +7,7 @@ import ExerciseGroup from './active-session/ExerciseGroup';
 import PlateCalculator from './active-session/PlateCalculator';
 import { RestTimerOverlay } from './active-session/RestTimerOverlay';
 import { useAutoScroll } from '../hooks/useAutoScroll';
+import { useSessionTimer } from '../hooks/useSessionTimer';
 import ExercisePicker from './exercise/ExercisePicker';
 import { usePhysiology } from '../hooks/usePhysiology';
 import { getExerciseById } from '../services/exerciseService';
@@ -138,22 +139,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     const allExerciseIds = useMemo(() => sessionExercises.map(e => e.id), [sessionExercises]);
 
     // Session Timer
-    const calculateDuration = () => {
-        if (!activeSession) return '0:00';
-        const diff = Math.floor((Date.now() - activeSession.date) / 1000);
-        const m = Math.floor(diff / 60);
-        const s = diff % 60;
-        return `${m}:${s.toString().padStart(2, '0')}`;
-    };
-
-    const [duration, setDuration] = useState(calculateDuration);
-
-    useEffect(() => {
-        if (!activeSession) return;
-        setDuration(calculateDuration());
-        const interval = setInterval(() => setDuration(calculateDuration()), 1000);
-        return () => clearInterval(interval);
-    }, [activeSession]);
+    const duration = useSessionTimer(activeSession?.date || 0);
 
     const handleFinish = async () => {
         if (activeSession) {

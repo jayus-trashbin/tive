@@ -22,6 +22,24 @@ export const useWorkoutStore = create<WorkoutState>()(
       name: 'adaptive-strength-pro-db',
       storage: createJSONStorage(() => idbStorage),
       version: 8,
+      migrate: (persistedState: any, version: number) => {
+        // Handle migration from previous versions
+        if (version < 8) {
+          // Initialize any missing default values here if migrating from older versions
+          if (!persistedState.userStats) {
+             persistedState.userStats = {
+                name: '', email: '', isOnboarded: false, bodyweight: 80, gender: 'male', wilksScore: 0, supabaseUrl: '', supabaseKey: '', unitSystem: 'metric', theme: 'dark'
+             };
+          }
+          if (!persistedState.physiology) {
+             persistedState.physiology = {
+                muscleFatigue: { chest: 0, back: 0, 'upper legs': 0, 'lower legs': 0, shoulders: 0, arms: 0, core: 0, cardio: 0 },
+                lastUpdate: Date.now()
+             };
+          }
+        }
+        return persistedState;
+      },
 
       partialize: (state) => ({
         history: state.history,

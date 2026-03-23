@@ -86,10 +86,15 @@ export const calculateSymmetry = (history: Session[], exercises: Map<string, any
       if (!ex) return;
 
       const vol = set.weight * set.reps;
+      const lowerName = ex.name.toLowerCase();
 
-      if (ex.targetMuscle === 'chest' || ex.targetMuscle === 'shoulders' || (ex.targetMuscle === 'arms' && ex.name.includes('Extension'))) {
+      const isPushArm = lowerName.includes('extension') || lowerName.includes('tricep') || lowerName.includes('trícep') || lowerName.includes('push') || lowerName.includes('press');
+      const isPullArm = lowerName.includes('curl') || lowerName.includes('bicep') || lowerName.includes('bícep') || lowerName.includes('rosca') || lowerName.includes('pull');
+
+      if (ex.targetMuscle === 'chest' || ex.targetMuscle === 'shoulders' || (ex.targetMuscle === 'arms' && isPushArm)) {
         stats.push += vol;
-      } else if (ex.targetMuscle === 'back' || (ex.targetMuscle === 'arms' && ex.name.includes('Curl'))) {
+      } else if (ex.targetMuscle === 'back' || (ex.targetMuscle === 'arms' && !isPushArm)) {
+        // If it's arms and not push, we assume pull by default (biceps/forearms)
         stats.pull += vol;
       } else if (ex.targetMuscle === 'upper legs' || ex.targetMuscle === 'lower legs') {
         stats.legs += vol;
@@ -247,7 +252,8 @@ export interface SessionCompletionResult {
 export const processSessionCompletion = (
   activeSession: Session,
   exercises: Exercise[],
-  physiology: PhysiologyState
+  physiology: PhysiologyState,
+  history: Session[] = []
 ): SessionCompletionResult => {
   const now = Date.now();
   const completedSets = activeSession.sets.filter(s => s.isCompleted);
@@ -291,13 +297,19 @@ export const processSessionCompletion = (
     }
   });
 
+  // Calculate ACWR including the current session
+  const simulatedSession = { ...activeSession, volumeLoad: totalVolume, date: now };
+  const acwrResult = calculateACWR([...history, simulatedSession]);
+
   // 4. TRANSFORM SESSION
   const completedSession: Session = {
     ...activeSession,
     sets: completedSets,
     isCompleted: true,
     volumeLoad: totalVolume,
+    acwr: acwrResult.ratio,
     updatedAt: now,
+    endTime: now,
     _synced: false
   };
 

@@ -3,6 +3,7 @@ import { Target, Play, Dumbbell, Zap, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Routine } from '../../types';
 import { cn } from '../../lib/utils';
+import { estimateRoutineDuration } from '../../utils/engine';
 
 interface NextMissionProps {
     nextRoutine: Routine | null;
@@ -54,7 +55,7 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
                         <div className="h-3 w-px bg-zinc-700" />
                         <div className="flex items-center gap-1.5 text-zinc-500 data-label">
                             <Zap size={12} />
-                            ~{nextRoutine.exerciseIds.length * 4} MIN
+                            ~{estimateRoutineDuration(nextRoutine)} MIN
                         </div>
                     </div>
                 </div>

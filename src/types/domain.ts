@@ -127,6 +127,8 @@ export interface Session {
   isCompleted: boolean;
   volumeLoad: number;
   acwr?: number;
+  routineId?: string;
+  endTime?: number;
   plannedExerciseIds?: string[];
   // Snapshot of routine config to apply rest times correctly during session
   routineSnapshot?: RoutineBlock[];

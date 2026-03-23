@@ -101,6 +101,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 id: crypto.randomUUID(),
                 date: Date.now(),
                 name: sessionName,
+                routineId,
                 sets: initialSets, // Now populated with targets
                 isCompleted: false,
                 volumeLoad: 0,
@@ -126,7 +127,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 completedSession,
                 updatedExercises,
                 updatedPhysiology
-            } = processSessionCompletion(activeSession, exercises, physiology);
+            } = processSessionCompletion(activeSession, exercises, physiology, history);
 
             set({
                 history: [completedSession, ...history],

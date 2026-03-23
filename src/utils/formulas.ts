@@ -20,7 +20,10 @@ export const MUSCLE_RECOVERY_PROFILE: Record<MuscleGroup, number> = {
   'cardio': 8       // Metabolic recovery is fast
 };
 
-const MAX_MUSCLE_CAPACITY = 10000;
+const MAX_MUSCLE_CAPACITY: Record<MuscleGroup, number> = {
+  chest: 1500, back: 1800, 'upper legs': 2500, 'lower legs': 1200,
+  shoulders: 1000, arms: 800, core: 600, cardio: 500
+};
 
 /**
  * Calculates the current readiness (0.0 to 1.0) of a muscle group
@@ -41,7 +44,7 @@ export const calculateMuscleReadiness = (
 
   // Normalize to 0-1 range (1 = Fresh, 0 = Destroyed)
   // We clamp fatigue at MAX_MUSCLE_CAPACITY logic
-  const rawScore = 1 - (decayedFatigue / MAX_MUSCLE_CAPACITY);
+  const rawScore = 1 - (decayedFatigue / MAX_MUSCLE_CAPACITY[muscle]);
   const score = Math.max(0, Math.min(1, rawScore));
 
   let label: 'Prime' | 'Good' | 'Fatigued' | 'Critical' = 'Prime';
@@ -98,16 +101,15 @@ export const calculateDynamicFatigue = (
   // Safety check
   if (isNaN(load) || isNaN(rpe)) return 0;
 
-  // Intensity Scaling: Non-linear. RPE 10 is vastly more taxing than RPE 5.
-  // Using a square function to model CNS stress accumulation at high intensities.
-  const intensityMultiplier = Math.pow(Math.min(rpe, 10) / 10, 2);
+  // Using an exponential curve for RPE severity
+  const rpeMultiplier = Math.exp((rpe - 7) * 0.15);
 
   // Systemic Drag: Progressive fatigue accumulation
   // Sets 1-5: Minimal extra drag
-  // Sets 10+: Significant systemic tax (+3% per set after index 0)
-  const systemicDrag = 1 + (setIndex * 0.03);
+  // Sets 10+: Significant systemic tax (+5% per set after index 0)
+  const consecutivePenalty = 1 + (setIndex * 0.05);
 
-  const result = load * intensityMultiplier * fatigueFactor * systemicDrag;
+  const result = (load / 10) * fatigueFactor * rpeMultiplier * consecutivePenalty;
   return isFinite(result) ? result : 0;
 };
 

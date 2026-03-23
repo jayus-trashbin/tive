@@ -13,9 +13,9 @@ const PlateCalculator: React.FC<Props> = ({ targetWeight }) => {
   const { plates, remainingDelta } = useMemo(() => calculatePlates(targetWeight), [targetWeight, calculatePlates]);
 
   return (
-    <div className="bg-slate-800 p-3 rounded-lg border border-slate-700 mt-2">
+    <div className="bg-zinc-800 p-3 rounded-lg border border-zinc-700 mt-2">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs text-slate-400 uppercase font-mono">Per Side Loading</span>
+        <span className="text-xs text-zinc-400 uppercase font-mono">Per Side Loading</span>
         <span className="text-xs text-brand-accent">Bar: 20kg</span>
       </div>
       
@@ -25,7 +25,7 @@ const PlateCalculator: React.FC<Props> = ({ targetWeight }) => {
         <div className="space-y-2">
             <div className="flex flex-wrap gap-2">
             {plates.length === 0 ? (
-                <span className="text-slate-500 text-sm italic">Empty Bar</span>
+                <span className="text-zinc-500 text-sm italic">Empty Bar</span>
             ) : (
                 plates.map((plate, idx) => (
                 <div 
@@ -35,7 +35,7 @@ const PlateCalculator: React.FC<Props> = ({ targetWeight }) => {
                     ${plate >= 20 ? 'border-red-600 bg-red-900/20 text-red-500' : ''}
                     ${plate === 15 ? 'border-yellow-600 bg-yellow-900/20 text-yellow-500' : ''}
                     ${plate === 10 ? 'border-green-600 bg-green-900/20 text-green-500' : ''}
-                    ${plate < 10 ? 'border-slate-500 bg-slate-700 text-slate-300' : ''}
+                    ${plate < 10 ? 'border-zinc-500 bg-zinc-700 text-zinc-300' : ''}
                     `}
                 >
                     {plate}
