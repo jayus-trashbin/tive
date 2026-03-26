@@ -6,6 +6,7 @@ import OneRMProgress from './OneRMProgress';
 import FrequencyHeatmap from './FrequencyHeatmap';
 import MuscleRadar from './MuscleRadar';
 import PRTimeline from './PRTimeline';
+import WeeklyMuscleComparison from './WeeklyMuscleComparison';
 
 /**
  * Premium Analytics Dashboard
@@ -119,7 +120,19 @@ const AnalyticsDashboard: React.FC = () => {
                     </div>
                 </section>
 
-                {/* 4. Recent PRs & Timeline */}
+                {/* 4. E-03: Weekly Muscle Volume Comparison */}
+                <section>
+                    <div className="flex items-center mb-3 px-1">
+                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <TrendingUp size={12} className="text-brand-primary" /> Weekly Muscle Load
+                        </h2>
+                    </div>
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4">
+                        <WeeklyMuscleComparison />
+                    </div>
+                </section>
+
+                {/* 5. Recent PRs & Timeline */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
                         <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">

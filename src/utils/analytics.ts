@@ -299,20 +299,73 @@ export function getSessionMuscleIntensity(
     session.sets.forEach(set => {
         const exercise = exerciseMap.get(set.exerciseId);
         if (exercise) {
-            // Intensity Score Calculation:
-            // We use "Relative Effort" as a proxy for intensity
-            // 1 Set @ RPE 10 = 1.0 points
-            // 1 Set @ RPE 5 = 0.5 points
-            // Default RPE = 7 if missing
             const rpe = set.rpe > 0 ? set.rpe : 7;
             const score = Math.min(10, rpe) / 10;
-
             const current = intensityMap.get(exercise.targetMuscle) || 0;
             intensityMap.set(exercise.targetMuscle, current + score);
-
-            // Secondary muscles get partial credit (optional, but sticking to primary for now)
         }
     });
 
     return intensityMap;
+}
+
+// --- E-03. Weekly Muscle Volume with Delta ---
+
+export interface WeeklyMuscleVolumePoint {
+    muscle: MuscleGroup;
+    /** Total volume (kg × reps) this week */
+    thisWeek: number;
+    /** Total volume last week */
+    lastWeek: number;
+    /** Absolute delta */
+    delta: number;
+    /** Percentage change (null when lastWeek === 0) */
+    deltaPct: number | null;
+    /** Number of sets performed this week for this muscle */
+    sets: number;
+}
+
+/**
+ * E-03 — Returns per-muscle volume for this week vs. last week.
+ * Useful to detect imbalances and track progressive overload per muscle group.
+ */
+export function getWeeklyMuscleVolume(
+    sessions: Session[],
+    exercises: Exercise[]
+): WeeklyMuscleVolumePoint[] {
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const thisWeekStart = now - weekMs;
+    const lastWeekStart = now - 2 * weekMs;
+
+    const exerciseMap = new Map(exercises.map(e => [e.id, e]));
+
+    const validSessions = sessions.filter(s => s.isCompleted && !s.deletedAt);
+    const thisWeekSessions = validSessions.filter(s => s.date >= thisWeekStart);
+    const lastWeekSessions = validSessions.filter(s => s.date >= lastWeekStart && s.date < thisWeekStart);
+
+    const muscles: MuscleGroup[] = ['chest', 'back', 'upper legs', 'lower legs', 'shoulders', 'arms', 'core', 'cardio'];
+
+    const calcVolume = (sessionList: Session[], muscle: MuscleGroup) => {
+        let vol = 0;
+        let setCount = 0;
+        sessionList.forEach(session => {
+            session.sets.forEach(set => {
+                const ex = exerciseMap.get(set.exerciseId);
+                if (ex && ex.targetMuscle === muscle) {
+                    vol += set.weight * set.reps;
+                    setCount++;
+                }
+            });
+        });
+        return { vol, setCount };
+    };
+
+    return muscles.map(muscle => {
+        const { vol: thisWeek, setCount: sets } = calcVolume(thisWeekSessions, muscle);
+        const { vol: lastWeek } = calcVolume(lastWeekSessions, muscle);
+        const delta = thisWeek - lastWeek;
+        const deltaPct = lastWeek > 0 ? (delta / lastWeek) * 100 : null;
+        return { muscle, thisWeek, lastWeek, delta, deltaPct, sets };
+    });
 }

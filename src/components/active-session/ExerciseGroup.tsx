@@ -1,9 +1,10 @@
-
 import React, { useMemo, useState } from 'react';
 import { Exercise, WorkoutSet, Session } from '../../types';
 import { Plus, Info, Trophy, CheckCircle2, MessageSquare, RefreshCw, GripVertical, Flame } from 'lucide-react';
 import SetRow from './SetRow';
+import PlateauAlert from './PlateauAlert';
 import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
+import { useProgressionEngine } from '../../hooks/useProgressionEngine';
 import { cn } from '../../lib/utils';
 import ExerciseDetailModal from '../exercise/ExerciseDetailModal';
 import { getPreviousSetPerformance } from '../../utils/engine';
@@ -33,6 +34,7 @@ const ExerciseGroup: React.FC<Props> = ({
     dragHandleProps
 }) => {
     const { handleAddSet, handleCloneSet, handleGenerateWarmups, handleUpdateSet, handleCompleteSet, handleDeleteSet, getInputId } = useWorkoutLogic();
+    const { status: progressStatus, suggestions: plateauSuggestions } = useProgressionEngine(exercise.id);
     const [showDetails, setShowDetails] = useState(false);
     const [isNotesOpen, setIsNotesOpen] = useState(false);
 
@@ -185,6 +187,9 @@ const ExerciseGroup: React.FC<Props> = ({
 
                     {/* Sets List */}
                     <div className="px-2 pb-2">
+                        {/* E-02: Plateau/Stall Alert */}
+                        <PlateauAlert status={progressStatus} suggestions={plateauSuggestions} />
+
                         {sets.map((set, idx) => (
                             <SetRow
                                 key={set.id}

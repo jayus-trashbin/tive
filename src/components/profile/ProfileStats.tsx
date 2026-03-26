@@ -51,10 +51,30 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                 <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-3xl">
                     <div className="flex items-center gap-2 text-zinc-500 mb-2">
                         <BarChart3 size={16} />
-                        <span className="text-[10px] font-bold uppercase">Wilks</span>
+                        <span className="text-[10px] font-bold uppercase">Wilks Score</span>
                     </div>
                     <div className="text-3xl font-black text-white">{calculatedWilks > 0 ? calculatedWilks : '--'}</div>
-                    <div className="text-[10px] text-zinc-600">Points</div>
+                    {calculatedWilks > 0 && (() => {
+                        const level =
+                            calculatedWilks >= 400 ? { label: 'Elite', color: 'text-amber-400', pct: 100 } :
+                            calculatedWilks >= 300 ? { label: 'Advanced', color: 'text-brand-primary', pct: 75 } :
+                            calculatedWilks >= 200 ? { label: 'Intermediate', color: 'text-brand-success', pct: 50 } :
+                            { label: 'Beginner', color: 'text-zinc-500', pct: 25 };
+                        return (
+                            <div className="mt-2">
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${level.color}`}>
+                                    {level.label}
+                                </span>
+                                <div className="mt-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-brand-primary transition-all duration-500"
+                                        style={{ width: `${level.pct}%` }}
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })()}
+                    {calculatedWilks === 0 && <div className="text-[10px] text-zinc-600">Points</div>}
                 </div>
             </div>
 

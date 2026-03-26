@@ -281,6 +281,152 @@ export const getSuggestedWeight = (previousSet: WorkoutSet | null): number | nul
   return previousSet.weight;
 };
 
+// --- E-01. Exercise Progression Status Engine ---
+
+export type ProgressionStatus = 'new' | 'progressing' | 'plateau' | 'stalled';
+
+export interface ExerciseProgressStatus {
+  status: ProgressionStatus;
+  /** % change in e1RM from the 2 previous sessions to the 2 most recent */
+  trend: number;
+  /** Best e1RM seen so far for this exercise */
+  bestE1RM: number;
+  /** Number of sessions this exercise has been logged */
+  sessionCount: number;
+  message: string;
+}
+
+/**
+ * Analyses historical sessions for a given exercise and returns
+ * a rich progression status object used for UI feedback.
+ */
+export const getExerciseProgressStatus = (
+  history: Session[],
+  exerciseId: string
+): ExerciseProgressStatus => {
+  // Gather sessions that include this exercise, sorted oldest-first
+  const relevantSessions = history
+    .filter(s => s.isCompleted && !s.deletedAt && s.sets.some(set => set.exerciseId === exerciseId))
+    .sort((a, b) => a.date - b.date);
+
+  if (relevantSessions.length === 0) {
+    return { status: 'new', trend: 0, bestE1RM: 0, sessionCount: 0, message: 'No history yet. Log your first set!' };
+  }
+
+  // --- Compute best e1RM per session ---
+  const sessionBests = relevantSessions.map(session => {
+    const sets = session.sets.filter(s => s.exerciseId === exerciseId && s.isCompleted && s.estimated1RM > 0);
+    return sets.length > 0 ? Math.max(...sets.map(s => s.estimated1RM)) : 0;
+  }).filter(v => v > 0);
+
+  const sessionCount = sessionBests.length;
+  const bestE1RM = Math.max(...sessionBests);
+
+  if (sessionCount < 2) {
+    return { status: 'new', trend: 0, bestE1RM, sessionCount, message: 'Keep going! Need a few more sessions to track trend.' };
+  }
+
+  // Compare recent 2 vs previous 2 (or all available)
+  const recent = sessionBests.slice(-2);
+  const previous = sessionBests.slice(-4, -2);
+
+  const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+  const prevAvg = previous.length > 0
+    ? previous.reduce((a, b) => a + b, 0) / previous.length
+    : sessionBests[0]; // baseline vs first session
+
+  const trend = prevAvg > 0 ? ((recentAvg - prevAvg) / prevAvg) * 100 : 0;
+
+  // --- Classify ---
+  let status: ProgressionStatus;
+  let message: string;
+
+  if (trend > 2) {
+    status = 'progressing';
+    message = `+${trend.toFixed(1)}% e1RM — great progress, keep the momentum!`;
+  } else if (trend >= -1) {
+    // Plateau: no meaningful change over the last 3+ sessions
+    const lastN = sessionBests.slice(-3);
+    const maxDiff = lastN.length >= 3 ? Math.max(...lastN) - Math.min(...lastN) : Infinity;
+    const absoluteChange = Math.abs(recentAvg - bestE1RM);
+    if (lastN.length >= 3 && maxDiff < bestE1RM * 0.015) {
+      status = 'plateau';
+      message = `Plateau detected — e1RM flat for ${sessionCount} sessions. Time to change stimulus.`;
+    } else {
+      status = 'progressing';
+      message = `Stable performance. Maintain or push slightly harder.`;
+    }
+  } else {
+    status = 'stalled';
+    message = `${Math.abs(trend).toFixed(1)}% drop in e1RM — consider a deload or check recovery.`;
+  }
+
+  return { status, trend, bestE1RM, sessionCount, message };
+};
+
+// --- E-02. Plateau Detection & Contextual Suggestions ---
+
+export type PlateauSuggestionType = 'deload' | 'volume' | 'intensity' | 'variation';
+
+export interface PlateauSuggestion {
+  type: PlateauSuggestionType;
+  title: string;
+  description: string;
+  /** Icon name hint for the UI (lucide-react) */
+  icon: string;
+}
+
+/**
+ * Returns actionable suggestions when a plateau or stall is detected.
+ * Each suggestion maps to a type that the UI can display with an appropriate icon/color.
+ */
+export const getPlateauSuggestions = (
+  status: ExerciseProgressStatus
+): PlateauSuggestion[] => {
+  if (status.status === 'new' || status.status === 'progressing') return [];
+
+  const suggestions: PlateauSuggestion[] = [];
+
+  if (status.status === 'plateau') {
+    // After a plateau, classic strategies: vary load, volume, or try a deload week
+    suggestions.push({
+      type: 'intensity',
+      title: 'Push Intensity',
+      description: 'Try working up to your RPE 9 on your top set this session.',
+      icon: 'Zap'
+    });
+    suggestions.push({
+      type: 'volume',
+      title: 'Add a Working Set',
+      description: 'Add 1 extra working set at the same load for accumulated stress.',
+      icon: 'Plus'
+    });
+    suggestions.push({
+      type: 'variation',
+      title: 'Switch Variation',
+      description: 'Swap to a close variation for 2 weeks (e.g. close-grip, paused, Romanian).',
+      icon: 'Shuffle'
+    });
+  }
+
+  if (status.status === 'stalled') {
+    suggestions.push({
+      type: 'deload',
+      title: 'Take a Deload',
+      description: 'Drop to 60% of your normal weight this week. Your CNS needs recovery.',
+      icon: 'Waves'
+    });
+    suggestions.push({
+      type: 'variation',
+      title: 'Change Exercise',
+      description: 'Replace this exercise for 3–4 weeks to break the adaptation.',
+      icon: 'RefreshCw'
+    });
+  }
+
+  return suggestions;
+};
+
 // --- I. Session Completion Core (State Transformers) ---
 
 export interface SessionCompletionResult {
