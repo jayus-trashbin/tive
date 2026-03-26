@@ -237,7 +237,51 @@ export const estimateRoutineDuration = (routine: Routine): number => {
   return Math.round(totalSeconds / 60);
 };
 
-// --- H. Session Completion Core (State Transformers) ---
+// --- H. Intelligent Weight Suggestion & Previous Performance ---
+export const getPreviousSetPerformance = (
+  history: Session[],
+  routineId: string | undefined,
+  exerciseId: string,
+  setIndex: number
+): WorkoutSet | null => {
+  if (!history || history.length === 0) return null;
+
+  // Search in reverse chronological order
+  const sortedHistory = [...history].sort((a, b) => b.date - a.date);
+
+  // First try to find in the same routine
+  if (routineId) {
+    for (const session of sortedHistory) {
+      if (session.routineId === routineId) {
+        const sets = session.sets.filter(s => s.exerciseId === exerciseId && s.isCompleted);
+        if (sets.length > 0) {
+          return sets[Math.min(setIndex, sets.length - 1)];
+        }
+      }
+    }
+  }
+
+  // Fallback to any routine
+  for (const session of sortedHistory) {
+    const sets = session.sets.filter(s => s.exerciseId === exerciseId && s.isCompleted);
+    if (sets.length > 0) {
+      return sets[Math.min(setIndex, sets.length - 1)];
+    }
+  }
+
+  return null;
+};
+
+export const getSuggestedWeight = (previousSet: WorkoutSet | null): number | null => {
+  if (!previousSet || previousSet.weight === 0) return null;
+  // Simple heuristic: if RPE < 8 previously, suggest 2.5kg more. Otherwise maintain.
+  if (previousSet.rpe && previousSet.rpe < 8) {
+    return previousSet.weight + 2.5;
+  }
+  return previousSet.weight;
+};
+
+// --- I. Session Completion Core (State Transformers) ---
 
 export interface SessionCompletionResult {
   completedSession: Session;

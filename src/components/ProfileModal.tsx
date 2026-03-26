@@ -33,7 +33,9 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
         supabaseKey: userStats.supabaseKey || '',
         unitSystem: userStats.unitSystem || 'metric',
         theme: userStats.theme || 'dark',
-        geminiApiKey: userStats.geminiApiKey || ''
+        geminiApiKey: userStats.geminiApiKey || '',
+        isAudioEnabled: userStats.isAudioEnabled ?? true,
+        isVibrationEnabled: userStats.isVibrationEnabled ?? true
     });
 
     const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -50,7 +52,9 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 supabaseKey: userStats.supabaseKey || '',
                 unitSystem: userStats.unitSystem || 'metric',
                 theme: userStats.theme || 'dark',
-                geminiApiKey: userStats.geminiApiKey || ''
+                geminiApiKey: userStats.geminiApiKey || '',
+                isAudioEnabled: userStats.isAudioEnabled ?? true,
+                isVibrationEnabled: userStats.isVibrationEnabled ?? true
             });
         }
     }, [isOpen, userStats]);

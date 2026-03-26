@@ -4,6 +4,7 @@ import { useWorkoutStore } from '../store/useWorkoutStore';
 import { Exercise, WorkoutSet, MuscleGroup, Session } from '../types';
 import { ChevronDown, Calculator, CheckCircle2, Plus, Dumbbell } from 'lucide-react';
 import ExerciseGroup from './active-session/ExerciseGroup';
+import SupersetGroup from './active-session/SupersetGroup';
 import PlateCalculator from './active-session/PlateCalculator';
 import { RestTimerOverlay } from './active-session/RestTimerOverlay';
 import { useAutoScroll } from '../hooks/useAutoScroll';
@@ -14,6 +15,24 @@ import { getExerciseById } from '../services/exerciseService';
 import { cn } from '../lib/utils';
 import LiveMuscleHeatmap from './active-session/LiveMuscleHeatmap';
 import PRCelebration from './active-session/PRCelebration';
+
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export interface FinishData {
     session: Session;
@@ -36,6 +55,25 @@ interface Props {
  * - Sharp finish modal (rounded-[4px])
  * - Sharp exercise containers
  */
+
+const SortableExerciseGroup = (props: React.ComponentProps<typeof ExerciseGroup> & { id: string }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.id });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        position: 'relative' as const,
+        zIndex: isDragging ? 50 : 1
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            {/* The handle will be passed to ExerciseGroup */}
+            <ExerciseGroup {...props} dragHandleProps={{ ...attributes, ...listeners }} />
+        </div>
+    );
+};
+
 const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     const {
         activeSession,
@@ -45,6 +83,8 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
         toggleMinimize,
         logSet,
         addExercise,
+        replaceExercise,
+        reorderExercises,
         triggerPostWorkoutPrompt
     } = useWorkoutStore();
     const { calculate1RM } = usePhysiology();
@@ -52,10 +92,26 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     const [showPlateCalc, setShowPlateCalc] = useState(false);
     const [showFinishModal, setShowFinishModal] = useState(false);
     const [showExercisePicker, setShowExercisePicker] = useState(false);
+    const [replaceExerciseId, setReplaceExerciseId] = useState<string | null>(null);
     const [prEvent, setPrEvent] = useState<{ id: string; name: string; weight: number; reps: number } | null>(null);
     const [seenSetIds, setSeenSetIds] = useState<Set<string>>(new Set());
 
     const { registerRef, scrollToExercise } = useAutoScroll();
+
+    // DND Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            const oldIndex = sessionExercises.findIndex(ex => ex.id === active.id);
+            const newIndex = sessionExercises.findIndex(ex => ex.id === over.id);
+            reorderExercises(oldIndex, newIndex);
+        }
+    };
 
     // --- PR DETECTION: Check new completed sets against history ---
     useEffect(() => {
@@ -137,6 +193,54 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     }, [activeSession, exercises]);
 
     const allExerciseIds = useMemo(() => sessionExercises.map(e => e.id), [sessionExercises]);
+
+    // Compute render groups: consecutive superset blocks are merged into SupersetGroup
+    type RenderGroup =
+        | { type: 'solo'; exercise: Exercise }
+        | { type: 'superset'; members: Exercise[]; groupKey: string };
+
+    const renderGroups = useMemo((): RenderGroup[] => {
+        const snapshot = activeSession?.routineSnapshot ?? [];
+        const groups: RenderGroup[] = [];
+        let supersetBuffer: Exercise[] = [];
+
+        const flushSuperset = () => {
+            if (supersetBuffer.length > 0) {
+                groups.push({
+                    type: 'superset',
+                    members: [...supersetBuffer],
+                    groupKey: supersetBuffer.map(e => e.id).join('-')
+                });
+                supersetBuffer = [];
+            }
+        };
+
+        for (const ex of sessionExercises) {
+            const block = snapshot.find(b => b.exerciseId === ex.id);
+            const isSuperset = block?.isSuperset === true;
+
+            if (isSuperset) {
+                // If we start a superset we first check if there's a pending solo item
+                // The convention in routineSnapshot is: block.isSuperset = true means
+                // "link me with the PREVIOUS block". So if we hit isSuperset we push
+                // the previously flushed solo item BACK into a buffer together.
+                // But since we already flushed it, we handle it by checking:
+                // if the last group is solo, promote it to start a superset buffer.
+                const last = groups[groups.length - 1];
+                if (supersetBuffer.length === 0 && last && last.type === 'solo') {
+                    // start superset buffer from previous solo
+                    supersetBuffer = [last.exercise];
+                    groups.pop(); // remove the solo we just pushed
+                }
+                supersetBuffer.push(ex);
+            } else {
+                flushSuperset();
+                groups.push({ type: 'solo', exercise: ex });
+            }
+        }
+        flushSuperset();
+        return groups;
+    }, [sessionExercises, activeSession?.routineSnapshot]);
 
     // Session Timer
     const duration = useSessionTimer(activeSession?.date || 0);
@@ -292,17 +396,44 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                                 <p className="data-label mt-1">Add an exercise to get started</p>
                             </div>
                         ) : (
-                            sessionExercises.map((ex) => (
-                                <ExerciseGroup
-                                    key={ex.id}
-                                    exercise={ex}
-                                    sets={activeSession.sets.filter(s => s.exerciseId === ex.id)}
-                                    history={history}
-                                    allExerciseIds={allExerciseIds}
-                                    registerRef={registerRef}
-                                    onAutoScrollRequest={scrollToExercise}
-                                />
-                            ))
+                            renderGroups.map((group) => {
+                                if (group.type === 'superset') {
+                                    return (
+                                        <SupersetGroup
+                                            key={group.groupKey}
+                                            items={group.members.map(ex => ({
+                                                exercise: ex,
+                                                sets: activeSession.sets.filter(s => s.exerciseId === ex.id)
+                                            }))}
+                                            history={history}
+                                            allExerciseIds={allExerciseIds}
+                                            registerRef={registerRef}
+                                            onAutoScrollRequest={scrollToExercise}
+                                            onReplaceRequest={(exerciseId) => {
+                                                setReplaceExerciseId(exerciseId);
+                                                setShowExercisePicker(true);
+                                            }}
+                                        />
+                                    );
+                                }
+                                const ex = group.exercise;
+                                return (
+                                    <ExerciseGroup
+                                        key={ex.id}
+                                        exercise={ex}
+                                        sets={activeSession.sets.filter(s => s.exerciseId === ex.id)}
+                                        history={history}
+                                        allExerciseIds={allExerciseIds}
+                                        registerRef={registerRef}
+                                        onAutoScrollRequest={scrollToExercise}
+                                        onReplaceRequest={() => {
+                                            setReplaceExerciseId(ex.id);
+                                            setShowExercisePicker(true);
+                                        }}
+                                        isSuperset={false}
+                                    />
+                                );
+                            })
                         )}
                     </div>
 
@@ -329,11 +460,22 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                 reps={prEvent?.reps}
             />
 
-            {/* Exercise Picker */}
+            {/* Exercise Picker — handles both "add" and "replace" modes */}
             <ExercisePicker
                 isOpen={showExercisePicker}
-                onClose={() => setShowExercisePicker(false)}
-                onSelect={handleAddExercises}
+                onClose={() => {
+                    setShowExercisePicker(false);
+                    setReplaceExerciseId(null);
+                }}
+                onSelect={(ids) => {
+                    if (replaceExerciseId && ids.length > 0) {
+                        replaceExercise(replaceExerciseId, ids[0]);
+                        setReplaceExerciseId(null);
+                    } else {
+                        handleAddExercises(ids);
+                    }
+                    setShowExercisePicker(false);
+                }}
             />
 
             {/* ──── FINISH MODAL ──── */}

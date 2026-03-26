@@ -7,7 +7,7 @@ import { audio } from '../../utils/audio';
 import { cn } from '../../lib/utils';
 
 export const RestTimerOverlay = () => {
-    const { restTimer, skipRest, addRestTime } = useWorkoutStore();
+    const { restTimer, skipRest, addRestTime, userStats } = useWorkoutStore();
     const { trigger: haptic } = useHaptic();
     const [timeLeft, setTimeLeft] = useState(0);
 
@@ -19,8 +19,8 @@ export const RestTimerOverlay = () => {
             const remaining = Math.ceil((restTimer.endTime! - now) / 1000);
 
             if (remaining <= 0) {
-                audio.playTimerFinished();
-                haptic('medium');
+                if (userStats.isAudioEnabled !== false) audio.playTimerFinished();
+                if (userStats.isVibrationEnabled !== false) haptic('medium');
                 skipRest(); // Auto close on finish
             } else {
                 setTimeLeft(remaining);
@@ -39,7 +39,7 @@ export const RestTimerOverlay = () => {
     const AdjustButton = ({ seconds, label }: { seconds: number, label: string }) => (
         <button
             onClick={() => {
-                if (navigator.vibrate) navigator.vibrate(10);
+                if (userStats.isVibrationEnabled !== false && navigator.vibrate) navigator.vibrate(10);
                 addRestTime(seconds);
             }}
             className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-zinc-800 border border-white/5 active:bg-zinc-700 active:scale-95 transition-all"
@@ -99,7 +99,7 @@ export const RestTimerOverlay = () => {
                     {/* Main Action */}
                     <button
                         onClick={() => {
-                            if (navigator.vibrate) navigator.vibrate(20);
+                            if (userStats.isVibrationEnabled !== false && navigator.vibrate) navigator.vibrate(20);
                             skipRest();
                         }}
                         className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl shadow-glow active:scale-[0.98] transition-transform flex items-center justify-center gap-2"

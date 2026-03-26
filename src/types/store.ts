@@ -27,9 +27,13 @@ export interface SessionSlice {
   deleteSession: (sessionId: string) => void;
 
   logSet: (set: WorkoutSet) => void;
+  addWarmupSets: (exerciseId: string, warmups: WorkoutSet[]) => void;
   updateSet: (setId: string, updates: Partial<WorkoutSet>) => void;
   toggleSetComplete: (setId: string, isCompleted: boolean) => void;
   deleteSet: (setId: string) => void;
+  replaceExercise: (oldExerciseId: string, newExerciseId: string) => void;
+  reorderExercises: (oldIndex: number, newIndex: number) => void;
+  updateExerciseNote: (exerciseId: string, note: string) => void;
 
   startRest: (seconds: number) => void;
   skipRest: () => void;

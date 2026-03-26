@@ -4,6 +4,7 @@ import { useHaptic } from './useHaptic';
 import { WorkoutSet, SetType } from '../types';
 import { usePhysiology } from './usePhysiology';
 import { audio } from '../utils/audio';
+import { getPreviousSetPerformance, getSuggestedWeight } from '../utils/engine';
 
 export const useWorkoutLogic = () => {
     const { activeSession, updateSet, logSet, toggleSetComplete, deleteSet, history } = useWorkoutStore();
@@ -29,22 +30,18 @@ export const useWorkoutLogic = () => {
         let defaultType: SetType = 'working';
 
         if (currentSets.length > 0) {
-            // Copy last set
+            // Copy last set from current session exactly
             const last = currentSets[currentSets.length - 1];
             defaultWeight = last.weight;
             defaultReps = last.reps;
             defaultRpe = last.rpe;
             defaultType = last.type || 'working';
         } else {
-            // Try to find historical data
-            const lastSession = history.find(s => s.sets.some(k => k.exerciseId === exerciseId));
-            if (lastSession) {
-                const histSets = lastSession.sets.filter(k => k.exerciseId === exerciseId);
-                const last = histSets[histSets.length - 1];
-                if (last) {
-                    defaultWeight = last.weight;
-                    defaultReps = last.reps;
-                }
+            // Try to find historical data using the engine
+            const lastPerf = getPreviousSetPerformance(history, currentSession.routineId, exerciseId, 0);
+            if (lastPerf) {
+                defaultWeight = getSuggestedWeight(lastPerf) || lastPerf.weight;
+                defaultReps = lastPerf.reps;
             }
         }
 
@@ -62,6 +59,57 @@ export const useWorkoutLogic = () => {
 
         logSet(newSet);
     }, [history, logSet, calculate1RM]);
+
+    // 1.5 CLONE SET
+    const handleCloneSet = useCallback((sourceSet: WorkoutSet) => {
+        const newSet: WorkoutSet = {
+            ...sourceSet,
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            isCompleted: false
+        };
+        logSet(newSet);
+    }, [logSet]);
+
+    // 1.8 GENERATE WARMUPS
+    const handleGenerateWarmups = useCallback((exerciseId: string, targetWeight: number) => {
+        if (targetWeight <= 20) {
+            haptic('error');
+            return; // No warmups needed for very light weight
+        }
+
+        const roundTo2_5 = (w: number) => Math.round(w / 2.5) * 2.5;
+
+        // Steps: Bar (20), 50%, 75%
+        const steps = [
+            { weight: 20, reps: 10 },
+            { weight: Math.max(20, roundTo2_5(targetWeight * 0.5)), reps: 5 },
+            { weight: Math.max(20, roundTo2_5(targetWeight * 0.75)), reps: 3 }
+        ];
+
+        // Filter valid steps (strictly increasing and less than target)
+        const uniqueSteps = steps.filter((step, i, arr) => 
+            step.weight < targetWeight && 
+            (i === 0 || step.weight > arr[i-1].weight)
+        );
+
+        if (uniqueSteps.length === 0) return;
+
+        const warmups: WorkoutSet[] = uniqueSteps.map(step => ({
+            id: crypto.randomUUID(),
+            exerciseId,
+            weight: step.weight,
+            reps: step.reps,
+            rpe: 8,
+            type: 'warmup',
+            timestamp: Date.now(),
+            estimated1RM: calculate1RM(step.weight, step.reps, 8),
+            isCompleted: false
+        }));
+
+        useWorkoutStore.getState().addWarmupSets(exerciseId, warmups);
+        haptic('success');
+    }, [calculate1RM, haptic]);
 
     // 2. UPDATE SET (Inline Editing)
     const handleUpdateSet = useCallback((setId: string, field: keyof WorkoutSet, value: WorkoutSet[keyof WorkoutSet]) => {
@@ -126,6 +174,8 @@ export const useWorkoutLogic = () => {
 
     return {
         handleAddSet,
+        handleCloneSet,
+        handleGenerateWarmups,
         handleUpdateSet,
         handleCompleteSet,
         handleDeleteSet: deleteSet,

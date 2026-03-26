@@ -30,6 +30,8 @@ export interface UserStats {
   lastSyncTime?: number;
   unitSystem: 'metric' | 'imperial';
   theme: 'dark' | 'light' | 'oled';
+  isAudioEnabled?: boolean;
+  isVibrationEnabled?: boolean;
 }
 
 export interface ProfileFormData {
@@ -42,6 +44,8 @@ export interface ProfileFormData {
   unitSystem: 'metric' | 'imperial';
   theme: 'dark' | 'light' | 'oled';
   geminiApiKey: string;
+  isAudioEnabled: boolean;
+  isVibrationEnabled: boolean;
 }
 
 export interface Exercise {
@@ -137,6 +141,7 @@ export interface Session {
   updatedAt?: number;
   deletedAt?: number; // Soft Delete
   _synced?: boolean;
+  notes?: Record<string, string>;
 }
 
 export interface Mesocycle {

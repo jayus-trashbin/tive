@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 import { WorkoutState, SessionSlice } from '../../types/store';
 import { Session, WorkoutSet, PhysiologyState, MuscleGroup, RoutineBlock, Routine, Exercise } from '../../types';
 import { syncService } from '../../services/SyncService';
-import { processSessionCompletion } from '../../utils/engine';
+import { processSessionCompletion, getPreviousSetPerformance, getSuggestedWeight } from '../../utils/engine';
 
 // Initial state helpers
 const initialPhysiology: PhysiologyState = {
@@ -52,24 +52,38 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                     routineSnapshot = routine.blocks || [];
 
                     // --- INTELLIGENT PRE-POPULATION ---
+                    const getDefaults = (exerciseId: string, setIndex: number, plannedWeight: number, plannedReps: number, plannedRpe: number) => {
+                        let w = plannedWeight || 0;
+                        let r = plannedReps || 0;
+                        let rpe = plannedRpe || 8;
+                        if (w === 0 || r === 0) {
+                            const lastPerf = getPreviousSetPerformance(get().history, routineId, exerciseId, setIndex);
+                            if (lastPerf) {
+                                if (w === 0) w = getSuggestedWeight(lastPerf) || lastPerf.weight;
+                                if (r === 0) r = lastPerf.reps;
+                            }
+                        }
+                        return { w, r, rpe };
+                    };
+
                     if (routine.blocks && routine.blocks.length > 0) {
                         // Modern Routine: Follow the blocks
                         routine.blocks.forEach(block => {
-                            block.sets.forEach(plannedSet => {
-                                // Parse target reps (e.g., "8-12" -> 10, "5" -> 5)
+                            block.sets.forEach((plannedSet, setIdx) => {
+                                // Parse target reps
                                 let initialReps = 0;
                                 const parsedReps = parseInt(plannedSet.targetReps);
                                 if (!isNaN(parsedReps)) initialReps = parsedReps;
 
+                                const defs = getDefaults(block.exerciseId, setIdx, plannedSet.targetWeight || 0, initialReps, plannedSet.targetRpe || 8);
+
                                 initialSets.push({
                                     id: crypto.randomUUID(),
                                     exerciseId: block.exerciseId,
-                                    // Pre-fill WEIGHT if planned (Zero Friction)
-                                    weight: plannedSet.targetWeight || 0,
-                                    // Pre-fill REPS if planned
-                                    reps: initialReps,
-                                    rpe: plannedSet.targetRpe || 8,
-                                    type: plannedSet.type,
+                                    weight: defs.w,
+                                    reps: defs.r,
+                                    rpe: defs.rpe,
+                                    type: plannedSet.type || 'working',
                                     timestamp: Date.now(),
                                     estimated1RM: 0,
                                     isCompleted: false
@@ -80,12 +94,13 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                         // Legacy Routine: Default to 3 sets
                         routine.exerciseIds.forEach(eid => {
                             for (let i = 0; i < 3; i++) {
+                                const defs = getDefaults(eid, i, 0, 0, 8);
                                 initialSets.push({
                                     id: crypto.randomUUID(),
                                     exerciseId: eid,
-                                    weight: 0,
-                                    reps: 0,
-                                    rpe: 8,
+                                    weight: defs.w,
+                                    reps: defs.r,
+                                    rpe: defs.rpe,
                                     type: 'working',
                                     timestamp: Date.now(),
                                     estimated1RM: 0,
@@ -187,6 +202,28 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
         }
     },
 
+    addWarmupSets: (exerciseId: string, warmups: WorkoutSet[]) => {
+        const { activeSession } = get();
+        if (!activeSession) return;
+
+        // Find index of first set of this exercise to insert them before it
+        const firstSetIndex = activeSession.sets.findIndex(s => s.exerciseId === exerciseId);
+        
+        let newSets = [...activeSession.sets];
+        if (firstSetIndex !== -1) {
+            newSets.splice(firstSetIndex, 0, ...warmups);
+        } else {
+            newSets = [...newSets, ...warmups];
+        }
+
+        set({
+            activeSession: {
+                ...activeSession,
+                sets: newSets
+            }
+        });
+    },
+
     updateSet: (setId, updates) => {
         const { activeSession } = get();
         if (activeSession) {
@@ -252,6 +289,76 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                     sets: activeSession.sets.filter(s => s.id !== setId),
                 },
             });
+        }
+    },
+
+    updateExerciseNote: (exerciseId: string, note: string) => {
+        const { activeSession } = get();
+        if (activeSession) {
+            set({
+                activeSession: {
+                    ...activeSession,
+                    notes: {
+                        ...(activeSession.notes || {}),
+                        [exerciseId]: note
+                    }
+                }
+            });
+        }
+    },
+
+    replaceExercise: (oldExerciseId: string, newExerciseId: string) => {
+        const { activeSession } = get();
+        if (activeSession) {
+            set({
+                activeSession: {
+                    ...activeSession,
+                    sets: activeSession.sets.map(s => 
+                        s.exerciseId === oldExerciseId ? { ...s, exerciseId: newExerciseId } : s
+                    ),
+                    plannedExerciseIds: activeSession.plannedExerciseIds?.map(id => 
+                        id === oldExerciseId ? newExerciseId : id
+                    ),
+                    // Also transfer notes if they exist
+                    notes: (() => {
+                        const newNotes = { ...(activeSession.notes || {}) };
+                        if (newNotes[oldExerciseId]) {
+                            newNotes[newExerciseId] = newNotes[oldExerciseId];
+                            delete newNotes[oldExerciseId];
+                        }
+                        return newNotes;
+                    })()
+                }
+            });
+        }
+    },
+
+    reorderExercises: (oldIndex: number, newIndex: number) => {
+        const { activeSession } = get();
+        if (activeSession) {
+            // Ensure we have a working array of planned IDs
+            const currentPlanned = activeSession.plannedExerciseIds || [];
+            
+            // Collect any freestyle exercises that have sets but aren't in planned
+            const loggedIds = Array.from(new Set(activeSession.sets.map(s => s.exerciseId)));
+            const freestyle = loggedIds.filter(id => !currentPlanned.includes(id));
+            
+            // Build the full ordered list as it appears in the UI
+            const allExerciseIds = [...currentPlanned, ...freestyle];
+            
+            // Perform the move
+            if (oldIndex >= 0 && oldIndex < allExerciseIds.length && newIndex >= 0 && newIndex < allExerciseIds.length) {
+                const itemToMove = allExerciseIds[oldIndex];
+                allExerciseIds.splice(oldIndex, 1);
+                allExerciseIds.splice(newIndex, 0, itemToMove);
+                
+                set({
+                    activeSession: {
+                        ...activeSession,
+                        plannedExerciseIds: allExerciseIds // Update store with the new order
+                    }
+                });
+            }
         }
     },
 

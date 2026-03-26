@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { WorkoutSet, SetType } from '../../types';
-import { Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, Copy } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion, PanInfo } from 'framer-motion';
+import { getSuggestedWeight } from '../../utils/engine';
+import { calculateHybrid1RM } from '../../utils/formulas';
 import RpePicker from './RpePicker';
 
 interface Props {
@@ -13,11 +15,12 @@ interface Props {
     onUpdate: (field: keyof WorkoutSet, value: WorkoutSet[keyof WorkoutSet]) => void;
     onComplete: () => void;
     onDelete: () => void;
+    onClone?: () => void;
     getInputId: (field: 'weight' | 'reps') => string;
 }
 
 const SetRow: React.FC<Props> = ({
-    index, set, previousSet, onUpdate, onComplete, onDelete, getInputId
+    index, set, previousSet, onUpdate, onComplete, onDelete, onClone, getInputId
 }) => {
     const isCompleted = set.isCompleted;
     const [showRpePicker, setShowRpePicker] = useState(false);
@@ -56,9 +59,20 @@ const SetRow: React.FC<Props> = ({
     return (
         <>
             <div className="relative group mb-2 last:mb-0 transform-gpu">
-                {/* Delete Background Layer - Simplified */}
-                <div className="absolute inset-0 bg-red-900/20 rounded-2xl flex items-center justify-end px-6 z-0">
-                    <Trash2 size={20} className="text-red-500" />
+                {/* Swipe Actions Background Layer */}
+                <div className="absolute inset-0 bg-red-900/20 rounded-2xl flex items-center justify-end px-4 gap-4 z-0">
+                    <button 
+                        onClick={() => onClone?.()} 
+                        className="w-10 h-10 bg-blue-500/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
+                    >
+                        <Copy size={18} />
+                    </button>
+                    <button 
+                        onClick={() => onDelete()} 
+                        className="w-10 h-10 bg-red-500/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
+                    >
+                        <Trash2 size={18} />
+                    </button>
                 </div>
 
                 {/* Foreground Content - Optimized Drag */}
@@ -69,7 +83,8 @@ const SetRow: React.FC<Props> = ({
                     dragMomentum={false}
                     dragDirectionLock={true}
                     onDragEnd={(e, info: PanInfo) => {
-                        if (info.offset.x < -80) onDelete();
+                        // Keep open or trigger action based on distance
+                        if (info.offset.x < -100) onDelete();
                     }}
                     className={cn(
                         "relative z-10 grid gap-1.5 items-center p-1.5 rounded-2xl border transition-colors duration-200 will-change-transform",
@@ -90,9 +105,9 @@ const SetRow: React.FC<Props> = ({
                         {getTypeLabel(set.type)}
                     </button>
 
-                    {/* 2. Weight Input Island - Removed heavy shadows/transitions */}
+                    {/* 2. Weight Input Island */}
                     <div className={cn(
-                        "relative h-full min-h-[48px] rounded-xl flex flex-col justify-center px-1",
+                        "relative h-full min-h-[48px] rounded-xl flex flex-col items-center justify-center px-1",
                         isCompleted ? "opacity-80" : "bg-zinc-950 border border-zinc-800"
                     )}>
                         {/* Floating Label (Hidden on small screens) */}
@@ -112,14 +127,26 @@ const SetRow: React.FC<Props> = ({
                             onFocus={(e) => e.target.select()}
                             className={cn(
                                 "w-full bg-transparent text-center text-lg font-bold font-mono focus:outline-none placeholder:text-zinc-800",
-                                isCompleted ? "text-brand-success" : "text-white"
+                                isCompleted ? "text-brand-success" : "text-white",
+                                previousSet && !isCompleted ? "leading-none mt-2" : ""
                             )}
                         />
+                        {previousSet && !isCompleted && (
+                            <button
+                                onClick={() => {
+                                    const suggested = getSuggestedWeight(previousSet);
+                                    if (suggested) onUpdate('weight', suggested);
+                                }}
+                                className="text-[9px] text-zinc-500 font-mono mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
+                            >
+                                Suggest: {getSuggestedWeight(previousSet)}
+                            </button>
+                        )}
                     </div>
 
                     {/* 3. Reps Input Island */}
                     <div className={cn(
-                        "relative h-full min-h-[48px] rounded-xl flex flex-col justify-center px-1",
+                        "relative h-full min-h-[48px] rounded-xl flex flex-col items-center justify-center px-1",
                         isCompleted ? "opacity-80" : "bg-zinc-950 border border-zinc-800"
                     )}>
                         {!isCompleted && (
@@ -138,12 +165,23 @@ const SetRow: React.FC<Props> = ({
                             onFocus={(e) => e.target.select()}
                             className={cn(
                                 "w-full bg-transparent text-center text-lg font-bold font-mono focus:outline-none placeholder:text-zinc-800",
-                                isCompleted ? "text-brand-success" : "text-white"
+                                isCompleted ? "text-brand-success" : "text-white",
+                                previousSet && !isCompleted ? "leading-none mt-2" : ""
                             )}
                         />
+                        {previousSet && !isCompleted && (
+                            <button
+                                onClick={() => {
+                                    if (previousSet.reps) onUpdate('reps', previousSet.reps);
+                                }}
+                                className="text-[9px] text-zinc-500 font-mono mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
+                            >
+                                Prev: {previousSet.reps}
+                            </button>
+                        )}
                     </div>
 
-                    {/* 4. RPE Pill */}
+                    {/* 4. RPE Pill + e1RM */}
                     <div className="flex justify-center h-full">
                         <button
                             onClick={() => setShowRpePicker(true)}
@@ -155,6 +193,11 @@ const SetRow: React.FC<Props> = ({
                             )}
                         >
                             <span>@{set.rpe}</span>
+                            {set.weight > 0 && set.reps > 0 && (
+                                <span className="text-[8px] opacity-70 leading-none" title="Estimated 1RM">
+                                    {Math.round(calculateHybrid1RM(set.weight, set.reps, set.rpe))}kg
+                                </span>
+                            )}
                         </button>
                     </div>
 
