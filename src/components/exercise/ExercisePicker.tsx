@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Check, Plus, Loader2, ChevronDown, Dumbbell } from 'lucide-react';
+import { Search, X, Check, Plus, Loader2, ChevronDown, Dumbbell, PenLine } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { getExercises } from '../../services/exerciseService';
 import { Exercise } from '../../types';
 import { cn } from '../../lib/utils';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
+import CreateExerciseModal from './CreateExerciseModal';
 
 interface Props {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
 
   const [results, setResults] = useState<Exercise[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -151,7 +153,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
   }, [isOpen]);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <>
           <motion.div
@@ -297,6 +299,16 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
               )}
             </div>
 
+            {/* R-03: Create Custom Exercise */}
+            <div className="shrink-0 px-4 pb-3 border-t border-zinc-900 pt-3">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-[11px] font-mono font-bold uppercase tracking-widest transition-all rounded-[2px]"
+              >
+                <PenLine size={12} /> Create Custom Exercise
+              </button>
+            </div>
+
             {/* Floating Action Button */}
             <AnimatePresence>
               {selectedIds.length > 0 && (
@@ -319,7 +331,21 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
           </motion.div>
         </>
       )}
+
+    {/* R-03: Create Custom Exercise modal */}
+    <AnimatePresence>
+      {showCreateModal && (
+        <CreateExerciseModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={(exercise) => {
+            setResults(prev => [exercise, ...prev]);
+            setSelectedIds(prev => [...prev, exercise.id]);
+            setShowCreateModal(false);
+          }}
+        />
+      )}
     </AnimatePresence>
+    </>
   );
 };
 

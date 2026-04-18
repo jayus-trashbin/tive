@@ -417,6 +417,9 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                                     );
                                 }
                                 const ex = group.exercise;
+                                const blockNote = activeSession.routineSnapshot?.find(
+                                    b => b.exerciseId === ex.id
+                                )?.notes;
                                 return (
                                     <ExerciseGroup
                                         key={ex.id}
@@ -431,6 +434,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                                             setShowExercisePicker(true);
                                         }}
                                         isSuperset={false}
+                                        blockNote={blockNote}
                                     />
                                 );
                             })

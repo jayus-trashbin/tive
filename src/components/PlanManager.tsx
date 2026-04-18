@@ -100,6 +100,27 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
         }
     };
 
+    // R-01: Deep clone routine with fresh IDs
+    const handleDuplicate = (id: string) => {
+        const source = routines.find(r => r.id === id);
+        if (!source) return;
+        const clonedBlocks = source.blocks?.map(b => ({
+            ...b,
+            id: crypto.randomUUID(),
+            sets: b.sets.map(s => ({ ...s, id: crypto.randomUUID() }))
+        }));
+        saveRoutine({
+            ...source,
+            id: crypto.randomUUID(),
+            name: `${source.name} (Copy)`,
+            blocks: clonedBlocks,
+            exerciseIds: clonedBlocks?.map(b => b.exerciseId) ?? source.exerciseIds,
+            lastPerformed: undefined,
+            updatedAt: Date.now(),
+            _synced: false,
+        });
+    };
+
     if (previewRoutineId) {
         return (
             <RoutinePreviewScreen
@@ -180,6 +201,7 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                                         onToggleSelection={toggleRoutineSelection}
                                         onEdit={setEditingRoutineId}
                                         onOpenPreview={handleOpenPreview}
+                                        onDuplicate={handleDuplicate}
                                     />
                                 </motion.div>
                             ))}

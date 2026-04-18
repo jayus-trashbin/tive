@@ -20,6 +20,7 @@ interface Props {
     onReplaceRequest?: () => void;
     isSuperset?: boolean;
     dragHandleProps?: any; // Dnd-kit listeners
+    blockNote?: string;   // R-02: read-only note from routine block
 }
 
 const ExerciseGroup: React.FC<Props> = ({
@@ -31,7 +32,8 @@ const ExerciseGroup: React.FC<Props> = ({
     onAutoScrollRequest,
     onReplaceRequest,
     isSuperset,
-    dragHandleProps
+    dragHandleProps,
+    blockNote
 }) => {
     const { handleAddSet, handleCloneSet, handleGenerateWarmups, handleUpdateSet, handleCompleteSet, handleDeleteSet, getInputId } = useWorkoutLogic();
     const { status: progressStatus, suggestions: plateauSuggestions } = useProgressionEngine(exercise.id);
@@ -164,7 +166,7 @@ const ExerciseGroup: React.FC<Props> = ({
                         </div>
                     </div>
 
-                    {/* Collapsible Notes Field */}
+                    {/* Collapsible Notes Field (user note during session) */}
                     {isNotesOpen && (
                         <div className="px-4 pb-4">
                             <textarea
@@ -173,6 +175,14 @@ const ExerciseGroup: React.FC<Props> = ({
                                 placeholder="Add notes for this exercise (e.g. seat setting 4, feeling good)..."
                                 className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg p-3 text-xs text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary/50 transition-colors resize-none min-h-[60px]"
                             />
+                        </div>
+                    )}
+
+                    {/* R-02: Block note from routine plan (read-only) */}
+                    {blockNote && (
+                        <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2 bg-amber-500/8 border border-amber-500/20 rounded-[3px]">
+                            <MessageSquare size={11} className="text-amber-400 mt-0.5 shrink-0" />
+                            <span className="text-[10px] text-amber-300 font-mono leading-relaxed">{blockNote}</span>
                         </div>
                     )}
 

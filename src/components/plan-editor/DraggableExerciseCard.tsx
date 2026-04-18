@@ -33,7 +33,7 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
         onDragEnd={(e, info: PanInfo) => {
           if (info.offset.x < -80) onRemove(set.id);
         }}
-        className="relative bg-zinc-900 grid grid-cols-[30px_60px_1fr_1fr] gap-2 items-center py-3 px-2"
+        className="relative bg-zinc-900 grid grid-cols-[26px_54px_1fr_1fr_44px] gap-1.5 items-center py-3 px-2"
       >
         <span className="text-xs text-zinc-500 font-mono text-center">{idx + 1}</span>
 
@@ -72,6 +72,19 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm font-bold text-white text-center focus:border-brand-primary focus:outline-none"
           />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-zinc-600 pointer-events-none">REPS</span>
+        </div>
+
+        {/* R-05: RPE Target */}
+        <div className="flex flex-col items-center gap-0.5">
+          <button
+            onClick={() => onUpdate(set.id, 'targetRpe', Math.min(10, (set.targetRpe || 8) + 1))}
+            className="w-full text-[9px] font-black text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+          >▲</button>
+          <span className="text-xs font-black text-zinc-300 font-mono">{set.targetRpe || 8}</span>
+          <button
+            onClick={() => onUpdate(set.id, 'targetRpe', Math.max(1, (set.targetRpe || 8) - 1))}
+            className="w-full text-[9px] font-black text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+          >▼</button>
         </div>
       </motion.div>
     </motion.div>
@@ -244,11 +257,12 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
       {/* Sets Table */}
       <div className="bg-zinc-900">
         {/* Table Header */}
-        <div className="grid grid-cols-[30px_60px_1fr_1fr] gap-2 py-1.5 px-2 border-b border-white/5 bg-zinc-950/30">
+        <div className="grid grid-cols-[26px_54px_1fr_1fr_44px] gap-1.5 py-1.5 px-2 border-b border-white/5 bg-zinc-950/30">
           <div className="text-[9px] text-zinc-600 text-center font-bold">#</div>
           <div className="text-[9px] text-zinc-600 text-center font-bold">TYPE</div>
           <div className="text-[9px] text-zinc-600 text-center font-bold">TARGET KG</div>
           <div className="text-[9px] text-zinc-600 text-center font-bold">REPS</div>
+          <div className="text-[9px] text-zinc-600 text-center font-bold">RPE</div>
         </div>
 
         <div className="max-h-[300px] overflow-y-auto">

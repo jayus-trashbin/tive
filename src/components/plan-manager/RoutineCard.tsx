@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Play, Edit2, Dumbbell, Trash2, CheckCircle2, ChevronRight, Layers, Clock } from 'lucide-react';
+import { Plus, Play, Edit2, Dumbbell, Trash2, CheckCircle2, ChevronRight, Layers, Clock, Copy } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Routine, Exercise } from '../../types';
 import { estimateRoutineDuration } from '../../utils/engine';
@@ -13,6 +13,7 @@ interface RoutineCardProps {
     onToggleSelection: (id: string) => void;
     onEdit: (id: string) => void;
     onOpenPreview: (id: string) => void;
+    onDuplicate: (id: string) => void;
 }
 
 const RoutineCard: React.FC<RoutineCardProps> = ({
@@ -22,7 +23,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     isSelected,
     onToggleSelection,
     onEdit,
-    onOpenPreview
+    onOpenPreview,
+    onDuplicate
 }) => {
 
     // 1. Resolve Data
@@ -147,12 +149,21 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                                 <CheckCircle2 size={14} strokeWidth={3} />
                             </div>
                         ) : (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onEdit(routine.id); }}
-                                className="w-7 h-7 bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-brand-primary hover:border-brand-primary transition-all active:translate-y-[1px]"
-                            >
-                                <Edit2 size={12} />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onDuplicate(routine.id); }}
+                                    title="Duplicate routine"
+                                    className="w-7 h-7 bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-amber-400 hover:border-amber-400/40 transition-all active:translate-y-[1px]"
+                                >
+                                    <Copy size={11} />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onEdit(routine.id); }}
+                                    className="w-7 h-7 bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-brand-primary hover:border-brand-primary transition-all active:translate-y-[1px]"
+                                >
+                                    <Edit2 size={12} />
+                                </button>
+                            </div>
                         )}
                     </div>
 
