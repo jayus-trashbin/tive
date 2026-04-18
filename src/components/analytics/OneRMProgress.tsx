@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils'; // Assuming this exists, based on previous files
 
 const OneRMProgress: React.FC = () => {
-    const { history, exercises } = useWorkoutStore();
+    const history = useWorkoutStore(state => state.history);
+    const exercises = useWorkoutStore(state => state.exercises);
     const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

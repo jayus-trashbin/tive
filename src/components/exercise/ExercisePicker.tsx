@@ -185,6 +185,9 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search (e.g. Squat)..."
+                  aria-label="Buscar exercícios"
+                  aria-autocomplete="list"
+                  aria-controls="exercise-results"
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:outline-none transition-colors placeholder:text-zinc-600"
                 />
                 {loading && (
@@ -217,7 +220,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
             </div>
 
             {/* Results List */}
-            <div className="flex-1 overflow-y-auto p-2 pb-32" id="exercise-picker-list">
+            <div className="flex-1 overflow-y-auto p-2 pb-32" id="exercise-results">
               {loading && results.length === 0 ? (
                 <div className="space-y-3 p-2">
                   {[1, 2, 3, 4, 5].map(i => (

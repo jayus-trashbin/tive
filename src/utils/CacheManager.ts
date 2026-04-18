@@ -1,5 +1,6 @@
 
 import { get, set } from 'idb-keyval';
+import { logger } from './logger';
 
 interface CacheEntry<T> {
   data: T;
@@ -27,7 +28,7 @@ export class CacheManager {
 
       return entry.data;
     } catch (e) {
-      console.warn(`CacheManager Get Error [${key}]`, e);
+      logger.warn('CacheManager', `Get error [${key}]`, e);
       return null;
     }
   }
@@ -47,7 +48,7 @@ export class CacheManager {
       };
       await set(key, entry);
     } catch (e) {
-      console.warn(`CacheManager Set Error [${key}]`, e);
+      logger.warn('CacheManager', `Set error [${key}]`, e);
     }
   }
 }

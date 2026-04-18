@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { logger } from './utils/logger';
 import { useWorkoutStore } from './store/useWorkoutStore';
 import Dashboard from './components/Dashboard';
 import Layout from './components/Layout';
@@ -20,7 +21,10 @@ const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDa
 const ProgressPhotos = lazy(() => import('./components/progress/ProgressPhotos'));
 const Settings = lazy(() => import('./components/Settings'));
 
-// Simple loading fallback for lazy components
+import HistorySkeleton from './components/ui/skeletons/HistorySkeleton';
+import PlanSkeleton from './components/ui/skeletons/PlanSkeleton';
+
+// Fallback for components with no dedicated skeleton (e.g. WorkoutPlayer)
 const LazyFallback = () => (
   <div className="flex items-center justify-center h-full bg-black">
     <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
@@ -59,7 +63,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       if (!_hasHydrated) {
-        console.warn("Hydration took too long. Forcing app entry.");
+        logger.warn('App', 'Hydration took too long — forcing app entry');
         setHasHydrated(true);
       }
     }, 2000);
@@ -216,12 +220,22 @@ const App: React.FC = () => {
                   className="h-full w-full absolute inset-0 overflow-hidden" // Absolute positioning is key for popLayout
                   style={{ willChange: 'transform, opacity' }}
                 >
-                  <Suspense fallback={<LazyFallback />}>
-                    {view === 'dashboard' && <Dashboard />}
-                    {view === 'plans' && <PlanManager onStartSession={handleStartRoutine} />}
-                    {view === 'photos' && <ProgressPhotos />}
-                    {view === 'history' && <HistoryLog />}
-                  </Suspense>
+                  {view === 'dashboard' && <Dashboard />}
+                  {view === 'plans' && (
+                    <Suspense fallback={<PlanSkeleton />}>
+                      <PlanManager onStartSession={handleStartRoutine} />
+                    </Suspense>
+                  )}
+                  {view === 'photos' && (
+                    <Suspense fallback={<LazyFallback />}>
+                      <ProgressPhotos />
+                    </Suspense>
+                  )}
+                  {view === 'history' && (
+                    <Suspense fallback={<HistorySkeleton />}>
+                      <HistoryLog />
+                    </Suspense>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

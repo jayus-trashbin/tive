@@ -53,7 +53,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick }) =>
                 hidden: { opacity: 0, y: 20 },
                 show: { opacity: 1, y: 0 }
             }}
+            role="button"
+            tabIndex={0}
             onClick={onClick}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+            aria-label={`Ver sessão: ${session.name}, ${formatDate(session.date)}`}
             className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 active:scale-[0.98] transition-all cursor-pointer hover:border-zinc-700"
         >
             <div className="w-full text-left p-0 overflow-hidden flex group cursor-pointer">

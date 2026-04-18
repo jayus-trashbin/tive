@@ -1,6 +1,7 @@
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CacheManager } from './CacheManager';
+import { logger } from './logger';
 
 const DEFAULT_TIMEOUT = 10000;
 
@@ -59,7 +60,7 @@ export class NetworkClient {
 
       return response.data;
     } catch (error) {
-      console.warn(`[Network] Failed to fetch ${url}`, error);
+      logger.warn('Network', `Failed to fetch ${url}`, error);
       throw error;
     }
   }

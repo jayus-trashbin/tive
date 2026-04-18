@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
-import { calculateCurrentStreak, getWeeklyStats } from '../utils/engine';
+import { logger } from '../utils/logger';
+import { calculateCurrentStreak, getWeeklyStats, calculateACWR } from '../utils/engine';
 import { usePhysiology } from '../hooks/usePhysiology';
 import { MuscleGroup, Routine } from '../types';
 import {
@@ -10,6 +11,7 @@ import {
     NextMission,
     MuscleReadiness
 } from './dashboard/index';
+import ACWRCard from './analytics/ACWRCard';
 
 /**
  * Dashboard — Premium Home Screen
@@ -30,12 +32,12 @@ const Dashboard: React.FC = () => {
     // --- CALCULATIONS ---
     const streak = useMemo(() => {
         try { return calculateCurrentStreak(history); }
-        catch (e) { console.error("[Dashboard] Streak calculation failed", e); return 0; }
+        catch (e) { logger.warn('Dashboard', 'Streak calculation failed', e); return 0; }
     }, [history]);
 
     const weeklyStats = useMemo(() => {
         try { return getWeeklyStats(history); }
-        catch (e) { console.error("[Dashboard] Weekly stats calculation failed", e); return { count: 0, volume: 0 }; }
+        catch (e) { logger.warn('Dashboard', 'Weekly stats calculation failed', e); return { count: 0, volume: 0 }; }
     }, [history]);
 
     const formattedVolume = useMemo(() => {
@@ -63,7 +65,7 @@ const Dashboard: React.FC = () => {
 
             if (lastIndex === -1 || lastIndex === routines.length - 1) return routines[0];
             return routines[lastIndex + 1];
-        } catch (e) { console.error("[Dashboard] Next routine logic failed", e); return routines[0] || null; }
+        } catch (e) { logger.warn('Dashboard', 'Next routine logic failed', e); return routines[0] || null; }
     }, [routines, history]);
 
     const readinessData = useMemo(() => {
@@ -73,8 +75,13 @@ const Dashboard: React.FC = () => {
                 const { score, label } = calculateReadiness(m);
                 return { muscle: m, score, label };
             }).sort((a, b) => a.score - b.score);
-        } catch (e) { console.error("[Dashboard] Readiness calculation failed", e); return []; }
+        } catch (e) { logger.warn('Dashboard', 'Readiness calculation failed', e); return []; }
     }, [calculateReadiness]);
+
+    const acwr = useMemo(() => {
+        try { return calculateACWR(history); }
+        catch (e) { return null; }
+    }, [history]);
 
     return (
         <div
@@ -92,6 +99,18 @@ const Dashboard: React.FC = () => {
             <NextMission nextRoutine={nextRoutine} onStart={startSession} />
 
             <MuscleReadiness readiness={readinessData} />
+
+            {/* A-02: ACWR Card */}
+            {acwr && history.length >= 4 && (
+                <section>
+                    <ACWRCard
+                        ratio={acwr.ratio}
+                        acute={acwr.acute}
+                        chronic={acwr.chronic}
+                        risk={acwr.risk}
+                    />
+                </section>
+            )}
         </div>
     );
 };

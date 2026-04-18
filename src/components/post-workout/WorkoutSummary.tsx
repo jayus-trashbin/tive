@@ -7,6 +7,8 @@ import {
 import { Session, MuscleGroup, Exercise } from '../../types';
 import MuscleOverlay from '../progress/MuscleOverlay';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
+import { calculateACWR } from '../../utils/engine';
+import ACWRCard from '../analytics/ACWRCard';
 import { cn } from '../../lib/utils';
 
 interface WorkoutSummaryProps {
@@ -14,8 +16,9 @@ interface WorkoutSummaryProps {
     muscleGroups: MuscleGroup[];
     exercises: Map<string, Exercise>;
     previousSession?: Session | null;
-    onContinue: () => void; // Proceeds to photo prompt
-    onDismiss: () => void;  // Skip everything
+    history?: Session[];  // A-02: full history for ACWR calc
+    onContinue: () => void;
+    onDismiss: () => void;
 }
 
 // Animated counter that rolls up from 0
@@ -55,7 +58,7 @@ const formatDuration = (ms: number): string => {
 };
 
 const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
-    session, muscleGroups, exercises, previousSession, onContinue, onDismiss
+    session, muscleGroups, exercises, previousSession, history = [], onContinue, onDismiss
 }) => {
     const [showConfetti, setShowConfetti] = useState(false);
 
@@ -114,6 +117,13 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
             setTimeout(() => setShowConfetti(true), 800);
         }
     }, [stats.prs.length]);
+
+    // A-02: ACWR from history including this session
+    const acwr = useMemo(() => {
+        if (history.length < 2) return null;
+        const simulatedSession = { ...session, volumeLoad: stats.totalVolume, isCompleted: true };
+        return calculateACWR([...history, simulatedSession]);
+    }, [history, session, stats.totalVolume]);
 
     return (
         <motion.div
@@ -359,6 +369,24 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                 ))}
                             </div>
                         </div>
+                    </motion.div>
+                )}
+
+                {/* A-02: ACWR Readiness */}
+                {acwr && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 }}
+                        className="px-6 py-4 border-b border-zinc-800/50"
+                    >
+                        <ACWRCard
+                            ratio={acwr.ratio}
+                            acute={acwr.acute}
+                            chronic={acwr.chronic}
+                            risk={acwr.risk}
+                            compact
+                        />
                     </motion.div>
                 )}
 

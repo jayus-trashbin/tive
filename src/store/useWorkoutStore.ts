@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { WorkoutState } from '../types/store';
 import { idbStorage } from '../utils/storage';
 import { syncService } from '../services/SyncService';
+import { credentialsStore } from '../utils/credentialsStore';
 import { createSessionSlice } from './slices/createSessionSlice';
 import { createExerciseSlice } from './slices/createExerciseSlice';
 import { createRoutineSlice } from './slices/createRoutineSlice';
@@ -46,7 +47,13 @@ export const useWorkoutStore = create<WorkoutState>()(
         activeSession: state.activeSession,
         exercises: state.exercises,
         routines: state.routines,
-        userStats: state.userStats,
+        // Credentials (supabaseKey, geminiApiKey) are excluded from IDB persistence
+        // and stored separately via credentialsStore to avoid plaintext leaks in exports.
+        userStats: {
+          ...state.userStats,
+          supabaseKey: '',
+          geminiApiKey: '',
+        },
         physiology: state.physiology,
         restTimer: state.restTimer
       }),
@@ -54,6 +61,13 @@ export const useWorkoutStore = create<WorkoutState>()(
       onRehydrateStorage: () => (state) => {
         return (rehydratedState: any, error: any) => {
           if (error) console.error("Hydration Failed", error);
+          // Restore credentials from separate store after hydration
+          const supabaseUrl = credentialsStore.getSupabaseUrl();
+          const supabaseKey = credentialsStore.getSupabaseKey();
+          const geminiApiKey = credentialsStore.getGeminiKey();
+          if (supabaseUrl || supabaseKey || geminiApiKey) {
+            state?.updateUserStats({ supabaseUrl, supabaseKey, geminiApiKey });
+          }
           state?.setHasHydrated(true);
           state?.setProfileOpen(false);
           state?.setRoutineEditorOpen(false);

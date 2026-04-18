@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Session, Exercise } from '../../types';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
-import { X, Calendar, Clock, Dumbbell, Trophy, Share2, Trash2, ArrowRight } from 'lucide-react';
+import { X, Calendar, Clock, Dumbbell, Trophy, Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface Props {
@@ -12,11 +12,10 @@ interface Props {
 }
 
 const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
-    const { exercises, deleteSession } = useWorkoutStore();
+    const { exercises, history, deleteSession } = useWorkoutStore();
 
     const sessionExercises = useMemo(() => {
         if (!session) return [];
-        // Group sets by exercise ID keeping order
         const orderedIds = Array.from(new Set(session.sets.map(s => s.exerciseId)));
         return orderedIds.map(id => {
             const ex = exercises.find(e => e.id === id);
@@ -30,6 +29,55 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
         const diff = Math.floor((session.updatedAt - session.date) / 1000 / 60);
         return diff > 0 ? `${diff} min` : '< 1 min';
     }, [session]);
+
+    // A-03: Find the most recent previous session with the same routine
+    const previousSession = useMemo(() => {
+        if (!session) return null;
+        const sorted = [...history]
+            .filter(s =>
+                s.isCompleted &&
+                !s.deletedAt &&
+                s.id !== session.id &&
+                s.date < session.date &&
+                (session.routineId ? s.routineId === session.routineId : s.name === session.name)
+            )
+            .sort((a, b) => b.date - a.date);
+        return sorted[0] || null;
+    }, [session, history]);
+
+    // A-03: Per-exercise comparison
+    const comparisonByExercise = useMemo(() => {
+        if (!session || !previousSession) return null;
+        const map = new Map<string, { currVol: number; prevVol: number; currBest1RM: number; prevBest1RM: number }>();
+
+        session.sets.filter(s => s.isCompleted).forEach(s => {
+            const c = map.get(s.exerciseId) || { currVol: 0, prevVol: 0, currBest1RM: 0, prevBest1RM: 0 };
+            c.currVol += s.weight * s.reps;
+            if ((s.estimated1RM || 0) > c.currBest1RM) c.currBest1RM = s.estimated1RM || 0;
+            map.set(s.exerciseId, c);
+        });
+
+        previousSession.sets.filter(s => s.isCompleted).forEach(s => {
+            const c = map.get(s.exerciseId);
+            if (c) {
+                c.prevVol += s.weight * s.reps;
+                if ((s.estimated1RM || 0) > c.prevBest1RM) c.prevBest1RM = s.estimated1RM || 0;
+            }
+        });
+
+        return map;
+    }, [session, previousSession]);
+
+    // Total comparison
+    const totalComparison = useMemo(() => {
+        if (!session || !previousSession) return null;
+        const currVol = session.sets.filter(s => s.isCompleted).reduce((a, s) => a + s.weight * s.reps, 0);
+        const prevVol = previousSession.sets.filter(s => s.isCompleted).reduce((a, s) => a + s.weight * s.reps, 0);
+        if (prevVol === 0) return null;
+        const diff = currVol - prevVol;
+        const pct = Math.round((diff / prevVol) * 100);
+        return { diff, pct, currVol, prevVol };
+    }, [session, previousSession]);
 
     if (!session) return null;
 
@@ -87,8 +135,20 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                         <div className="grid grid-cols-3 gap-3">
                             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 flex flex-col items-center justify-center gap-1">
                                 <Dumbbell size={16} className="text-brand-primary" />
-                                <span className="text-lg font-black text-white">{session.volumeLoad > 1000 ? (session.volumeLoad / 1000).toFixed(1) + 'k' : session.volumeLoad}</span>
+                                <span className="text-lg font-black text-white">
+                                    {session.volumeLoad > 1000 ? (session.volumeLoad / 1000).toFixed(1) + 'k' : session.volumeLoad}
+                                </span>
                                 <span className="text-[9px] text-zinc-500 uppercase font-bold">Volume (kg)</span>
+                                {/* A-03: delta badge */}
+                                {totalComparison && (
+                                    <span className={cn(
+                                        "text-[8px] font-bold flex items-center gap-0.5",
+                                        totalComparison.pct >= 0 ? "text-brand-primary" : "text-red-400"
+                                    )}>
+                                        {totalComparison.pct >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
+                                        {totalComparison.pct >= 0 ? '+' : ''}{totalComparison.pct}% vs prev
+                                    </span>
+                                )}
                             </div>
                             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 flex flex-col items-center justify-center gap-1">
                                 <Clock size={16} className="text-blue-400" />
@@ -101,6 +161,38 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                                 <span className="text-[9px] text-zinc-500 uppercase font-bold">Records</span>
                             </div>
                         </div>
+
+                        {/* A-03: Previous session comparison banner */}
+                        {previousSession && (
+                            <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-3">
+                                <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                    <TrendingUp size={9} className="text-brand-primary" />
+                                    vs. {new Date(previousSession.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {Array.from(comparisonByExercise?.entries() || []).slice(0, 4).map(([exId, comp]) => {
+                                        const ex = exercises.find(e => e.id === exId);
+                                        const volDiff = comp.currVol - comp.prevVol;
+                                        const rmDiff = comp.currBest1RM - comp.prevBest1RM;
+                                        return (
+                                            <div key={exId} className="bg-zinc-900 rounded-[3px] p-2">
+                                                <div className="text-[9px] text-zinc-400 font-bold truncate mb-1">{ex?.name || 'Exercise'}</div>
+                                                <div className={cn("text-[10px] font-black flex items-center gap-0.5", volDiff >= 0 ? "text-brand-primary" : "text-red-400")}>
+                                                    {volDiff >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
+                                                    {volDiff >= 0 ? '+' : ''}{volDiff.toFixed(0)} kg vol
+                                                </div>
+                                                {comp.prevBest1RM > 0 && (
+                                                    <div className={cn("text-[9px] font-bold flex items-center gap-0.5", rmDiff > 0 ? "text-brand-primary" : rmDiff < 0 ? "text-red-400" : "text-zinc-500")}>
+                                                        {rmDiff > 0 ? <TrendingUp size={7} /> : rmDiff < 0 ? <TrendingDown size={7} /> : <Minus size={7} />}
+                                                        {rmDiff > 0 ? '+' : ''}{rmDiff.toFixed(1)} 1RM
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Exercises Detail */}
                         <div className="space-y-6">
@@ -123,14 +215,12 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                                     </div>
 
                                     <div className="border border-white/5 rounded-2xl overflow-hidden bg-zinc-900/50">
-                                        {/* Table Header */}
                                         <div className="grid grid-cols-[30px_1fr_1fr_1fr] bg-zinc-900 border-b border-white/5 py-1.5 px-3">
                                             <div className="text-[9px] font-bold text-zinc-600 text-center">#</div>
                                             <div className="text-[9px] font-bold text-zinc-600 text-center">KG</div>
                                             <div className="text-[9px] font-bold text-zinc-600 text-center">REPS</div>
                                             <div className="text-[9px] font-bold text-zinc-600 text-center">1RM</div>
                                         </div>
-                                        {/* Sets */}
                                         {sets.map((set, idx) => (
                                             <div key={set.id} className={cn(
                                                 "grid grid-cols-[30px_1fr_1fr_1fr] py-2 px-3 items-center border-b border-white/5 last:border-0",

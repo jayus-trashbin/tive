@@ -1,6 +1,7 @@
 
 import React, { ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Copy } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Copy, Trash2 } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  confirmingClear: boolean;
 }
 
 /**
@@ -23,7 +25,8 @@ class ErrorBoundary extends React.Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      confirmingClear: false,
     };
   }
 
@@ -32,14 +35,10 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // 1. Structured Logging for easy tracing
-    console.group('%c [CRITICAL_UI_ERROR]', 'color: #ef4444; font-weight: bold; font-size: 14px;');
-    console.error('Message:', error.message);
-    console.error('Stack:', error.stack);
-    console.error('Component Stack:', errorInfo.componentStack);
-    console.groupEnd();
-    
-    // Fixed: state update now recognized correctly by extending React.Component
+    logger.error('ErrorBoundary', error.message, {
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+    });
     this.setState({ errorInfo });
   }
 
@@ -47,10 +46,21 @@ class ErrorBoundary extends React.Component<Props, State> {
     window.location.reload();
   };
 
+  private handleClearData = () => {
+    import('idb-keyval').then(({ clear }) => {
+      clear().then(() => window.location.reload());
+    });
+  };
+
   private handleCopyError = () => {
     const text = `Error: ${this.state.error?.message}\n\nStack: ${this.state.errorInfo?.componentStack}`;
-    navigator.clipboard.writeText(text);
-    alert('Error details copied to clipboard');
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.createElement('div');
+      toast.textContent = 'Error log copied to clipboard';
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#27272a;color:#fff;padding:8px 20px;border-radius:8px;z-index:9999;font-size:13px;font-family:sans-serif;';
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 2000);
+    });
   };
 
   public render() {
@@ -70,19 +80,35 @@ class ErrorBoundary extends React.Component<Props, State> {
           </p>
           
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <button 
+            <button
                 onClick={this.handleReload}
                 className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-black font-black rounded-xl active:scale-95 transition-transform shadow-glow"
             >
                 <RefreshCw size={18} /> RELOAD APP
             </button>
-            
-            <button 
+
+            <button
                 onClick={this.handleCopyError}
                 className="flex items-center justify-center gap-2 px-6 py-4 bg-zinc-900 text-zinc-400 font-bold rounded-xl active:scale-95 transition-transform border border-zinc-800"
             >
                 <Copy size={18} /> COPY ERROR LOG
             </button>
+
+            {this.state.confirmingClear ? (
+              <button
+                onClick={this.handleClearData}
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-red-600 text-white font-black rounded-xl active:scale-95 transition-transform"
+              >
+                <Trash2 size={18} /> CONFIRM — WIPE ALL DATA
+              </button>
+            ) : (
+              <button
+                onClick={() => this.setState({ confirmingClear: true })}
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-zinc-900 text-red-500 font-bold rounded-xl active:scale-95 transition-transform border border-red-900/50"
+              >
+                <Trash2 size={18} /> CLEAR DATA &amp; RESTART
+              </button>
+            )}
           </div>
 
           {/* Dev-only detail view */}

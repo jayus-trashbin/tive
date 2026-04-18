@@ -2,9 +2,10 @@
 import { Exercise, MuscleGroup, ApiExercise, ApiResponse } from '../types';
 import { FALLBACK_EXERCISES } from '../data/fallbackExercises';
 import { NetworkClient } from '../utils/network';
+import { logger } from '../utils/logger';
 
-const API_BASE_URL = 'https://exercisedbv2.ascendapi.com/api/v1';
-const BATCH_SIZE = 20; // Reduced from 25 to be safer with rate limits
+const API_BASE_URL = import.meta.env.VITE_EXERCISE_API_URL ?? 'https://exercisedbv2.ascendapi.com/api/v1';
+const BATCH_SIZE = Number(import.meta.env.VITE_EXERCISE_API_BATCH_SIZE) || 20;
 
 // --- MAPPING HELPERS ---
 
@@ -12,7 +13,7 @@ const BATCH_SIZE = 20; // Reduced from 25 to be safer with rate limits
  * Maps the specific API body part (e.g. "QUADRICEPS") to the internal application MuscleGroup (e.g. "upper legs")
  * Used for fatigue tracking and symmetry analysis stats.
  */
-const mapBodyPartToMuscle = (apiBodyPart: string): MuscleGroup => {
+export const mapBodyPartToMuscle = (apiBodyPart: string): MuscleGroup => {
     const normalized = (apiBodyPart || '').toUpperCase();
 
     switch (normalized) {
@@ -62,7 +63,7 @@ const mapBodyPartToMuscle = (apiBodyPart: string): MuscleGroup => {
  * Translates UI selection to API Query Parameter.
  * Documentation: "Filter exercises by body parts. Use comma-separated values."
  */
-const getApiBodyParts = (muscle: string): string => {
+export const getApiBodyParts = (muscle: string): string => {
     if (!muscle || muscle === 'all') return '';
     const lower = muscle.toLowerCase();
 
@@ -123,7 +124,7 @@ const mapApiToModel = (apiEx: ApiExercise): Exercise => {
             secondaryMuscles: apiEx.secondaryMuscles || []
         };
     } catch (error) {
-        console.error("[ExerciseService] Mapping Error", error);
+        logger.warn('ExerciseService', 'Mapping error', error);
         return {
             id: apiEx.exerciseId || crypto.randomUUID(),
             name: apiEx.name || 'Unknown',
@@ -196,7 +197,7 @@ export const getExercises = async (
         };
 
     } catch (error: unknown) {
-        console.warn("Fetch failed, possibly rate limited or offline.", error);
+        logger.warn('ExerciseService', 'Fetch failed — offline or rate limited', error);
 
         // Graceful degradation: Return empty instead of crashing UI
         return { data: [], nextCursor: null };

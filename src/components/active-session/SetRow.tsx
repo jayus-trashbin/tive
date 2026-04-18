@@ -205,6 +205,8 @@ const SetRow: React.FC<Props> = ({
                     <div className="flex justify-center h-full">
                         <button
                             onClick={(e) => { e.stopPropagation(); onComplete(); }}
+                            aria-label={`Marcar set ${index + 1} completo — ${set.weight}kg × ${set.reps} reps`}
+                            aria-pressed={isCompleted}
                             className={cn(
                                 "w-full h-full min-h-[44px] rounded-xl flex items-center justify-center active:scale-95 transition-transform",
                                 isCompleted

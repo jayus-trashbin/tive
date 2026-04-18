@@ -89,6 +89,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                         className="pointer-events-auto w-full max-w-[340px]"
                     >
                         <motion.nav
+                            role="navigation"
+                            aria-label="Navegação principal"
                             onPan={handlePan}
                             className="
                                 relative h-[56px]
@@ -109,6 +111,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                                             if (navigator.vibrate) navigator.vibrate(5);
                                             onTabChange(tab.id as any);
                                         }}
+                                        aria-label={tab.label}
+                                        aria-current={isActive ? 'page' : undefined}
                                         className={cn(
                                             "relative h-[44px] flex items-center justify-center z-10 cursor-pointer transition-all duration-200",
                                             isActive ? "flex-[1.6]" : "flex-1"

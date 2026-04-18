@@ -16,6 +16,7 @@ import {
     Sparkles
 } from 'lucide-react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { credentialsStore } from '../utils/credentialsStore';
 import { cn } from '../lib/utils';
 
 /**
@@ -156,7 +157,10 @@ const Settings: React.FC = () => {
                             <input
                                 type="password"
                                 value={userStats.geminiApiKey || ''}
-                                onChange={(e) => useWorkoutStore.getState().updateUserStats({ geminiApiKey: e.target.value })}
+                                onChange={(e) => {
+                                    useWorkoutStore.getState().updateUserStats({ geminiApiKey: e.target.value });
+                                    credentialsStore.setGeminiKey(e.target.value);
+                                }}
                                 placeholder="AIzaSy..."
                                 className="w-full bg-black border border-zinc-700 p-3 text-sm font-mono text-white placeholder:text-zinc-700 focus:border-brand-primary focus:outline-none rounded-[2px]"
                             />

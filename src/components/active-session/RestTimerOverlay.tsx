@@ -80,9 +80,13 @@ export const RestTimerOverlay = () => {
                 </div>
 
                 {/* Main Timer Display */}
-                <div className="text-7xl font-black font-mono text-white mb-8 tabular-nums tracking-tighter relative">
+                <time
+                    aria-live="polite"
+                    dateTime={`PT${timeLeft}S`}
+                    className="text-7xl font-black font-mono text-white mb-8 tabular-nums tracking-tighter relative"
+                >
                     {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
-                </div>
+                </time>
 
                 {/* Controls Container */}
                 <div className="w-full max-w-sm space-y-6">

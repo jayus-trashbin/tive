@@ -13,7 +13,8 @@ const MUSCLE_LABELS: Record<string, string> = {
 };
 
 const MuscleRadar: React.FC = () => {
-    const { history, exercises } = useWorkoutStore();
+    const history = useWorkoutStore(state => state.history);
+    const exercises = useWorkoutStore(state => state.exercises);
 
     const data = useMemo(() => {
         const distribution = getMuscleVolumeDistribution(history, exercises, 30);

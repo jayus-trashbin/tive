@@ -2,6 +2,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useWorkoutStore } from "../store/useWorkoutStore";
 import { Routine, RoutineBlock, SetType } from "../types";
+import { logger } from '../utils/logger';
 
 // Define the response structure we expect/return
 export interface AIResponse {
@@ -96,7 +97,7 @@ export const generateRoutine = async (userInput: string): Promise<AIResponse> =>
         return { routine, message: "Routine generated successfully!" };
 
     } catch (error: any) {
-        console.error("AI Generation Error:", error);
+        logger.error('AIService', 'Routine generation failed', error);
         return { message: `AI Error: ${error.message || "Unknown error"}` };
     }
 };

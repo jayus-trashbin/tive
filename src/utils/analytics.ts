@@ -313,7 +313,7 @@ export function getSessionMuscleIntensity(
 
 export interface WeeklyMuscleVolumePoint {
     muscle: MuscleGroup;
-    /** Total volume (kg × reps) this week */
+    /** Total volume (kg Ã— reps) this week */
     thisWeek: number;
     /** Total volume last week */
     lastWeek: number;
@@ -326,7 +326,7 @@ export interface WeeklyMuscleVolumePoint {
 }
 
 /**
- * E-03 — Returns per-muscle volume for this week vs. last week.
+ * E-03 â€” Returns per-muscle volume for this week vs. last week.
  * Useful to detect imbalances and track progressive overload per muscle group.
  */
 export function getWeeklyMuscleVolume(
@@ -369,3 +369,5 @@ export function getWeeklyMuscleVolume(
         return { muscle, thisWeek, lastWeek, delta, deltaPct, sets };
     });
 }
+
+// ------------------------------------------------------

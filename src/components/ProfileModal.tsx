@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { syncService } from '../services/SyncService';
+import { photoSyncService } from '../services/PhotoSyncService';
+import { credentialsStore } from '../utils/credentialsStore';
 import { cn } from '../lib/utils';
 import { ProfileStats } from './profile/ProfileStats';
 import { ProfileSettings } from './profile/ProfileSettings';
@@ -63,7 +65,17 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
         // 1. Save Basic
         updateUserStats(formData);
 
-        // 2. Validate Cloud if provided
+        // 2. Persist credentials to separate store (excluded from IDB)
+        credentialsStore.setSupabase(formData.supabaseUrl, formData.supabaseKey);
+        if (formData.geminiApiKey) {
+            credentialsStore.setGeminiKey(formData.geminiApiKey);
+        }
+
+        // 3. Reset service clients so they pick up new credentials
+        syncService.reset();
+        photoSyncService.reset();
+
+        // 4. Validate Cloud if provided
         if (formData.supabaseUrl && formData.supabaseKey) {
             setStatusMsg({ type: 'success', text: 'Validating Connection...' });
             const isValid = await syncService.validateConnection(formData.supabaseUrl, formData.supabaseKey);

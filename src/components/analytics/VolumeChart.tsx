@@ -11,7 +11,7 @@ interface VolumeChartProps {
 }
 
 const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
-    const { history } = useWorkoutStore();
+    const history = useWorkoutStore(state => state.history);
 
     const data = useMemo(() => getVolumeTimeSeries(history, days), [history, days]);
 

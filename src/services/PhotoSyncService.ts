@@ -12,6 +12,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { ProgressPhoto } from '../types/photo';
+import { logger } from '../utils/logger';
+import { credentialsStore } from '../utils/credentialsStore';
 
 const SYNC_QUEUE_KEY = 'tive_photo_sync_queue';
 const SUPABASE_BUCKET = 'progress-photos';
@@ -27,6 +29,7 @@ type SyncStatus = 'pending' | 'syncing' | 'synced' | 'failed';
 
 class PhotoSyncService {
     private client: SupabaseClient | null = null;
+    private currentUrl: string = '';
     private isSyncing = false;
     private syncStatuses: Map<string, SyncStatus> = new Map();
 
@@ -43,16 +46,18 @@ class PhotoSyncService {
     }
 
     private getClient(): SupabaseClient | null {
-        const { supabaseUrl, supabaseKey } = useWorkoutStore.getState().userStats;
+        const supabaseUrl = credentialsStore.getSupabaseUrl() || useWorkoutStore.getState().userStats.supabaseUrl;
+        const supabaseKey = credentialsStore.getSupabaseKey() || useWorkoutStore.getState().userStats.supabaseKey;
         if (!supabaseUrl || !supabaseKey) return null;
 
-        if (!this.client) {
+        if (!this.client || this.currentUrl !== supabaseUrl) {
             try {
                 this.client = createClient(supabaseUrl, supabaseKey, {
                     auth: { persistSession: false },
                 });
+                this.currentUrl = supabaseUrl;
             } catch (e) {
-                console.error('[PhotoSync] Invalid Supabase config:', e);
+                logger.error('PhotoSync', 'Invalid Supabase config', e);
                 return null;
             }
         }
@@ -161,7 +166,7 @@ class PhotoSyncService {
                 }
                 this.removeFromQueue(item.photoId, item.action);
             } catch (error) {
-                console.error(`[PhotoSync] Failed ${item.action} for ${item.photoId}:`, error);
+                logger.warn('PhotoSync', `Failed ${item.action} for ${item.photoId}`, error);
 
                 // Update retry count
                 const updatedQueue = this.getQueue().map(q => {
@@ -188,7 +193,7 @@ class PhotoSyncService {
         const photo = photos.find(p => p.id === photoId);
 
         if (!photo) {
-            console.warn(`[PhotoSync] Photo ${photoId} not found in store`);
+            logger.warn('PhotoSync', `Photo ${photoId} not found in store`);
             return;
         }
 
@@ -246,7 +251,7 @@ class PhotoSyncService {
             .order('timestamp', { ascending: false });
 
         if (metaError || !metadataList) {
-            console.error('[PhotoSync] Failed to fetch metadata:', metaError);
+            logger.error('PhotoSync', 'Failed to fetch metadata', metaError);
             return [];
         }
 
@@ -274,7 +279,7 @@ class PhotoSyncService {
                     },
                 });
             } catch (e) {
-                console.error(`[PhotoSync] Failed to restore ${meta.id}:`, e);
+                logger.warn('PhotoSync', `Failed to restore ${meta.id}`, e);
             }
         }
 
@@ -311,6 +316,14 @@ class PhotoSyncService {
      */
     public getPendingCount(): number {
         return this.getQueue().length;
+    }
+
+    /**
+     * Reset the Supabase client — call after credentials change in Settings
+     */
+    public reset(): void {
+        this.client = null;
+        this.currentUrl = '';
     }
 }
 

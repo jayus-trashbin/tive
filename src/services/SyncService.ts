@@ -2,6 +2,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { Session, Routine, Exercise } from '../types';
+import { logger } from '../utils/logger';
+import { credentialsStore } from '../utils/credentialsStore';
 
 class SyncService {
     private client: SupabaseClient | null = null;
@@ -27,14 +29,15 @@ class SyncService {
                 throw error;
             }
 
-            console.warn(`Sync retry in ${delay}ms... (${retries} left)`, error.message);
+            logger.info('SyncService', `Retry in ${delay}ms (${retries} left)`, error.message);
             await new Promise(resolve => setTimeout(resolve, delay));
             return this.retryOperation(operation, retries - 1, delay * 2);
         }
     }
 
     private getClient() {
-        const { supabaseUrl, supabaseKey } = useWorkoutStore.getState().userStats;
+        const supabaseUrl = credentialsStore.getSupabaseUrl() || useWorkoutStore.getState().userStats.supabaseUrl;
+        const supabaseKey = credentialsStore.getSupabaseKey() || useWorkoutStore.getState().userStats.supabaseKey;
         if (!supabaseUrl || !supabaseKey) return null;
 
         if (!this.client || this.currentUrl !== supabaseUrl) {
@@ -45,7 +48,7 @@ class SyncService {
                 });
                 this.currentUrl = supabaseUrl;
             } catch (e) {
-                console.error("Invalid Supabase Configuration", e);
+                logger.error('SyncService', 'Invalid Supabase configuration', e);
                 return null;
             }
         }
@@ -63,7 +66,7 @@ class SyncService {
                 // If table doesn't exist, it's still a valid connection to Supabase, just missing schema
                 if (error.code === 'PGRST116' || error.message?.includes('does not exist')) return true;
                 // Auth error or network error
-                console.warn("Validation Error:", error.message);
+                logger.warn('SyncService', 'Connection validation failed', error.message);
                 return false;
             }
             return true;
@@ -103,7 +106,7 @@ class SyncService {
             }
 
         } catch (e) {
-            console.error("Pull failed:", e);
+            logger.error('SyncService', 'Pull failed', e);
         }
     }
 
@@ -115,7 +118,7 @@ class SyncService {
         const userId = await this.getUserId(client);
 
         if (!userId) {
-            console.warn("Cannot push: No authenticated user");
+            logger.warn('SyncService', 'Cannot push — no authenticated user');
             return;
         }
 
@@ -193,10 +196,18 @@ class SyncService {
             await this.push(client);
             useWorkoutStore.getState().updateUserStats({ lastSyncTime: Date.now() });
         } catch (err) {
-            console.warn("Sync Cycle incomplete:", err);
+            logger.warn('SyncService', 'Sync cycle incomplete', err);
         } finally {
             this.isSyncing = false;
         }
+    }
+
+    /**
+     * Reset the Supabase client — call after credentials change in Settings
+     */
+    public reset(): void {
+        this.client = null;
+        this.currentUrl = '';
     }
 }
 
