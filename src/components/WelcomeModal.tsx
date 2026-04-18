@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useWorkoutStore } from '../store/useWorkoutStore';
-import { ChevronRight, Check, Dumbbell, User, Target, ArrowRight, Activity } from 'lucide-react';
+import { ChevronRight, Check, Dumbbell, User, Target, ArrowRight, Activity, Moon, Zap } from 'lucide-react';
 import { FALLBACK_EXERCISES } from '../data/fallbackExercises';
 import { Routine } from '../types';
 import { cn } from '../lib/utils';
@@ -17,6 +17,8 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
   const [name, setName] = useState('');
   const [weight, setWeight] = useState(75);
   const [goal, setGoal] = useState<'strength' | 'hypertrophy'>('strength');
+  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
+  const [theme, setTheme] = useState<'dark' | 'oled'>('dark');
   const [isFinishing, setIsFinishing] = useState(false);
 
   const handleFinish = async () => {
@@ -29,7 +31,9 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
     updateUserStats({
       name,
       bodyweight: weight,
-      isOnboarded: true
+      isOnboarded: true,
+      unitSystem,
+      theme,
     });
 
     // 2. Create Starter Routine
@@ -229,6 +233,58 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                 </div>
                             </div>
                         </button>
+                    </div>
+                    {/* U-05: Unit System + Theme */}
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                        {/* Unit System */}
+                        <div>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Units</p>
+                            <div className="flex gap-2">
+                                {(['metric', 'imperial'] as const).map(u => (
+                                    <button
+                                        key={u}
+                                        onClick={() => setUnitSystem(u)}
+                                        className={cn(
+                                            "flex-1 py-2.5 text-xs font-mono font-bold border rounded-[3px] transition-all",
+                                            unitSystem === u
+                                                ? "bg-white text-black border-white"
+                                                : "bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-700"
+                                        )}
+                                    >
+                                        {u === 'metric' ? 'kg' : 'lbs'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Theme */}
+                        <div>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Theme</p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setTheme('dark')}
+                                    className={cn(
+                                        "flex-1 py-2.5 text-xs font-mono font-bold border rounded-[3px] transition-all flex items-center justify-center gap-1",
+                                        theme === 'dark'
+                                            ? "bg-zinc-800 text-white border-zinc-600"
+                                            : "bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-700"
+                                    )}
+                                >
+                                    <Moon size={10} /> Dark
+                                </button>
+                                <button
+                                    onClick={() => setTheme('oled')}
+                                    className={cn(
+                                        "flex-1 py-2.5 text-xs font-mono font-bold border rounded-[3px] transition-all flex items-center justify-center gap-1",
+                                        theme === 'oled'
+                                            ? "bg-black text-brand-primary border-brand-primary/40"
+                                            : "bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-700"
+                                    )}
+                                >
+                                    <Zap size={10} /> OLED
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </motion.div>
             )}

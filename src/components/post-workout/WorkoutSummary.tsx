@@ -111,6 +111,31 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
         return { volumeDiff, volumePercent, setDiff };
     }, [previousSession, stats]);
 
+    // U-01: Per-exercise volume comparison vs previousSession
+    const perExerciseDelta = useMemo(() => {
+        if (!previousSession) return [];
+        const current = new Map<string, number>();
+        const prev = new Map<string, number>();
+
+        session.sets.filter(s => s.isCompleted).forEach(s => {
+            current.set(s.exerciseId, (current.get(s.exerciseId) || 0) + s.weight * s.reps);
+        });
+        previousSession.sets.filter(s => s.isCompleted).forEach(s => {
+            prev.set(s.exerciseId, (prev.get(s.exerciseId) || 0) + s.weight * s.reps);
+        });
+
+        const ids = Array.from(new Set([...current.keys(), ...prev.keys()]));
+        return ids.map(id => {
+            const curr = current.get(id) || 0;
+            const p = prev.get(id) || 0;
+            const diff = curr - p;
+            const pct = p > 0 ? Math.round((diff / p) * 100) : null;
+            return { id, curr, prev: p, diff, pct };
+        }).filter(d => d.curr > 0 || d.prev > 0)
+          .sort((a, b) => b.curr - a.curr)
+          .slice(0, 5);
+    }, [session, previousSession]);
+
     // Trigger confetti if PRs
     useEffect(() => {
         if (stats.prs.length > 0) {
@@ -334,6 +359,59 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                         <span className="font-mono text-[11px] font-bold text-white whitespace-nowrap">
                                             {pr.weight}kg × {pr.reps}
                                         </span>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* U-01: Per-exercise comparison vs last session */}
+                {perExerciseDelta.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        transition={{ delay: 0.9 }}
+                        className="px-6 py-4 border-b border-zinc-800/50"
+                    >
+                        <div className="flex items-center gap-2 mb-3">
+                            <TrendingUp size={12} className="text-zinc-500" />
+                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold tracking-wider">vs Last Session</span>
+                        </div>
+                        <div className="space-y-2">
+                            {perExerciseDelta.map((d, i) => {
+                                const ex = exercises.get(d.id);
+                                const isUp = d.diff >= 0;
+                                return (
+                                    <motion.div
+                                        key={d.id}
+                                        initial={{ x: -8, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: 1.1 + i * 0.08 }}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <span className="flex-1 font-mono text-[10px] text-zinc-400 truncate">{ex?.name ?? d.id}</span>
+                                        <div className="flex items-center gap-1">
+                                            {d.prev === 0 ? (
+                                                <span className="font-mono text-[9px] text-zinc-600">New</span>
+                                            ) : (
+                                                <>
+                                                    {isUp
+                                                        ? <TrendingUp size={9} className="text-brand-primary" />
+                                                        : <TrendingDown size={9} className="text-red-400" />
+                                                    }
+                                                    <span className={cn(
+                                                        "font-mono text-[10px] font-bold",
+                                                        isUp ? "text-brand-primary" : "text-red-400"
+                                                    )}>
+                                                        {isUp ? '+' : ''}{d.pct}%
+                                                    </span>
+                                                </>
+                                            )}
+                                            <span className="font-mono text-[9px] text-zinc-600">
+                                                {d.curr >= 1000 ? `${(d.curr/1000).toFixed(1)}t` : `${d.curr}kg`}
+                                            </span>
+                                        </div>
                                     </motion.div>
                                 );
                             })}

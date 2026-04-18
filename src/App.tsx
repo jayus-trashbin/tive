@@ -12,6 +12,7 @@ import { Notifications } from './components/ui/Notifications';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { FinishData } from './components/WorkoutPlayer';
 import WorkoutSummary from './components/post-workout/WorkoutSummary';
+import GlobalSearch from './components/ui/GlobalSearch';
 
 // Lazy load heavy components for better initial load performance
 const WorkoutPlayer = lazy(() => import('./components/WorkoutPlayer'));
@@ -49,6 +50,7 @@ const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [finishData, setFinishData] = useState<FinishData | null>(null);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
 
   // Helper to set view with direction calculation
   const setView = (newView: View) => {
@@ -85,6 +87,28 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [_hasHydrated, userStats.isOnboarded]);
+
+  // U-04: Apply OLED class to <html> based on theme setting
+  useEffect(() => {
+    const html = document.documentElement;
+    if (userStats.theme === 'oled') {
+      html.classList.add('oled');
+    } else {
+      html.classList.remove('oled');
+    }
+  }, [userStats.theme]);
+
+  // U-03: Cmd+K / Ctrl+K opens global search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   const handleStartRoutine = (routineId: string) => {
     startSession(routineId);
@@ -263,6 +287,13 @@ const App: React.FC = () => {
                 onContinue={handleSummaryContinue}
                 onDismiss={handleSummaryDismiss}
               />
+            )}
+          </AnimatePresence>
+
+          {/* U-03: Global Search */}
+          <AnimatePresence>
+            {showGlobalSearch && (
+              <GlobalSearch onClose={() => setShowGlobalSearch(false)} />
             )}
           </AnimatePresence>
         </motion.div>

@@ -117,3 +117,12 @@
     scroll-behavior: auto !important;
   }
 }
+/* U-04: OLED Theme */
+html.oled { background-color: #000 !important; }
+html.oled .bg-zinc-950 { background-color: #000 !important; }
+html.oled .bg-zinc-900 { background-color: #060606 !important; }
+html.oled .bg-black { background-color: #000 !important; }
+html.oled .bg-black\/80 { background-color: rgba(0,0,0,0.8) !important; }
+html.oled .bg-black\/85 { background-color: rgba(0,0,0,0.85) !important; }
+html.oled .bg-black\/95 { background-color: rgba(0,0,0,0.95) !important; }
+html.oled .card-elevated { background-color: #060606 !important; }
