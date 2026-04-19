@@ -22,24 +22,40 @@ export const useWorkoutStore = create<WorkoutState>()(
     {
       name: 'adaptive-strength-pro-db',
       storage: createJSONStorage(() => idbStorage),
-      version: 8,
+      version: 9,
       migrate: (persistedState: any, version: number) => {
+        // D-01: Robust migration and fallback logic
+        const state = { ...persistedState };
+
+        // Ensure arrays exist to prevent UI crashes (map/filter undefined errors)
+        state.routines = Array.isArray(state.routines) ? state.routines : [];
+        state.exercises = Array.isArray(state.exercises) ? state.exercises : [];
+        state.history = Array.isArray(state.history) ? state.history : [];
+        state.photos = Array.isArray(state.photos) ? state.photos : [];
+
         // Handle migration from previous versions
         if (version < 8) {
-          // Initialize any missing default values here if migrating from older versions
-          if (!persistedState.userStats) {
-             persistedState.userStats = {
-                name: '', email: '', isOnboarded: false, bodyweight: 80, gender: 'male', wilksScore: 0, supabaseUrl: '', supabaseKey: '', unitSystem: 'metric', theme: 'dark'
+          if (!state.userStats) {
+             state.userStats = {
+                name: '', email: '', isOnboarded: false, bodyweight: 80, gender: 'male', 
+                wilksScore: 0, supabaseUrl: '', supabaseKey: '', unitSystem: 'metric', theme: 'dark'
              };
           }
-          if (!persistedState.physiology) {
-             persistedState.physiology = {
+          if (!state.physiology) {
+             state.physiology = {
                 muscleFatigue: { chest: 0, back: 0, 'upper legs': 0, 'lower legs': 0, shoulders: 0, arms: 0, core: 0, cardio: 0 },
                 lastUpdate: Date.now()
              };
           }
         }
-        return persistedState;
+
+        if (version < 9) {
+          // Initialize newly added fields in v9
+          if (state.userStats && !state.userStats.theme) state.userStats.theme = 'dark';
+          if (state.userStats && !state.userStats.unitSystem) state.userStats.unitSystem = 'metric';
+        }
+
+        return state;
       },
 
       partialize: (state) => ({
