@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Trophy, Clock, Dumbbell, Flame, TrendingUp, TrendingDown,
@@ -155,7 +155,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[95] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+            className="fixed inset-0 z-[95] bg-black/95 backdrop-blur-xl flex items-end sm:items-center justify-center sm:p-4 overflow-y-auto"
         >
             {/* Confetti particles for PR */}
             <AnimatePresence>
@@ -195,12 +195,13 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                 initial={{ y: 40, opacity: 0, scale: 0.95 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
-                className="w-full max-w-md bg-zinc-950 border border-zinc-800 overflow-hidden relative"
+                className="w-full max-w-md bg-zinc-950 border border-zinc-800 overflow-hidden relative overflow-y-auto max-h-[90dvh] rounded-t-2xl sm:rounded-none"
             >
-                {/* Close button */}
+                {/* Close button â€” 44px touch target */}
                 <button
                     onClick={onDismiss}
-                    className="absolute top-4 right-4 z-10 p-1.5 text-zinc-600 hover:text-white transition-colors"
+                    className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full text-zinc-600 hover:text-white hover:bg-zinc-800 active:bg-zinc-700 transition-colors"
+                    aria-label="Close"
                 >
                     <X size={18} />
                 </button>
@@ -219,7 +220,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         Workout Complete
                     </h2>
                     <p className="font-mono text-[10px] text-zinc-500 mt-1 uppercase">
-                        {session.name || 'Free Session'} • {new Date(session.date).toLocaleDateString()}
+                        {session.name || 'Free Session'} â€¢ {new Date(session.date).toLocaleDateString()}
                     </p>
                 </div>
 
@@ -357,7 +358,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                             {ex?.name || 'Exercise'}
                                         </span>
                                         <span className="font-mono text-[11px] font-bold text-white whitespace-nowrap">
-                                            {pr.weight}kg × {pr.reps}
+                                            {pr.weight}kg Ã— {pr.reps}
                                         </span>
                                     </motion.div>
                                 );

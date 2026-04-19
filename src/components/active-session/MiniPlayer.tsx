@@ -67,7 +67,8 @@ export const MiniPlayer = () => {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 150, opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="fixed bottom-[90px] left-4 right-4 z-40 flex justify-center pointer-events-none"
+            className="fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
+            style={{ bottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}
         >
             <div
                 onClick={() => toggleMinimize(false)}
