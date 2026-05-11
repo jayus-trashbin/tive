@@ -1,21 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#09090b"/>
-  
-  <!-- Dumbbell Bar -->
-  <rect x="96" y="240" width="320" height="32" fill="#BEF264"/>
-  
-  <!-- Left Weight Plates -->
-  <rect x="96" y="176" width="48" height="160" fill="#BEF264"/>
-  <rect x="48" y="192" width="48" height="128" fill="#a3e635"/>
-  
-  <!-- Right Weight Plates -->
-  <rect x="368" y="176" width="48" height="160" fill="#BEF264"/>
-  <rect x="416" y="192" width="48" height="128" fill="#a3e635"/>
-  
-  <!-- Corner Accent -->
-  <rect x="0" y="0" width="64" height="8" fill="#BEF264"/>
-  <rect x="0" y="0" width="8" height="64" fill="#BEF264"/>
-  
-  <rect x="448" y="504" width="64" height="8" fill="#BEF264"/>
-  <rect x="504" y="448" width="8" height="64" fill="#BEF264"/>
+  <!-- Background: safe zone for maskable (content within 80% = 204px padding each side -> effective area 104..408) -->
+  <rect width="512" height="512" rx="0" fill="#09090b"/>
+
+  <!-- === Wordmark: bold "T" with integrated barbell aesthetic === -->
+
+  <!-- Vertical stem of T -->
+  <rect x="220" y="148" width="72" height="220" rx="8" fill="#bef264"/>
+
+  <!-- Horizontal crossbar (top of T) -->
+  <rect x="110" y="148" width="292" height="68" rx="8" fill="#bef264"/>
+
+  <!-- Left weight collar -->
+  <rect x="88"  y="136" width="22" height="92" rx="5" fill="#a3e635"/>
+
+  <!-- Right weight collar -->
+  <rect x="402" y="136" width="22" height="92" rx="5" fill="#a3e635"/>
+
 </svg>
