@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Trash2, X, ChevronLeft, ChevronRight, Grid, Layout as LayoutIcon } from 'lucide-react';
+import { Camera, Upload, Trash2, X, ChevronLeft, ChevronRight, Grid, Layout as LayoutIcon, Columns } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { ProgressPhoto } from '../../types/photo';
 import { MuscleGroup } from '../../types/domain';
@@ -19,9 +19,8 @@ interface PhotoGroup {
 
 /**
  * Premium Photo Gallery
- * - Tech-Brutalist design (sharp corners, mono data)
- * - Improved grid layout (single vs double column)
- * - Meta-data focused overlays
+ * - High-performance grid/stack layout
+ * - Progression-focused overlays
  */
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }) => {
     const { photos, deletePhoto, isLoading } = useWorkoutStore();
@@ -106,56 +105,68 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
 
             {/* PREMIUM HEADER */}
             <header className="shrink-0 pt-safe px-4 pb-2 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-20 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <div>
+                <div className="flex items-center justify-between gap-2">
+                    {/* Title — can shrink so buttons never get clipped */}
+                    <div className="min-w-0 shrink">
                         <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-1">Visual Progress</div>
-                        <h1 className="text-3xl font-bold text-white tracking-tighter uppercase font-medium">
-                            Gallery<span className="text-brand-primary">_</span>
+                        <h1 className="text-3xl font-bold text-white tracking-tighter uppercase truncate">
+                            Gallery
                         </h1>
                     </div>
 
-                    <div className="flex gap-2">
+                    {/* Actions — never shrink, always visible */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Compare — icon only on mobile, icon+count when active */}
                         <motion.button
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                                setIsCompareMode(!isCompareMode);
-                                setCompareSelection([]);
-                            }}
+                            onClick={() => { setIsCompareMode(!isCompareMode); setCompareSelection([]); }}
+                            title="Compare photos"
                             className={cn(
-                                "px-3 py-2 border text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors",
+                                "flex items-center gap-1.5 h-10 px-3 border text-xs font-bold uppercase tracking-wider rounded-xl transition-colors",
                                 isCompareMode
                                     ? "bg-brand-primary text-black border-brand-primary"
                                     : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white"
                             )}
                         >
-                            {isCompareMode ? `Compare (${compareSelection.length}/2)` : "Compare"}
+                            <Columns size={16} />
+                            {isCompareMode && (
+                                <span className="tabular-nums">{compareSelection.length}/2</span>
+                            )}
+                            {!isCompareMode && (
+                                <span className="hidden sm:inline">Compare</span>
+                            )}
                         </motion.button>
 
+                        {/* Grid/Stack toggle */}
                         <motion.button
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setViewMode(viewMode === 'grid' ? 'stack' : 'grid')}
-                            className="p-3 bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white rounded-lg"
+                            title={viewMode === 'stack' ? 'Grid view' : 'Stack view'}
+                            className="w-10 h-10 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white rounded-xl"
                         >
-                            {viewMode === 'stack' ? <Grid size={18} /> : <LayoutIcon size={18} />}
+                            {viewMode === 'stack' ? <Grid size={17} /> : <LayoutIcon size={17} />}
                         </motion.button>
 
+                        {/* Upload */}
                         {onUploadPhoto && (
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
                                 onClick={onUploadPhoto}
-                                className="flex items-center gap-2 px-4 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-medium text-sm font-bold uppercase tracking-widest rounded-lg transition-colors"
+                                title="Upload photo"
+                                className="w-10 h-10 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-colors"
                             >
-                                <Upload size={16} />
+                                <Upload size={17} />
                             </motion.button>
                         )}
 
+                        {/* Camera — always icon, green accent */}
                         <motion.button
                             onClick={onAddPhoto}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center gap-2 px-6 bg-brand-primary text-black font-medium text-sm font-bold uppercase tracking-widest rounded-lg shadow-[4px_4px_0px_0px_rgba(190,242,100,0.3)]"
+                            title="Take photo"
+                            className="w-10 h-10 flex items-center justify-center bg-brand-primary text-black rounded-xl shadow-lg"
                         >
                             <Camera size={18} />
-                            Add
                         </motion.button>
                     </div>
                 </div>
@@ -196,7 +207,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
             <div className="flex-1 overflow-y-auto px-4 pb-32 no-scrollbar scroll-smooth">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="font-medium text-xs font-bold text-zinc-700 animate-pulse tracking-[0.3em] uppercase">Initialising stream...</div>
+                        <div className="text-xs font-bold text-zinc-700 animate-pulse tracking-[0.3em] uppercase">Loading Gallery...</div>
                     </div>
                 ) : photos.length === 0 ? (
                     <EmptyState
@@ -279,13 +290,8 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                                     )}
                                                 </div>
 
-                                                {/* Tech Corners - Hidden when selected to avoid overlap with checkmark */}
-                                                {!isSelectedForCompare && (
-                                                    <React.Fragment>
-                                                        <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-brand-primary/30 opacity-0 group-hover:opacity-100" />
-                                                        <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-brand-primary/30 opacity-0 group-hover:opacity-100" />
-                                                    </React.Fragment>
-                                                )}
+                                                {/* Visual indicator when hovered */}
+                                                <div className="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/5 transition-colors pointer-events-none" />
                                             </motion.div>
                                         );
                                     })}

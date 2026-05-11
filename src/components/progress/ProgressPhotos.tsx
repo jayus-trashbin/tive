@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
-import CameraCapture from './CameraCapture';
+import CameraCapture, { PhotoSource } from './CameraCapture';
 import PhotoCanvas from './PhotoCanvas';
 import PhotoGallery from './PhotoGallery';
 import { MuscleGroup } from '../../types/domain';
@@ -13,13 +13,9 @@ interface CaptureData {
     rawImage: string;
     muscleGroups: MuscleGroup[];
     volumes?: Map<MuscleGroup, number>;
-    facingMode?: 'user' | 'environment';
+    source: PhotoSource;
 }
 
-/**
- * Main Progress Photos container component
- * Orchestrates camera capture, file upload, overlay processing, and gallery display
- */
 const ProgressPhotos: React.FC = () => {
     const {
         loadPhotos,
@@ -27,22 +23,20 @@ const ProgressPhotos: React.FC = () => {
         userStats,
         pendingMuscleGroups,
         dismissPostWorkoutPrompt,
-        // Added for intensity
         pendingSessionId,
         history,
-        exercises
+        exercises,
     } = useWorkoutStore();
 
     const [view, setView] = useState<ViewState>('gallery');
     const [captureData, setCaptureData] = useState<CaptureData | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Load photos on mount
     useEffect(() => {
         loadPhotos();
     }, [loadPhotos]);
 
-    // Derived session intensity
     const sessionVolumes = useMemo(() => {
         if (!pendingSessionId) return undefined;
         const session = history.find(s => s.id === pendingSessionId);
@@ -50,48 +44,56 @@ const ProgressPhotos: React.FC = () => {
         return getSessionMuscleIntensity(session, exercises);
     }, [pendingSessionId, history, exercises]);
 
-    // Handle camera capture
-    const handleCapture = useCallback((imageData: string, facingMode: 'user' | 'environment') => {
+    // From camera (live capture)
+    const handleCapture = useCallback((imageData: string, source: PhotoSource) => {
+        setSaveError(null);
         setCaptureData({
             rawImage: imageData,
             muscleGroups: pendingMuscleGroups.length > 0 ? pendingMuscleGroups : [],
             volumes: sessionVolumes,
-            facingMode,
+            source,
         });
         setView('processing');
     }, [pendingMuscleGroups, sessionVolumes]);
 
-    // Handle processed photo render
+    // After canvas bakes in overlay
     const handleProcessedPhoto = useCallback(async (finalImage: string, thumbnail: string) => {
-        await addPhoto({
-            timestamp: Date.now(),
-            muscleGroups: captureData?.muscleGroups || [],
-            imageData: finalImage,
-            thumbnailData: thumbnail,
-            metadata: {
-                bodyweight: userStats.bodyweight,
-                camera: captureData?.facingMode === 'environment' ? 'back' : 'front',
-            },
-        });
+        setSaveError(null);
+        try {
+            await addPhoto({
+                timestamp: Date.now(),
+                muscleGroups: captureData?.muscleGroups ?? [],
+                imageData: finalImage,
+                thumbnailData: thumbnail,
+                metadata: {
+                    bodyweight: userStats.bodyweight,
+                    camera: captureData?.source ?? 'upload',
+                },
+            });
 
-        setCaptureData(null);
-        dismissPostWorkoutPrompt();
-        setView('gallery');
-    }, [addPhoto, captureData, userStats.bodyweight, dismissPostWorkoutPrompt]);
+            setCaptureData(null);
+            if (pendingMuscleGroups.length > 0) dismissPostWorkoutPrompt();
+            setView('gallery');
+        } catch (err) {
+            console.error('[ProgressPhotos] Failed to save photo:', err);
+            setSaveError('Failed to save photo. Please try again.');
+        }
+    }, [addPhoto, captureData, userStats.bodyweight, dismissPostWorkoutPrompt, pendingMuscleGroups]);
 
-    // Handle camera cancel — only dismiss post-workout prompt if it was the trigger
+    // Camera cancel
     const handleCameraCancel = useCallback(() => {
         setCaptureData(null);
         if (pendingMuscleGroups.length > 0) dismissPostWorkoutPrompt();
         setView('gallery');
     }, [dismissPostWorkoutPrompt, pendingMuscleGroups]);
 
-    // Open camera for new photo
+    // Open camera
     const handleAddPhoto = useCallback(() => {
+        setSaveError(null);
         setView('camera');
     }, []);
 
-    // File upload handler — adds photo directly (bypasses camera/canvas)
+    // Gallery file upload trigger
     const handleFileUpload = useCallback(() => {
         fileInputRef.current?.click();
     }, []);
@@ -100,29 +102,26 @@ const ProgressPhotos: React.FC = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Read image as base64
+        setSaveError(null);
         const reader = new FileReader();
         reader.onload = (event) => {
             const imageData = event.target?.result as string;
             if (!imageData) return;
 
-            // Route to canvas for overlay processing
             setCaptureData({
                 rawImage: imageData,
                 muscleGroups: pendingMuscleGroups.length > 0 ? pendingMuscleGroups : [],
-                volumes: sessionVolumes
+                volumes: sessionVolumes,
+                source: 'upload',
             });
             setView('processing');
         };
         reader.readAsDataURL(file);
-
-        // Reset input so the same file can be re-selected
         e.target.value = '';
     }, [pendingMuscleGroups, sessionVolumes]);
 
     return (
         <>
-            {/* Hidden file input for uploads */}
             <input
                 ref={fileInputRef}
                 type="file"
@@ -131,12 +130,10 @@ const ProgressPhotos: React.FC = () => {
                 onChange={handleFileSelected}
             />
 
-            {/* Gallery View */}
             {view === 'gallery' && (
                 <PhotoGallery onAddPhoto={handleAddPhoto} onUploadPhoto={handleFileUpload} />
             )}
 
-            {/* Camera Capture */}
             <AnimatePresence>
                 {view === 'camera' && (
                     <CameraCapture
@@ -146,18 +143,31 @@ const ProgressPhotos: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {/* Processing Canvas (hidden) */}
             {view === 'processing' && captureData && (
-                <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-                    <div className="font-medium text-lime-400 animate-pulse">
-                        Processing...
-                    </div>
-                    <PhotoCanvas
-                        imageData={captureData.rawImage}
-                        muscleGroups={captureData.muscleGroups}
-                        volumes={captureData.volumes}
-                        onRender={handleProcessedPhoto}
-                    />
+                <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-4">
+                    {saveError ? (
+                        <>
+                            <p className="text-sm font-bold text-red-400 text-center px-8">{saveError}</p>
+                            <button
+                                onClick={() => { setCaptureData(null); setView('gallery'); }}
+                                className="px-6 py-3 bg-zinc-800 text-white font-bold text-xs border border-zinc-700 uppercase rounded-xl"
+                            >
+                                Back to Gallery
+                            </button>
+                        </>
+                    ) : (
+                        <div className="text-sm font-bold text-brand-primary animate-pulse uppercase tracking-widest">
+                            Processing...
+                        </div>
+                    )}
+                    {!saveError && (
+                        <PhotoCanvas
+                            imageData={captureData.rawImage}
+                            muscleGroups={captureData.muscleGroups}
+                            volumes={captureData.volumes}
+                            onRender={handleProcessedPhoto}
+                        />
+                    )}
                 </div>
             )}
         </>

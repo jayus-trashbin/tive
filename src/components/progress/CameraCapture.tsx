@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, RotateCcw, Check, AlertCircle, SwitchCamera, Upload, Image as ImageIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+export type PhotoSource = 'front' | 'back' | 'upload';
+
 interface CameraCaptureProps {
-    onCapture: (imageData: string, facingMode: 'user' | 'environment') => void;
+    onCapture: (imageData: string, source: PhotoSource) => void;
     onCancel: () => void;
 }
 
@@ -17,11 +19,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isMounted = useRef(true);
     const timeoutRef = useRef<NodeJS.Timeout>();
-    const isStartingRef = useRef(false); // guard against concurrent starts
+    const isStartingRef = useRef(false);
 
     const [state, setState] = useState<CameraState>('requesting');
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [captureSource, setCaptureSource] = useState<PhotoSource>('front');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     const stopStream = useCallback(() => {
@@ -48,21 +51,20 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
             }
         }, 10000);
 
-        const tryGetStream = async (constraints: MediaStreamConstraints): Promise<MediaStream> => {
-            return navigator.mediaDevices.getUserMedia(constraints);
-        };
-
         try {
             let stream: MediaStream;
             try {
-                stream = await tryGetStream({ video: { facingMode: facing }, audio: false });
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facing },
+                    audio: false,
+                });
             } catch (err) {
-                // OverconstrainedError or NotFoundError with facingMode → retry without it
+                // OverconstrainedError or NotFoundError → retry without facingMode hint
                 if (
                     err instanceof DOMException &&
                     (err.name === 'OverconstrainedError' || err.name === 'NotFoundError')
                 ) {
-                    stream = await tryGetStream({ video: true, audio: false });
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 } else {
                     throw err;
                 }
@@ -78,7 +80,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
 
             streamRef.current = stream;
 
-            // videoRef is always in the DOM (rendered outside AnimatePresence)
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
                 await videoRef.current.play();
@@ -127,7 +128,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Restart when facingMode changes (only after initial mount)
+    // Restart when facingMode changes (skip on first mount)
     const isFirstMount = useRef(true);
     useEffect(() => {
         if (isFirstMount.current) {
@@ -137,7 +138,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         startCamera(facingMode);
     }, [facingMode, startCamera]);
 
-    // Capture frame
+    // Capture from live video feed
     const handleCapture = useCallback(() => {
         if (!videoRef.current || !canvasRef.current) return;
 
@@ -150,6 +151,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        // Mirror the front camera image (un-mirror what the user sees)
         if (facingMode === 'user') {
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
@@ -158,12 +160,15 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         ctx.drawImage(video, 0, 0);
 
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        const source: PhotoSource = facingMode === 'user' ? 'front' : 'back';
+
         setCapturedImage(imageData);
+        setCaptureSource(source);
         setState('preview');
         stopStream();
     }, [facingMode, stopStream]);
 
-    // File upload
+    // File upload — always tagged as 'upload'
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -177,30 +182,31 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         reader.onloadend = () => {
             if (typeof reader.result === 'string') {
                 setCapturedImage(reader.result);
+                setCaptureSource('upload');
                 setState('preview');
                 stopStream();
             }
         };
         reader.onerror = () => alert('Failed to read file.');
         reader.readAsDataURL(file);
+
+        // Reset so same file can be re-selected
+        event.target.value = '';
     };
 
     const triggerFileUpload = () => fileInputRef.current?.click();
 
-    // Retake
     const handleRetake = useCallback(() => {
         setCapturedImage(null);
         startCamera(facingMode);
     }, [startCamera, facingMode]);
 
-    // Confirm
     const handleConfirm = useCallback(() => {
         if (capturedImage) {
-            onCapture(capturedImage, facingMode);
+            onCapture(capturedImage, captureSource);
         }
-    }, [capturedImage, onCapture, facingMode]);
+    }, [capturedImage, captureSource, onCapture]);
 
-    // Switch camera
     const handleSwitchCamera = useCallback(() => {
         setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
     }, []);
@@ -226,7 +232,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                     <X size={24} strokeWidth={2.5} />
                 </button>
 
-                <span className="font-medium text-xs text-zinc-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
                     Progress Photo
                 </span>
 
@@ -245,8 +251,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
             {/* Camera/Preview Area */}
             <div className="flex-1 relative overflow-hidden bg-zinc-900">
                 {/*
-                  Video is ALWAYS in the DOM so videoRef.current is available
-                  before setState('ready') is called. Visibility controlled by CSS.
+                  Always in DOM so videoRef.current exists before setState('ready').
+                  Visibility controlled by CSS only.
                 */}
                 <video
                     ref={videoRef}
@@ -270,7 +276,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                             className="absolute inset-0 flex flex-col items-center justify-center gap-4"
                         >
                             <Camera size={48} className="text-zinc-600 animate-pulse" />
-                            <p className="font-medium text-sm text-zinc-500">Initializing camera...</p>
+                            <p className="text-sm font-medium text-zinc-500">Initializing camera...</p>
                         </motion.div>
                     )}
 
@@ -287,12 +293,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                             </div>
                             <div className="text-center space-y-2">
                                 <h3 className="text-white font-bold">Camera Unavailable</h3>
-                                <p className="font-medium text-sm text-zinc-400">{errorMessage}</p>
+                                <p className="text-sm font-medium text-zinc-400">{errorMessage}</p>
                             </div>
                             <div className="flex flex-col gap-3 w-full max-w-xs">
                                 <button
                                     onClick={triggerFileUpload}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary text-black font-bold uppercase text-xs rounded-lg hover:bg-brand-accent transition-colors"
+                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary text-black font-bold uppercase text-xs rounded-xl hover:bg-brand-primaryHover transition-colors"
                                 >
                                     <ImageIcon size={16} />
                                     Upload Image
@@ -300,14 +306,14 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                                 {state === 'error' && (
                                     <button
                                         onClick={() => startCamera(facingMode)}
-                                        className="px-6 py-3 bg-zinc-800 text-white font-medium text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase"
+                                        className="px-6 py-3 bg-zinc-800 text-white font-bold text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase rounded-xl"
                                     >
                                         Retry
                                     </button>
                                 )}
                                 <button
                                     onClick={onCancel}
-                                    className="px-6 py-3 bg-zinc-800 text-white font-medium text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase"
+                                    className="px-6 py-3 bg-zinc-800 text-white font-bold text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase rounded-xl"
                                 >
                                     Cancel
                                 </button>
@@ -355,18 +361,18 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                             <div className="w-14 h-14 rounded-full border-2 border-current flex items-center justify-center bg-black/50 backdrop-blur-sm">
                                 <RotateCcw size={24} />
                             </div>
-                            <span className="font-medium text-xs uppercase">Retake</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">Retake</span>
                         </motion.button>
 
                         <motion.button
                             onClick={handleConfirm}
                             whileTap={{ scale: 0.95 }}
-                            className="flex flex-col items-center gap-2 text-lime-400 hover:text-lime-300 transition-colors"
+                            className="flex flex-col items-center gap-2 text-brand-primary hover:text-brand-primaryHover transition-colors"
                         >
-                            <div className="w-14 h-14 rounded-full border-2 border-current bg-lime-400/20 flex items-center justify-center backdrop-blur-sm">
+                            <div className="w-14 h-14 rounded-full border-2 border-current bg-brand-primary/20 flex items-center justify-center backdrop-blur-sm">
                                 <Check size={28} strokeWidth={3} />
                             </div>
-                            <span className="font-medium text-xs uppercase">Use Photo</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">Use Photo</span>
                         </motion.button>
                     </div>
                 )}

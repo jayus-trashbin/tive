@@ -25,6 +25,8 @@ dist-ssr
 
 # Antigravity Kit
 .agent/
+.agents/
+graphify-out/
 
 # Claude Code worktrees (isolated git checkouts)
 .claude/worktrees/
