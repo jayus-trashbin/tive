@@ -28,7 +28,7 @@ export const ExerciseAnatomy: React.FC<Props> = ({ exercise }) => {
                         <Activity size={28} />
                     </div>
                     <div>
-                        <span className="block text-xl font-black text-white capitalize tracking-tight">{exercise.targetMuscle}</span>
+                        <span className="block text-xl font-bold text-white capitalize tracking-tight">{exercise.targetMuscle}</span>
                         <span className="text-xs text-zinc-500 font-medium">Primary Target Muscle</span>
                     </div>
                 </div>

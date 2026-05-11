@@ -34,8 +34,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         .map(id => storedExercises.find(e => e.id === id))
         .filter((e): e is Exercise => !!e);
 
-    // 2. Dynamic Thumbnails (Take up to 3 unique GIFs)
-    const thumbnails = Array.from(new Set(resolvedExercises.map(e => e?.gifUrl).filter(Boolean))).slice(0, 3);
+    // 2. Dynamic Thumbnails (Take up to 3 unique static images)
+    const thumbnails = Array.from(new Set(resolvedExercises.map(e => e?.staticImageUrl || (e?.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(e.gifUrl)}&n=1&output=png` : '')).filter(Boolean))).slice(0, 3);
 
     // 3. Muscle Group Tags (Top 2 most frequent)
     const muscleCounts = resolvedExercises.reduce((acc, ex) => {
@@ -62,11 +62,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     };
 
     return (
-        <div className="relative w-full aspect-[2/1] rounded-[2px] overflow-hidden bg-zinc-950 border border-zinc-900 group">
+        <div className="card relative w-full aspect-[2/1] group p-0 overflow-hidden cursor-pointer">
 
             {/* SWIPE ACTION BACKGROUND (Left/Start) */}
             <div className="absolute inset-y-0 left-0 w-full bg-brand-primary flex items-center pl-6">
-                <div className="flex items-center gap-2 text-zinc-950 font-black font-heading uppercase tracking-widest text-lg">
+                <div className="flex items-center gap-2 text-zinc-950 font-bold uppercase tracking-wider text-lg">
                     <Play size={20} fill="currentColor" />
                     Start
                 </div>
@@ -130,11 +130,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         {/* Muscle Pills */}
                         <div className="flex flex-wrap gap-1">
                             {topMuscles.length > 0 ? topMuscles.map(m => (
-                                <span key={m} className="px-1.5 py-0.5 bg-brand-primary text-black text-[10px] font-mono font-bold uppercase tracking-tighter">
+                                <span key={m} className="px-2 py-0.5 bg-brand-primary text-black text-[10px] font-bold uppercase tracking-widest rounded-full">
                                     {m}
                                 </span>
                             )) : (
-                                <span className="px-1.5 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] font-mono font-bold uppercase tracking-tighter">
+                                <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
                                     General
                                 </span>
                             )}
@@ -143,7 +143,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         {/* Selection Checkbox */}
                         {isSelectionMode ? (
                             <div className={cn(
-                                "w-5 h-5 border-2 flex items-center justify-center transition-colors bg-black",
+                                "w-5 h-5 rounded flex items-center justify-center transition-colors bg-black border",
                                 isSelected ? "bg-brand-primary border-brand-primary text-black" : "border-zinc-700 text-transparent"
                             )}>
                                 <CheckCircle2 size={14} strokeWidth={3} />
@@ -153,15 +153,15 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onDuplicate(routine.id); }}
                                     title="Duplicate routine"
-                                    className="w-7 h-7 bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-amber-400 hover:border-amber-400/40 transition-all active:translate-y-[1px]"
+                                    className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-amber-400 hover:border-amber-400/40 transition-all active:scale-95"
                                 >
-                                    <Copy size={11} />
+                                    <Copy size={12} />
                                 </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onEdit(routine.id); }}
-                                    className="w-7 h-7 bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-brand-primary hover:border-brand-primary transition-all active:translate-y-[1px]"
+                                    className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-brand-primary hover:border-brand-primary transition-all active:scale-95"
                                 >
-                                    <Edit2 size={12} />
+                                    <Edit2 size={14} />
                                 </button>
                             </div>
                         )}
@@ -169,16 +169,16 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
                     {/* Bottom Row */}
                     <div>
-                        <h3 className="text-lg font-bold text-white leading-tight mb-1.5 tracking-tight font-mono truncate">
+                        <h3 className="text-lg font-bold text-white leading-tight mb-1 tracking-tight truncate">
                             {routine.name}
                         </h3>
-                        <div className="flex items-center gap-3 text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-[0.2em]">
+                        <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
                             <span className="flex items-center gap-1">
-                                <Layers size={10} className="text-brand-primary" />
+                                <Layers size={12} className="text-brand-primary" />
                                 {displayIds.length} EX
                             </span>
                             <span className="flex items-center gap-1">
-                                <Clock size={10} className="text-brand-primary" />
+                                <Clock size={12} className="text-brand-primary" />
                                 {estTime} MIN
                             </span>
                         </div>
@@ -188,8 +188,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                 {/* Hover Arrow */}
                 {!isSelectionMode && (
                     <div className="absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                        <div className="w-8 h-8 bg-brand-primary text-black flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] transition-transform">
-                            <Play size={14} fill="currentColor" strokeWidth={3} />
+                        <div className="w-10 h-10 rounded-full bg-brand-primary text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+                            <Play size={16} fill="currentColor" />
                         </div>
                     </div>
                 )}

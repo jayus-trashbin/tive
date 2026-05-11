@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Download, Sparkles } from 'lucide-react';
+import { Plus, Download, Sparkles, Table2, CalendarDays } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
@@ -9,6 +9,8 @@ interface PlanHeaderProps {
     onShowAIBuilder: () => void;
     onShowImporter: () => void;
     onStartCreate: () => void;
+    onShowTableBuilder: () => void;
+    onShowMesocycle: () => void;
     hasRoutines: boolean;
 }
 
@@ -18,6 +20,8 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
     onShowAIBuilder,
     onShowImporter,
     onStartCreate,
+    onShowTableBuilder,
+    onShowMesocycle,
     hasRoutines
 }) => {
     return (
@@ -28,8 +32,8 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
             <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
                     <div className="section-title">Your Training Plans</div>
-                    <h1 className="page-title">
-                        My<span className="text-brand-primary">_</span>Routines
+                    <h1 className="text-3xl font-bold text-white leading-tight">
+                        My Routines
                     </h1>
                 </div>
             </div>
@@ -40,10 +44,10 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
                     <button
                         onClick={toggleSelectionMode}
                         className={cn(
-                            "flex-1 h-11 text-[10px] font-heading font-bold uppercase tracking-wider border transition-all rounded-[2px] text-center flex items-center justify-center",
+                            "flex-1 h-11 text-[10px] font-bold uppercase tracking-widest transition-all rounded-xl text-center flex items-center justify-center border",
                             isSelectionMode
                                 ? "bg-zinc-800 border-zinc-700 text-white"
-                                : "bg-transparent border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600"
+                                : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700"
                         )}
                     >
                         {isSelectionMode ? "DONE" : "SELECT"}
@@ -52,15 +56,34 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
 
                 <button
                     onClick={onShowAIBuilder}
-                    className="h-11 w-11 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-brand-primary rounded-[2px] hover:bg-zinc-800 transition-colors"
+                    className="h-11 w-11 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-brand-primary rounded-xl hover:bg-zinc-800 transition-colors"
+                    title="AI Routine Builder"
                 >
                     <Sparkles size={18} />
                 </button>
 
                 <motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={onShowTableBuilder}
+                    className="h-11 w-11 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-brand-primary hover:border-brand-primary/40 transition-all rounded-xl cursor-pointer"
+                    title="Build from table"
+                >
+                    <Table2 size={18} />
+                </motion.button>
+
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onShowMesocycle}
+                    className="h-11 w-11 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all rounded-xl cursor-pointer"
+                    title="Mesocycle Planner"
+                >
+                    <CalendarDays size={18} />
+                </motion.button>
+
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
                     onClick={onShowImporter}
-                    className="h-11 w-11 flex items-center justify-center border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 transition-all rounded-[2px] cursor-pointer"
+                    className="h-11 w-11 flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all rounded-xl cursor-pointer"
                 >
                     <Download size={18} />
                 </motion.button>
@@ -68,7 +91,7 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
                 <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={onStartCreate}
-                    className="flex-1 h-11 flex items-center justify-center gap-2 btn-tech text-[10px] rounded-[2px] cursor-pointer"
+                    className="flex-1 h-11 flex items-center justify-center gap-2 bg-brand-primary text-black font-bold uppercase tracking-wider text-[11px] rounded-xl cursor-pointer shadow-lg hover:brightness-110 transition-all"
                 >
                     <Plus size={16} strokeWidth={3} />
                     CREATE

@@ -5,6 +5,7 @@ import { getExercises } from '../../services/exerciseService';
 import ExerciseCard from './ExerciseCard';
 import ExerciseDetailModal from './ExerciseDetailModal';
 import { Search, Loader2, Database, ChevronDown } from 'lucide-react';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { Exercise } from '../../types';
 
 interface Props {
@@ -95,7 +96,7 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
     <>
       <div className="pb-24 space-y-6">
         <header className="sticky top-0 bg-zinc-950/80 backdrop-blur-md pt-4 pb-2 z-10">
-            <h1 className="text-3xl font-black text-white mb-4">LIBRARY</h1>
+            <h1 className="page-title mb-4">Exercise Library</h1>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
               <input 
@@ -128,36 +129,51 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
               ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 pb-4">
-              {viewExercises.map(ex => (
-                  <ExerciseCard 
-                      key={ex.id} 
-                      exercise={ex} 
-                      onClick={() => onSelect(ex.id)}
-                      onInfoClick={() => setDetailExercise(ex)}
-                  />
-              ))}
-              
-              {/* Load More Button */}
-              {nextCursor && (
-                  <button 
-                    onClick={handleLoadMore}
-                    disabled={loadingMore}
-                    className="w-full py-4 mt-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
-                  >
-                      {loadingMore ? (
-                          <Loader2 className="animate-spin" size={16} />
-                      ) : (
-                          <ChevronDown size={16} />
-                      )}
-                      {loadingMore ? 'Loading...' : 'Load More Exercises'}
-                  </button>
-              )}
+          <div className="flex-1 w-full h-full relative" style={{ height: 'calc(100vh - 200px)' }}>
+              {viewExercises.length > 0 ? (
+                  <>
+                      <List
+                          height={window.innerHeight - 200}
+                          itemCount={viewExercises.length + (nextCursor ? 1 : 0)}
+                          itemSize={220} // Approximate height for aspect-[16/9] on mobile
+                          width="100%"
+                          className="no-scrollbar"
+                      >
+                          {({ index, style }: ListChildComponentProps) => {
+                              if (index === viewExercises.length) {
+                                  return (
+                                      <div style={style} className="p-2">
+                                          <button 
+                                            onClick={handleLoadMore}
+                                            disabled={loadingMore}
+                                            className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                                          >
+                                              {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
+                                              {loadingMore ? 'Loading...' : 'Load More Exercises'}
+                                          </button>
+                                      </div>
+                                  );
+                              }
 
-              {viewExercises.length === 0 && !loading && (
-                  <div className="text-center py-10 text-zinc-500">
-                      No exercises found. Try a different search term.
-                  </div>
+                              const ex = viewExercises[index];
+                              return (
+                                  <div style={style} className="p-2">
+                                      <ExerciseCard 
+                                          exercise={ex} 
+                                          onClick={() => onSelect(ex.id)}
+                                          onInfoClick={() => setDetailExercise(ex)}
+                                      />
+                                  </div>
+                              );
+                          }}
+                      </List>
+                  </>
+              ) : (
+                  !loading && (
+                      <div className="text-center py-10 text-zinc-500">
+                          No exercises found. Try a different search term.
+                      </div>
+                  )
               )}
           </div>
         )}

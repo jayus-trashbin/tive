@@ -9,6 +9,7 @@ import EmptyState from '../ui/EmptyState';
 interface DayDetail {
     date: string;
     count: number;
+    volume: number;
     sessions: { name: string; volumeLoad: number; date: number }[];
 }
 
@@ -48,13 +49,20 @@ const FrequencyHeatmap: React.FC = () => {
     const handleDayClick = (point: typeof data[0]) => {
         if (point.count === 0) return;
         const sessions = dayMap.get(point.date) || [];
-        setSelected({ date: point.date, count: point.count, sessions });
+        setSelected({ date: point.date, count: point.count, volume: point.volume, sessions });
     };
 
-    const colorForCount = (count: number) => {
-        if (count === 0) return 'bg-zinc-900 border border-zinc-800/50 cursor-default';
-        if (count === 1) return 'bg-lime-900/60 border border-lime-800/40 cursor-pointer hover:brightness-125';
-        if (count === 2) return 'bg-lime-700/70 border border-lime-600/40 cursor-pointer hover:brightness-125';
+    const getIntensity = (volume: number): 0|1|2|3 => {
+        if (volume === 0) return 0;
+        if (volume < 5000) return 1;
+        if (volume < 12000) return 2;
+        return 3;
+    };
+
+    const colorForIntensity = (intensity: 0|1|2|3) => {
+        if (intensity === 0) return 'bg-zinc-900 border border-zinc-800/50 cursor-default';
+        if (intensity === 1) return 'bg-lime-900/60 border border-lime-800/40 cursor-pointer hover:brightness-125';
+        if (intensity === 2) return 'bg-lime-700/70 border border-lime-600/40 cursor-pointer hover:brightness-125';
         return 'bg-brand-primary/80 border border-brand-primary/50 shadow-[0_0_6px_rgba(190,242,100,0.3)] cursor-pointer hover:brightness-125';
     };
 
@@ -91,8 +99,8 @@ const FrequencyHeatmap: React.FC = () => {
                                     key={point.date}
                                     whileHover={point.count > 0 ? { scale: 1.3 } : {}}
                                     onClick={() => handleDayClick(point)}
-                                    title={`${point.date}: ${point.count} session${point.count !== 1 ? 's' : ''}`}
-                                    className={cn('w-[10px] h-[10px] rounded-[2px] transition-all', colorForCount(point.count))}
+                                    title={`${point.date}: ${point.volume > 0 ? (point.volume / 1000).toFixed(1) + 'k kg' : 'Rest'}`}
+                                    className={cn('w-[10px] h-[10px] rounded-lg transition-all', colorForIntensity(getIntensity(point.volume)))}
                                 />
                             ))}
                         </div>
@@ -102,11 +110,11 @@ const FrequencyHeatmap: React.FC = () => {
 
             {/* Legend */}
             <div className="flex items-center gap-2 mt-3 justify-end">
-                <span className="text-[8px] text-zinc-700 font-mono">Less</span>
-                {[0, 1, 2, 3].map(v => (
-                    <div key={v} className={cn('w-[8px] h-[8px] rounded-[2px]', colorForCount(v).split(' ')[0])} />
+                <span className="text-[8px] text-zinc-700 font-medium">Less</span>
+                {([0, 1, 2, 3] as const).map(v => (
+                    <div key={v} className={cn('w-[8px] h-[8px] rounded-lg', colorForIntensity(v).split(' ')[0])} />
                 ))}
-                <span className="text-[8px] text-zinc-700 font-mono">More</span>
+                <span className="text-[8px] text-zinc-700 font-medium">More</span>
             </div>
 
             {/* Drill-down panel */}
@@ -118,9 +126,9 @@ const FrequencyHeatmap: React.FC = () => {
                         exit={{ opacity: 0, height: 0 }}
                         className="mt-4 overflow-hidden"
                     >
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-[4px] p-3">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-black text-zinc-300 font-mono flex items-center gap-1">
+                                <span className="text-[10px] font-bold text-zinc-300 font-medium flex items-center gap-1">
                                     <CalendarIcon size={10} className="text-brand-primary" />
                                     {new Date(selected.date).toLocaleDateString(undefined, {
                                         weekday: 'short', month: 'short', day: 'numeric'
@@ -134,7 +142,7 @@ const FrequencyHeatmap: React.FC = () => {
                                 {selected.sessions.map((s, i) => (
                                     <div key={i} className="flex items-center justify-between">
                                         <span className="text-[10px] text-white font-bold truncate mr-2">{s.name}</span>
-                                        <span className="text-[9px] text-zinc-500 font-mono shrink-0">
+                                        <span className="text-[9px] text-zinc-500 font-medium shrink-0">
                                             {s.volumeLoad > 1000 ? `${(s.volumeLoad / 1000).toFixed(1)}k` : s.volumeLoad} kg
                                         </span>
                                     </div>

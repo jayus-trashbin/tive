@@ -15,7 +15,7 @@ const PlateCalculator: React.FC<Props> = ({ targetWeight }) => {
   return (
     <div className="bg-zinc-800 p-3 rounded-lg border border-zinc-700 mt-2">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs text-zinc-400 uppercase font-mono">Per Side Loading</span>
+        <span className="text-xs text-zinc-400 uppercase font-medium">Per Side Loading</span>
         <span className="text-xs text-brand-accent">Bar: 20kg</span>
       </div>
       

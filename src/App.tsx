@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { logger } from './utils/logger';
 import { useWorkoutStore } from './store/useWorkoutStore';
+import { useUIStore } from "./store/useUIStore";
 import Dashboard from './components/Dashboard';
 import Layout from './components/Layout';
 import WelcomeModal from './components/WelcomeModal';
@@ -24,6 +25,7 @@ const Settings = lazy(() => import('./components/Settings'));
 
 import HistorySkeleton from './components/ui/skeletons/HistorySkeleton';
 import PlanSkeleton from './components/ui/skeletons/PlanSkeleton';
+import { AnalyticsBoundary, HistoryBoundary, WorkoutPlayerBoundary } from './components/ui/SectionBoundaries';
 
 // Fallback for components with no dedicated skeleton (e.g. WorkoutPlayer)
 const LazyFallback = () => (
@@ -46,7 +48,8 @@ const App: React.FC = () => {
   // Use a tuple [currentView, direction] to track navigation direction
   const [[view, direction], setViewTuple] = useState<[View, number]>(['dashboard', 0]);
 
-  const { activeSession, startSession, _hasHydrated, userStats, isMinimized, setHasHydrated, isProfileOpen, setProfileOpen } = useWorkoutStore();
+  const { activeSession, startSession, userStats } = useWorkoutStore();
+    const { _hasHydrated, isMinimized, setHasHydrated, isProfileOpen, setProfileOpen } = useUIStore();;
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [finishData, setFinishData] = useState<FinishData | null>(null);
@@ -227,9 +230,11 @@ const App: React.FC = () => {
                   style={{ willChange: 'transform' }}
                 >
                   <div className="w-full max-w-lg md:max-w-2xl h-full bg-zinc-950 pointer-events-auto shadow-2xl relative overflow-hidden">
-                    <Suspense fallback={<LazyFallback />}>
-                      <WorkoutPlayer onFinish={() => setView('history')} onFinishWithData={handleFinishWithData} />
-                    </Suspense>
+                    <WorkoutPlayerBoundary onEscape={() => { setViewTuple(['dashboard', -1]); }}>
+                      <Suspense fallback={<LazyFallback />}>
+                        <WorkoutPlayer onFinish={() => setView('history')} onFinishWithData={handleFinishWithData} />
+                      </Suspense>
+                    </WorkoutPlayerBoundary>
                   </div>
                 </motion.div>
               ) : (
@@ -256,9 +261,11 @@ const App: React.FC = () => {
                     </Suspense>
                   )}
                   {view === 'history' && (
-                    <Suspense fallback={<HistorySkeleton />}>
-                      <HistoryLog />
-                    </Suspense>
+                    <HistoryBoundary>
+                      <Suspense fallback={<HistorySkeleton />}>
+                        <HistoryLog />
+                      </Suspense>
+                    </HistoryBoundary>
                   )}
                 </motion.div>
               )}

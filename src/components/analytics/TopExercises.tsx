@@ -38,7 +38,7 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
 
     if (top.length === 0) {
         return (
-            <div className="text-center py-8 text-zinc-600 text-xs font-mono">
+            <div className="text-center py-8 text-zinc-600 text-xs font-medium">
                 No exercise data yet. Complete a workout to see your top exercises.
             </div>
         );
@@ -60,9 +60,9 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
                             onClick={() => setSelected(exercise)}
                             className="w-full text-left"
                         >
-                            <div className="flex items-center gap-3 p-3 bg-zinc-900/50 border border-zinc-800 rounded-[4px] hover:border-zinc-700 transition-colors group">
+                            <div className="flex items-center gap-3 p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors group">
                                 {/* Rank */}
-                                <span className="text-[10px] font-black font-mono text-zinc-600 w-4 shrink-0">
+                                <span className="text-[10px] font-bold text-zinc-600 w-4 shrink-0">
                                     {i + 1}
                                 </span>
 
@@ -105,8 +105,8 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
 
                                 {/* Stats */}
                                 <div className="text-right shrink-0">
-                                    <div className="text-[11px] font-black text-white font-mono">{setCount}s</div>
-                                    <div className="text-[9px] text-zinc-600 font-mono">{formatVolume(totalVolume)}kg</div>
+                                    <div className="text-[11px] font-bold text-white font-medium">{setCount}s</div>
+                                    <div className="text-[9px] text-zinc-600 font-medium">{formatVolume(totalVolume)}kg</div>
                                 </div>
 
                                 <ChevronRight size={12} className="text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />

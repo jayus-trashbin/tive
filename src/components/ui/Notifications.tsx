@@ -1,11 +1,11 @@
 import React from 'react';
-import { useWorkoutStore } from '../../store/useWorkoutStore';
+import { useUIStore } from '../../store/useUIStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Info, AlertCircle, CheckCircle, X } from 'lucide-react';
 
 export const Notifications: React.FC = () => {
-    const notifications = useWorkoutStore(s => s.notifications);
-    const removeNotification = useWorkoutStore(s => s.removeNotification);
+    const notifications = useUIStore(s => s.notifications);
+    const removeNotification = useUIStore(s => s.removeNotification);
 
     return (
         <div className="fixed top-20 right-4 z-[300] flex flex-col gap-2 w-72 md:w-80 pointer-events-none">
@@ -17,7 +17,7 @@ export const Notifications: React.FC = () => {
                         initial={{ x: 50, opacity: 0, scale: 0.9 }}
                         animate={{ x: 0, opacity: 1, scale: 1 }}
                         exit={{ x: 20, opacity: 0, scale: 0.9 }}
-                        className={`pointer-events-auto flex items-start gap-3 p-3 border-2 bg-black/90 backdrop-blur-md shadow-[4px_4px_0px_0px] ${n.type === 'error' ? 'border-red-500/50 shadow-red-950/40' :
+                        className={`pointer-events-auto flex items-start gap-3 p-3 rounded-xl border bg-black/90 backdrop-blur-md shadow-xl ${n.type === 'error' ? 'border-red-500/50 shadow-red-950/40' :
                             n.type === 'success' ? 'border-emerald-500/50 shadow-emerald-950/40' :
                                 'border-zinc-700/50 shadow-zinc-950/40'
                             }`}

@@ -11,9 +11,10 @@ interface Props {
     onClick?: () => void;
     onInfoClick?: () => void;
     compact?: boolean;
+    style?: React.CSSProperties;
 }
 
-const ExerciseCard: React.FC<Props> = ({ exercise, onClick, onInfoClick, compact = false }) => {
+const ExerciseCard: React.FC<Props> = ({ exercise, onClick, onInfoClick, compact = false, style }) => {
     const muscleColors: Record<string, string> = {
         'upper legs': 'bg-orange-500',
         'lower legs': 'bg-yellow-600',
@@ -30,33 +31,26 @@ const ExerciseCard: React.FC<Props> = ({ exercise, onClick, onInfoClick, compact
 
     return (
         <motion.div
+            style={style}
             layout
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
             className={cn(
-                "relative overflow-hidden rounded-[2px] bg-zinc-950 border border-zinc-900 cursor-pointer group hover:border-zinc-700 transition-all",
+                "card relative overflow-hidden cursor-pointer group p-0 transition-all hover:border-zinc-700",
                 compact ? "aspect-[1]" : "aspect-[16/9]"
             )}
         >
-            {/* Background Layer */}
-            <div className="absolute inset-0 z-0 bg-zinc-950 flex items-center justify-center p-0.5">
-                <div className="w-full h-full relative overflow-hidden rounded-[inherit] bg-zinc-900">
-                    {/* Tech Grid Background for transparent images */}
-                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#3f3f46 1px, transparent 1px)', backgroundSize: '8px 8px' }} />
-
-                    <ImageWithFallback
-                        src={exercise.staticImageUrl || exercise.gifUrl}
-                        alt={exercise.name}
-                        className={cn(
-                            "w-full h-full object-cover transition-all duration-700 scale-100 group-hover:scale-110",
-                            "grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100" // Tech effect: B&W -> Color
-                        )}
-                        fallbackIcon={<Dumbbell size={48} className="text-zinc-800" />}
-                    />
-                </div>
+            {/* Background Image Layer */}
+            <div className="absolute inset-0 z-0 bg-zinc-900">
+                <ImageWithFallback
+                    src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')}
+                    alt={exercise.name}
+                    className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
+                    fallbackIcon={<Dumbbell size={48} className="text-zinc-800" />}
+                />
             </div>
 
-            {/* Gradient Overlay for Text Readability - Stronger at bottom */}
+            {/* Gradient Overlay for Text Readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent z-10 pointer-events-none" />
 
             {/* Info Button (Top Right) */}
@@ -73,8 +67,8 @@ const ExerciseCard: React.FC<Props> = ({ exercise, onClick, onInfoClick, compact
 
             {/* Content Layer */}
             <div className="absolute inset-0 p-5 flex flex-col justify-end z-20 pointer-events-none">
-                <div className="flex items-center gap-2 mb-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className={cn("w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]", tagColor)} />
+                <div className="flex items-center gap-2 mb-1">
+                    <div className={cn("w-2 h-2 rounded-full", tagColor)} />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                         {exercise.targetMuscle}
                     </span>

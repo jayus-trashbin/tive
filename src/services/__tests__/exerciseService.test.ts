@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { mapBodyPartToMuscle, getApiBodyParts } from '../exerciseService';
 
 // mapApiToModel is not directly exported so we test via the mapping helpers
@@ -46,36 +46,33 @@ describe('mapBodyPartToMuscle', () => {
 });
 
 describe('getApiBodyParts', () => {
+    // OSS API uses lowercase bodyPart names: 'upper arms', 'lower arms', 'upper legs', etc.
+
     it('returns empty string for "all"', () => {
         expect(getApiBodyParts('all')).toBe('');
         expect(getApiBodyParts('')).toBe('');
     });
 
-    it('expands arms to comma-separated API values', () => {
+    it('expands arms to OSS upper arms and lower arms', () => {
         const result = getApiBodyParts('arms');
-        expect(result).toContain('BICEPS');
-        expect(result).toContain('TRICEPS');
-        expect(result).toContain('FOREARMS');
+        expect(result).toContain('upper arms');
+        expect(result).toContain('lower arms');
     });
 
-    it('expands upper legs to thigh/hamstring/quad/hip', () => {
-        const result = getApiBodyParts('upper legs');
-        expect(result).toContain('THIGHS');
-        expect(result).toContain('HAMSTRINGS');
-        expect(result).toContain('QUADRICEPS');
-        expect(result).toContain('HIPS');
+    it('expands upper legs to OSS upper legs bodyPart', () => {
+        expect(getApiBodyParts('upper legs')).toBe('upper legs');
     });
 
-    it('maps core to WAIST', () => {
-        expect(getApiBodyParts('core')).toBe('WAIST');
+    it('maps core to OSS waist bodyPart', () => {
+        expect(getApiBodyParts('core')).toBe('waist');
     });
 
-    it('maps back to BACK,NECK', () => {
-        expect(getApiBodyParts('back')).toBe('BACK,NECK');
+    it('maps back to OSS back bodyPart', () => {
+        expect(getApiBodyParts('back')).toBe('back');
     });
 
-    it('uppercases direct passthrough values', () => {
-        expect(getApiBodyParts('chest')).toBe('CHEST');
-        expect(getApiBodyParts('shoulders')).toBe('SHOULDERS');
+    it('passes through valid OSS bodyPart values as lowercase', () => {
+        expect(getApiBodyParts('chest')).toBe('chest');
+        expect(getApiBodyParts('shoulders')).toBe('shoulders');
     });
 });

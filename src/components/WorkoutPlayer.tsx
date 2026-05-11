@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useUIStore } from "../store/useUIStore";
 import { Exercise, WorkoutSet, MuscleGroup, Session } from '../types';
 import { ChevronDown, Calculator, CheckCircle2, Plus, Dumbbell } from 'lucide-react';
 import ExerciseGroup from './active-session/ExerciseGroup';
@@ -52,8 +53,8 @@ interface Props {
  * Redesign:
  * - Left-aligned session name, mono timer top-right
  * - Thicker progress bar (h-1.5) with tick marks
- * - Sharp finish modal (rounded-[4px])
- * - Sharp exercise containers
+ * - Rounded finish modal (rounded-2xl)
+ * - Rounded exercise containers
  */
 
 const SortableExerciseGroup = (props: React.ComponentProps<typeof ExerciseGroup> & { id: string }) => {
@@ -75,18 +76,8 @@ const SortableExerciseGroup = (props: React.ComponentProps<typeof ExerciseGroup>
 };
 
 const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
-    const {
-        activeSession,
-        finishSession,
-        exercises,
-        history,
-        toggleMinimize,
-        logSet,
-        addExercise,
-        replaceExercise,
-        reorderExercises,
-        triggerPostWorkoutPrompt
-    } = useWorkoutStore();
+    const { activeSession, finishSession, exercises, history, logSet, addExercise, replaceExercise, reorderExercises, triggerPostWorkoutPrompt } = useWorkoutStore();
+    const { toggleMinimize } = useUIStore();;
     const { calculate1RM } = usePhysiology();
 
     const [showPlateCalc, setShowPlateCalc] = useState(false);
@@ -325,28 +316,28 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     <div className="flex items-center gap-2 min-w-0">
                         <button
                             onClick={() => toggleMinimize(true)}
-                            className="w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all rounded-[4px] shrink-0"
+                            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-95 transition-all rounded-full shrink-0"
                         >
-                            <ChevronDown size={22} />
+                            <ChevronDown size={24} />
                         </button>
                         <LiveMuscleHeatmap
                             sets={activeSession.sets}
                             exercises={exercises}
                             size={40}
                         />
-                        <h1 className="text-base font-heading font-black text-white uppercase tracking-tight truncate">
+                        <h1 className="text-lg font-bold text-white tracking-tight truncate ml-1">
                             {activeSession.name}
                         </h1>
                     </div>
 
                     {/* Right: timer + finish */}
-                    <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-sm font-mono font-bold text-brand-primary tabular-nums tracking-wider">
+                    <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-sm font-medium text-zinc-300 tabular-nums">
                             {duration}
                         </span>
                         <button
                             onClick={() => setShowFinishModal(true)}
-                            className="btn-tech text-[10px] px-4 py-2 rounded-[2px] cursor-pointer"
+                            className="px-4 py-2 bg-brand-primary text-black font-semibold text-sm rounded-full active:scale-95 transition-transform"
                         >
                             Finish
                         </button>
@@ -373,9 +364,9 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         <div className="section-title">Running Order</div>
                         <button
                             onClick={() => setShowPlateCalc(!showPlateCalc)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-[10px] font-heading font-bold text-zinc-400 border border-zinc-800 hover:border-brand-primary/50 transition-colors active:scale-95 rounded-[4px]"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-xs font-medium text-zinc-400 border border-zinc-800 hover:text-white transition-colors active:scale-95 rounded-full"
                         >
-                            <Calculator size={12} /> Plates
+                            <Calculator size={14} /> Plates
                         </button>
                     </div>
 
@@ -390,10 +381,12 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     {/* Exercises */}
                     <div className="space-y-4">
                         {sessionExercises.length === 0 ? (
-                            <div className="text-center py-16 px-8 border border-dashed border-zinc-800 rounded-[4px]">
-                                <Dumbbell className="mx-auto text-zinc-700 mb-4" size={40} />
-                                <p className="text-zinc-400 font-heading font-bold text-sm uppercase">Session Empty</p>
-                                <p className="data-label mt-1">Add an exercise to get started</p>
+                            <div className="card border-dashed border-zinc-700/50 p-8 text-center flex flex-col items-center justify-center bg-zinc-900/50">
+                                <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                                    <Dumbbell className="text-zinc-500" size={20} />
+                                </div>
+                                <h3 className="text-white font-semibold text-lg mb-1">Session Empty</h3>
+                                <p className="text-zinc-400 text-sm mb-5 max-w-[200px]">Add an exercise to get started</p>
                             </div>
                         ) : (
                             renderGroups.map((group) => {
@@ -444,7 +437,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     {/* Add Exercise */}
                     <button
                         onClick={() => setShowExercisePicker(true)}
-                        className="w-full py-4 border border-dashed border-zinc-800 hover:border-brand-primary/50 text-zinc-500 hover:text-brand-primary transition-all flex items-center justify-center gap-2 font-heading font-bold text-xs uppercase tracking-wider active:scale-[0.99] rounded-[4px]"
+                        className="w-full py-4 border border-dashed border-zinc-800 hover:border-brand-primary hover:text-brand-primary text-zinc-400 transition-all flex items-center justify-center gap-2 font-medium text-sm rounded-2xl active:scale-[0.99] bg-zinc-900/50"
                     >
                         <Plus size={18} /> Add Exercise
                     </button>
@@ -491,9 +484,9 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                            className="bg-zinc-950 border border-zinc-800 rounded-[4px] p-8 w-full max-w-sm text-center shadow-card"
+                            className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 w-full max-w-sm text-center shadow-card"
                         >
-                            <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-[4px]">
+                            <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-2xl">
                                 <CheckCircle2 size={32} />
                             </div>
                             <h2 className="page-title text-2xl mb-2">All Done?</h2>
@@ -504,13 +497,13 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={handleFinish}
-                                    className="w-full py-4 btn-tech text-sm rounded-[2px]"
+                                    className="w-full py-4 btn-primary text-sm rounded-xl"
                                 >
                                     Finish Workout
                                 </button>
                                 <button
                                     onClick={() => setShowFinishModal(false)}
-                                    className="w-full py-3 bg-zinc-900 text-zinc-400 font-heading font-bold text-sm uppercase hover:text-white transition-colors rounded-[4px] border border-zinc-800"
+                                    className="w-full py-3 bg-zinc-900 text-zinc-400 font-bold text-sm uppercase hover:text-white transition-colors rounded-xl border border-zinc-800"
                                 >
                                     Keep Going
                                 </button>

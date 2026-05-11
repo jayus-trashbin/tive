@@ -4,7 +4,8 @@ import { Routine, Exercise } from '../../types';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { getExerciseById } from '../../services/exerciseService';
 import { ArrowLeft, Clock, Dumbbell, Play, ChevronRight, Zap, Loader2, Edit2, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import ExerciseDetailModal from '../exercise/ExerciseDetailModal';
 import { estimateRoutineDuration } from '../../utils/engine';
 import { calculateACWR } from '../../utils/engine';
 
@@ -18,6 +19,7 @@ interface Props {
 const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onEdit }) => {
   const { routines, exercises, history, addExercise } = useWorkoutStore();
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   
   const routine = useMemo(() => 
     routines.find(r => r.id === routineId), 
@@ -128,7 +130,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                             </span>
                         )}
                     </div>
-                    <h1 className="text-3xl font-black text-white leading-none mb-2">{routine.name}</h1>
+                    <h1 className="text-3xl font-bold text-white leading-none mb-2">{routine.name}</h1>
                     <div className="flex items-center gap-4 text-zinc-400 text-sm font-medium">
                         <span className="flex items-center gap-1.5"><Clock size={14} /> {estTime} min</span>
                         <span className="flex items-center gap-1.5"><Dumbbell size={14} /> {displayItems.length} Exercises</span>
@@ -149,7 +151,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                             </div>
                             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
                                 {muscleDistribution.slice(0, 4).map(({ muscle, pct }) => (
-                                    <span key={muscle} className="text-[9px] font-mono text-zinc-500">
+                                    <span key={muscle} className="text-[9px] font-medium text-zinc-500">
                                         {muscle} <span className="text-zinc-400">{pct}%</span>
                                     </span>
                                 ))}
@@ -174,11 +176,12 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="flex items-center gap-4 p-3 bg-zinc-900 border border-white/5 rounded-2xl"
+                        onClick={() => item.exercise && setSelectedExercise(item.exercise)}
+                        className={`flex items-center gap-4 p-3 bg-zinc-900 border border-white/5 rounded-2xl transition-all ${item.exercise ? 'cursor-pointer hover:bg-zinc-800 active:scale-[0.98]' : ''}`}
                     >
                         <div className="w-14 h-14 rounded-xl bg-zinc-800 overflow-hidden shrink-0 border border-white/5 relative">
                             {item.exercise ? (
-                                <img src={item.exercise.staticImageUrl || item.exercise.gifUrl} className="w-full h-full object-cover opacity-80" loading="lazy" />
+                                <img src={item.exercise.staticImageUrl || (item.exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(item.exercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" loading="lazy" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-zinc-800">
                                     <Dumbbell size={20} className="text-zinc-600" />
@@ -190,7 +193,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                             <h4 className="text-white font-bold text-sm truncate">
                                 {item.exercise ? item.exercise.name : 'Loading...'}
                             </h4>
-                            <p className="text-brand-primary text-xs font-mono mt-0.5">{item.summary}</p>
+                            <p className="text-brand-primary text-xs font-medium mt-0.5">{item.summary}</p>
                         </div>
 
                         <ChevronRight size={16} className="text-zinc-600" />
@@ -202,11 +205,20 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-12 px-4 pb-safe z-50">
                 <button 
                     onClick={onBegin}
-                    className="w-full mb-6 py-4 bg-white text-black font-black text-lg rounded-2xl flex items-center justify-center gap-2 shadow-glow active:scale-[0.98] transition-transform"
+                    className="w-full mb-6 py-4 bg-white text-black font-bold text-lg rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform"
                 >
                     <Play size={20} fill="currentColor" /> BEGIN WORKOUT
                 </button>
             </div>
+
+            <AnimatePresence>
+                {selectedExercise && (
+                    <ExerciseDetailModal 
+                        exercise={selectedExercise} 
+                        onClose={() => setSelectedExercise(null)} 
+                    />
+                )}
+            </AnimatePresence>
         </div>
     </div>
   );

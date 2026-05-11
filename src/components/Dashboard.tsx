@@ -12,6 +12,9 @@ import {
     MuscleReadiness
 } from './dashboard/index';
 import ACWRCard from './analytics/ACWRCard';
+import { InsightsPanel } from './analytics/InsightsPanel';
+import { StrengthStandards } from './analytics/StrengthStandards';
+import SocialHub from './social/SocialHub';
 
 /**
  * Dashboard — Premium Home Screen
@@ -100,6 +103,16 @@ const Dashboard: React.FC = () => {
 
             <MuscleReadiness readiness={readinessData} />
 
+            {/* A-01: Insights Panel */}
+            <section>
+                <InsightsPanel />
+            </section>
+
+            {/* A-01.5: Strength Standards */}
+            <section>
+                <StrengthStandards />
+            </section>
+
             {/* A-02: ACWR Card */}
             {acwr && history.length >= 4 && (
                 <section>
@@ -111,6 +124,11 @@ const Dashboard: React.FC = () => {
                     />
                 </section>
             )}
+
+            {/* 6.3: Social Layer */}
+            <section>
+                <SocialHub />
+            </section>
         </div>
     );
 };

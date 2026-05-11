@@ -71,8 +71,7 @@ const CalendarModal: React.FC<Props> = ({ isOpen, onClose, selectedDate, onSelec
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
-                    onClick={e => e.stopPropagation()}
-                    className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-[4px] p-6 shadow-2xl"
+                    className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl p-6 shadow-2xl"
                     style={{ marginBottom: `env(safe-area-inset-bottom)` }}
                 >
                     {/* Calendar Header */}

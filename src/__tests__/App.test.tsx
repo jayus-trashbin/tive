@@ -22,6 +22,11 @@ vi.mock('../store/useWorkoutStore', () => ({
         selector ? selector(mockState) : mockState,
 }));
 
+vi.mock('../store/useUIStore', () => ({
+    useUIStore: (selector: (s: typeof mockState) => unknown) =>
+        selector ? selector(mockState) : mockState,
+}));
+
 // ─── Component mocks ─────────────────────────────────────────────────────────
 
 vi.mock('../components/WorkoutPlayer', () => ({

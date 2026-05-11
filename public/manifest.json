@@ -1,6 +1,7 @@
 {
-  "name": "TIVE Performance",
+  "name": "TIVE — Strength Tracking",
   "short_name": "TIVE",
+  "description": "Minimalist high-performance strength training tracker. Log sets, track PRs, analyze volume progression.",
   "start_url": "/",
   "id": "tive-app",
   "display": "standalone",
@@ -12,12 +13,12 @@
   "background_color": "#09090b",
   "theme_color": "#09090b",
   "orientation": "portrait",
+  "lang": "en",
   "categories": [
     "fitness",
     "health",
     "lifestyle"
   ],
-  "description": "Minimalist high-performance workout tracking.",
   "icons": [
     {
       "src": "/icons/icon.svg",
@@ -31,5 +32,22 @@
       "type": "image/svg+xml",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "description": "Begin a new training session",
+      "url": "/?action=start-workout",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "View History",
+      "short_name": "History",
+      "description": "See past sessions",
+      "url": "/?view=history",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

@@ -1,99 +1,114 @@
+const CACHE_NAME = 'tive-cache-v1';
+const DYNAMIC_CACHE = 'tive-dynamic-v1';
+const IMAGE_CACHE = 'tive-images-v1';
 
-const CACHE_NAME = 'tive-v1';
-const STATIC_ASSETS = [
+// App shell
+const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap'
+  '/icons/icon.svg',
+  // Vite injects hashed files dynamically, so we rely heavily on runtime caching for assets
 ];
 
-// 1. INSTALL: Precache Static Assets
+// Install Event: Pre-cache static assets
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Precaching App Shell');
-      return cache.addAll(STATIC_ASSETS);
+      console.log('[Service Worker] Pre-caching offline page');
+      return cache.addAll(PRECACHE_ASSETS);
     })
   );
 });
 
-// 2. ACTIVATE: Cleanup Old Caches
+// Activate Event: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keyList) => {
       return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
+        keyList.map((key) => {
+          if (![CACHE_NAME, DYNAMIC_CACHE, IMAGE_CACHE].includes(key)) {
+            console.log('[Service Worker] Removing old cache', key);
+            return caches.delete(key);
           }
         })
       );
-    }).then(() => self.clients.claim())
+    })
   );
+  self.clients.claim();
 });
 
-// 3. FETCH: Strategy Router
+// Fetch Event: Network-first for API, Cache-first for images, Stale-while-revalidate for JS/CSS
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // A. Navigation Requests (SPA Fallback)
-  // If the user navigates to /history or /workout directly, return index.html
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/index.html');
-      })
-    );
-    return;
+  // 1. Supabase API & AI endpoints -> Network Only
+  if (url.origin.includes('supabase.co') || url.pathname.includes('/v1/models/')) {
+    return; // Pass through to browser
   }
 
-  // B. Images & Media (Cache First, Fallback to Network)
-  if (event.request.destination === 'image' || url.pathname.match(/\.(png|jpg|jpeg|svg|gif)$/)) {
+  // 2. Images (Exercise DB GIFs, etc.) -> Cache First, fallback to network
+  if (event.request.destination === 'image' || url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp)$/i)) {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          // Don't cache opaque responses (CDN issues) blindly, but for images it's usually okay
-          if (!response || response.status !== 200) return response;
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        
+        return fetch(event.request).then((networkResponse) => {
+          // Only cache valid responses
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+          const responseToCache = networkResponse.clone();
+          caches.open(IMAGE_CACHE).then((cache) => cache.put(event.request, responseToCache));
+          return networkResponse;
         });
       })
     );
     return;
   }
 
-  // C. API Requests (Network First, then Fallback to Cache if offline)
-  // Note: We use 'idb-keyval' for application data, but this handles raw API caching overlap
-  if (url.pathname.includes('/api/')) {
+  // 3. Fonts and JS/CSS bundles -> Stale While Revalidate
+  if (url.origin === location.origin && (url.pathname.match(/\.(js|css)$/i) || event.request.destination === 'font')) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => {
-          return caches.match(event.request);
-        })
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        }).catch(() => {
+          // Ignore network errors for stale-while-revalidate
+        });
+        
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }
 
-  // D. Stale-While-Revalidate for Scripts/CSS (Everything else)
+  // 4. Default: Network first, fallback to cache
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+    fetch(event.request)
+      .then((response) => {
+        // Cache successful responses for offline access
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => cache.put(event.request, responseToCache));
         }
-        return networkResponse;
-      });
-      return cachedResponse || fetchPromise;
-    })
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache if network fails
+        return caches.match(event.request);
+      })
   );
+});
+
+// Background Sync (Optional for future)
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-workouts') {
+    // Implement background sync if needed
+    console.log('[Service Worker] Background sync triggered');
+  }
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, Play, Dumbbell, Zap, Calendar } from 'lucide-react';
+import { Target, Play, Dumbbell, Zap, Calendar, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Routine } from '../../types';
 import { cn } from '../../lib/utils';
@@ -16,61 +16,43 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
     return (
         <section className="shrink-0">
             <div className="section-title mb-3">
-                <Target size={12} className="text-brand-primary" /> Next Workout
+                <Target size={16} className="text-brand-primary" /> Up Next
             </div>
 
             <motion.div
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onStart(nextRoutine.id)}
-                className="relative overflow-hidden card-elevated cursor-pointer group"
-                style={{ aspectRatio: '2 / 1' }}
+                className="card relative overflow-hidden cursor-pointer group"
             >
-                {/* Grid background */}
-                <div
-                    className="absolute inset-0 opacity-[0.04] pointer-events-none"
-                    style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-                />
-                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-primary/5 blur-3xl pointer-events-none" />
+                {/* Subtle Ambient Glow */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 blur-3xl pointer-events-none transition-opacity group-hover:opacity-100 opacity-50" />
 
-                {/* Top row */}
-                <div className="relative z-10 p-5 flex justify-between items-start">
-                    <div className="px-2 py-1 bg-brand-primary/10 border border-brand-primary/20 rounded-[2px]">
-                        <span className="data-label text-brand-primary">Ready to Go</span>
-                    </div>
-                    <div className="w-12 h-12 bg-white text-black flex items-center justify-center rounded-[2px] shadow-tech group-hover:translate-x-[-2px] group-hover:translate-y-[-2px] transition-transform duration-200">
-                        <Play size={20} fill="black" />
-                    </div>
-                </div>
-
-                {/* Bottom row */}
-                <div className="absolute bottom-0 left-0 right-0 z-10 p-5">
-                    <h3 className="text-2xl font-heading font-black text-white mb-2 leading-none uppercase tracking-tight">
-                        {nextRoutine.name}
-                    </h3>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 text-zinc-500 data-label">
-                            <Dumbbell size={12} />
-                            {nextRoutine.exerciseIds.length} EXERCISES
+                <div className="p-5 flex justify-between items-center relative z-10">
+                    <div className="space-y-3">
+                        <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-medium">
+                            Ready to Train
                         </div>
-                        <div className="h-3 w-px bg-zinc-700" />
-                        <div className="flex items-center gap-1.5 text-zinc-500 data-label">
-                            <Zap size={12} />
-                            ~{estimateRoutineDuration(nextRoutine)} MIN
+                        
+                        <h3 className="text-2xl font-bold text-white tracking-tight">
+                            {nextRoutine.name}
+                        </h3>
+                        
+                        <div className="flex items-center gap-3 text-sm text-zinc-400 font-medium">
+                            <div className="flex items-center gap-1.5">
+                                <Dumbbell size={14} />
+                                {nextRoutine.exerciseIds.length} exercises
+                            </div>
+                            <div className="h-3 w-px bg-zinc-700" />
+                            <div className="flex items-center gap-1.5">
+                                <Zap size={14} />
+                                ~{estimateRoutineDuration(nextRoutine)} min
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Bottom tech bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] flex">
-                    {[...Array(24)].map((_, i) => (
-                        <div
-                            key={i}
-                            className={cn(
-                                "flex-1 h-full",
-                                i < 8 ? "bg-brand-primary/40" : "bg-zinc-800"
-                            )}
-                        />
-                    ))}
+                    <div className="w-12 h-12 bg-brand-primary text-black flex items-center justify-center rounded-full shadow-lg group-hover:scale-105 transition-transform duration-200 shrink-0">
+                        <Play size={20} fill="black" className="ml-1" />
+                    </div>
                 </div>
             </motion.div>
         </section>
@@ -78,12 +60,14 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
 };
 
 const EmptyMission: React.FC = () => (
-    <div className="card-subtle border-dashed p-10 text-center flex flex-col items-center justify-center" style={{ aspectRatio: '2 / 1' }}>
-        <Calendar size={28} className="text-zinc-700 mb-4" />
-        <h3 className="text-white font-heading font-bold text-lg uppercase tracking-tight">No Active Plan</h3>
-        <p className="text-zinc-600 data-label mt-1 mb-5">Create a routine to unlock AI mapping</p>
-        <button className="btn-tech text-[10px]">
-            Create Routine
+    <div className="card border-dashed border-zinc-700/50 p-8 text-center flex flex-col items-center justify-center bg-zinc-900/50">
+        <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+            <Calendar size={20} className="text-zinc-500" />
+        </div>
+        <h3 className="text-white font-semibold text-lg mb-1">No Routine Scheduled</h3>
+        <p className="text-zinc-400 text-sm mb-5 max-w-[200px]">Create a routine to start tracking your progress.</p>
+        <button className="btn-primary py-2 px-4 text-sm w-full max-w-[180px]">
+            <Plus size={16} /> New Routine
         </button>
     </div>
 );

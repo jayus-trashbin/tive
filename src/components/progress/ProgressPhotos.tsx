@@ -13,6 +13,7 @@ interface CaptureData {
     rawImage: string;
     muscleGroups: MuscleGroup[];
     volumes?: Map<MuscleGroup, number>;
+    facingMode?: 'user' | 'environment';
 }
 
 /**
@@ -50,13 +51,12 @@ const ProgressPhotos: React.FC = () => {
     }, [pendingSessionId, history, exercises]);
 
     // Handle camera capture
-    const handleCapture = useCallback((imageData: string) => {
+    const handleCapture = useCallback((imageData: string, facingMode: 'user' | 'environment') => {
         setCaptureData({
             rawImage: imageData,
-            muscleGroups: pendingMuscleGroups.length > 0
-                ? pendingMuscleGroups
-                : [],
-            volumes: sessionVolumes
+            muscleGroups: pendingMuscleGroups.length > 0 ? pendingMuscleGroups : [],
+            volumes: sessionVolumes,
+            facingMode,
         });
         setView('processing');
     }, [pendingMuscleGroups, sessionVolumes]);
@@ -70,7 +70,7 @@ const ProgressPhotos: React.FC = () => {
             thumbnailData: thumbnail,
             metadata: {
                 bodyweight: userStats.bodyweight,
-                camera: 'front',
+                camera: captureData?.facingMode === 'environment' ? 'back' : 'front',
             },
         });
 
@@ -79,12 +79,12 @@ const ProgressPhotos: React.FC = () => {
         setView('gallery');
     }, [addPhoto, captureData, userStats.bodyweight, dismissPostWorkoutPrompt]);
 
-    // Handle camera cancel
+    // Handle camera cancel — only dismiss post-workout prompt if it was the trigger
     const handleCameraCancel = useCallback(() => {
         setCaptureData(null);
-        dismissPostWorkoutPrompt();
+        if (pendingMuscleGroups.length > 0) dismissPostWorkoutPrompt();
         setView('gallery');
-    }, [dismissPostWorkoutPrompt]);
+    }, [dismissPostWorkoutPrompt, pendingMuscleGroups]);
 
     // Open camera for new photo
     const handleAddPhoto = useCallback(() => {
@@ -149,7 +149,7 @@ const ProgressPhotos: React.FC = () => {
             {/* Processing Canvas (hidden) */}
             {view === 'processing' && captureData && (
                 <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-                    <div className="font-mono text-lime-400 animate-pulse">
+                    <div className="font-medium text-lime-400 animate-pulse">
                         Processing...
                     </div>
                     <PhotoCanvas

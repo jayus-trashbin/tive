@@ -20,6 +20,7 @@ import {
     verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
+import { useUIStore } from "../../store/useUIStore";
 import { RoutineBlock } from '../../types';
 import DraggableExerciseCard from './DraggableExerciseCard';
 import { Plus, Save, ArrowLeft, Trash2, Clock } from 'lucide-react';
@@ -35,7 +36,8 @@ interface Props {
 }
 
 const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
-    const { routines, saveRoutine, deleteRoutine, exercises: storedExercises, setRoutineEditorOpen } = useWorkoutStore();
+    const { routines, saveRoutine, deleteRoutine, exercises: storedExercises } = useWorkoutStore();
+    const { setRoutineEditorOpen } = useUIStore();;
 
     // Editor State
     const [routineName, setRoutineName] = useState('');
@@ -191,9 +193,9 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
                         value={routineName}
                         onChange={(e) => setRoutineName(e.target.value)}
                         placeholder="ROUTINE NAME"
-                        className="w-full bg-transparent text-xl font-black text-white placeholder:text-zinc-700 focus:outline-none uppercase font-mono tracking-tight"
+                        className="w-full bg-transparent text-xl font-bold text-white placeholder:text-zinc-700 focus:outline-none uppercase font-medium tracking-tight"
                     />
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-brand-primary mt-1 font-mono">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-brand-primary mt-1 font-medium">
                         <Clock size={12} />
                         <span>~{estimatedDuration} MIN</span>
                     </div>
@@ -201,7 +203,7 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
 
                 <button
                     onClick={handleSave}
-                    className="text-black font-bold text-sm bg-brand-primary px-5 py-2.5 flex items-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] transition-transform active:translate-y-[1px] active:shadow-none uppercase tracking-wider font-mono"
+                    className="text-black font-bold text-sm bg-brand-primary px-5 py-2.5 flex items-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] transition-transform active:translate-y-[1px] active:shadow-none uppercase tracking-wider font-medium"
                 >
                     <Save size={16} /> SAVE
                 </button>
@@ -260,7 +262,7 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
                 {/* Add Exercise Trigger */}
                 <button
                     onClick={() => setShowPicker(true)}
-                    className="w-full mt-6 py-5 border border-dashed border-zinc-800 bg-zinc-900/50 text-zinc-500 font-bold flex items-center justify-center gap-2 hover:border-brand-primary hover:text-brand-primary hover:bg-zinc-900 transition-all active:translate-y-[1px] uppercase tracking-widest text-xs font-mono"
+                    className="w-full mt-6 py-5 border border-dashed border-zinc-800 bg-zinc-900/50 text-zinc-500 font-bold flex items-center justify-center gap-2 hover:border-brand-primary hover:text-brand-primary hover:bg-zinc-900 transition-all active:translate-y-[1px] uppercase tracking-widest text-xs font-medium"
                 >
                     <Plus size={18} /> ADD EXERCISE
                 </button>

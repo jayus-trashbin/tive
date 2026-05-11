@@ -1,19 +1,22 @@
 
+// OSS ExerciseDB API — oss.exercisedb.dev/api/v1
+// Dataset: exerciseId, name, gifUrl, bodyParts[], targetMuscles[], equipments[], secondaryMuscles[], instructions[]
 export interface ApiExercise {
   exerciseId: string;
   name: string;
-  imageUrl?: string; // New field for V1
-  imageUrls?: Record<string, string>; // Available in details
-  gifUrl?: string; // Legacy/Fallback
-  videoUrl?: string; // Sometimes used for demos
-  targetMuscles: string[];
-  bodyParts: string[];
-  equipments: string[];
+  gifUrl: string;                  // Always present: https://static.exercisedb.dev/media/{exerciseId}.gif
+  bodyParts: string[];             // lowercase: "chest", "back", "upper legs", "lower legs", "shoulders", "upper arms", "lower arms", "waist", "cardio", "neck"
+  targetMuscles: string[];         // anatomical: "pectorals", "spine", "quadriceps", "hamstrings", etc.
+  equipments: string[];            // lowercase: "barbell", "dumbbell", "body weight", "cable", "leverage machine", etc.
   secondaryMuscles: string[];
   instructions?: string[];
-  exerciseTips?: string[]; // New
-  overview?: string; // New
-  variations?: string[]; // New
+  // V2-compat fields — may appear in locally cached data from old API, kept for safe deserialization
+  imageUrl?: string;
+  imageUrls?: Record<string, string>;
+  videoUrl?: string;
+  exerciseTips?: string[];
+  overview?: string;
+  variations?: string[];
   exerciseType?: string;
   keywords?: string[];
 }
@@ -24,6 +27,7 @@ export interface ApiResponse {
   meta?: {
     total: number;
     hasNextPage: boolean;
+    hasPreviousPage: boolean;
     nextCursor: string | null;
     previousCursor: string | null;
   };

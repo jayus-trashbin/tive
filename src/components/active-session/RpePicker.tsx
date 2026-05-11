@@ -54,7 +54,7 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
                         <Flame className="text-brand-warning" size={14} />
                         <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide">RPE / Intensity</span>
                     </div>
-                    <div className="text-[10px] text-zinc-500 font-mono">
+                    <div className="text-[10px] text-zinc-500 font-medium">
                         {currentRpe >= 9 ? 'FAILURE' : currentRpe >= 7 ? 'HARD' : 'MODERATE'}
                     </div>
                 </div>
@@ -82,7 +82,7 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
                                             : "bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
                                 )}
                             >
-                                <span className="text-lg font-black font-mono tracking-tighter">{val}</span>
+                                <span className="text-lg font-bold tracking-tighter">{val}</span>
                             </button>
                         );
                     })}

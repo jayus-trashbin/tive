@@ -62,7 +62,7 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-                            <h3 className="font-mono text-sm font-bold text-white uppercase tracking-wider">
+                            <h3 className="font-medium text-sm font-bold text-white uppercase tracking-wider">
                                 Workout Complete
                             </h3>
                             <button
@@ -86,10 +86,10 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                                 </div>
 
                                 <div className="flex-1">
-                                    <h4 className="font-mono text-lg font-bold text-white mb-1">
+                                    <h4 className="font-medium text-lg font-bold text-white mb-1">
                                         Take Progress Photo?
                                     </h4>
-                                    <p className="font-mono text-xs text-zinc-400 mb-4">
+                                    <p className="font-medium text-xs text-zinc-400 mb-4">
                                         Capture your post-workout state. Your trained muscles will be marked on the photo.
                                     </p>
 
@@ -99,13 +99,13 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                                             {pendingMuscleGroups.slice(0, 5).map((muscle) => (
                                                 <span
                                                     key={muscle}
-                                                    className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-mono text-[10px] text-lime-400 uppercase font-black"
+                                                    className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-medium text-[10px] text-lime-400 uppercase font-bold"
                                                 >
                                                     {muscle}
                                                 </span>
                                             ))}
                                             {pendingMuscleGroups.length > 5 && (
-                                                <span className="font-mono text-[10px] text-zinc-500 font-bold self-center">
+                                                <span className="font-medium text-[10px] text-zinc-500 font-bold self-center">
                                                     +{pendingMuscleGroups.length - 5}
                                                 </span>
                                             )}
@@ -119,14 +119,14 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                         <div className="flex border-t border-zinc-800">
                             <button
                                 onClick={handleSkip}
-                                className="flex-1 px-4 py-4 font-mono text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center"
+                                className="flex-1 px-4 py-4 font-medium text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center"
                             >
                                 Skip
                             </button>
                             <div className="w-px bg-zinc-800" />
                             <button
                                 onClick={handleTakePhoto}
-                                className="flex-1 px-4 py-4 bg-lime-400 font-mono text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors"
+                                className="flex-1 px-4 py-4 bg-lime-400 font-medium text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors"
                             >
                                 <Camera size={18} />
                                 <span>Take Photo</span>

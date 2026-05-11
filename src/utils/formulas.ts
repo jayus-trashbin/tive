@@ -9,51 +9,7 @@ export interface PlateInventory {
 
 // Recovery Half-Life (Hours): Time for fatigue to drop by 50%
 // Large muscles/CNS heavy lifts take longer. Small muscles recover fast.
-export const MUSCLE_RECOVERY_PROFILE: Record<MuscleGroup, number> = {
-  'upper legs': 24, // High CNS impact, slow repair
-  'back': 22,       // Large surface area
-  'chest': 18,      // Moderate
-  'shoulders': 16,  // Fast twitch, recovers decent
-  'lower legs': 12, // Very fast recovery (walking adaptation)
-  'arms': 12,       // Small groups
-  'core': 10,       // Postural, designed for endurance
-  'cardio': 8       // Metabolic recovery is fast
-};
-
-const MAX_MUSCLE_CAPACITY: Record<MuscleGroup, number> = {
-  chest: 1500, back: 1800, 'upper legs': 2500, 'lower legs': 1200,
-  shoulders: 1000, arms: 800, core: 600, cardio: 500
-};
-
-/**
- * Calculates the current readiness (0.0 to 1.0) of a muscle group
- * based on its specific biological decay rate.
- */
-export const calculateMuscleReadiness = (
-  currentFatigue: number,
-  lastUpdateTimestamp: number,
-  muscle: MuscleGroup
-): { score: number, label: 'Prime' | 'Good' | 'Fatigued' | 'Critical' } => {
-
-  const now = Date.now();
-  const halfLife = MUSCLE_RECOVERY_PROFILE[muscle] || 18;
-  const hoursPassed = (now - lastUpdateTimestamp) / (1000 * 60 * 60);
-
-  // Exponential Decay Formula: N(t) = N0 * (0.5)^(t / half_life)
-  const decayedFatigue = currentFatigue * Math.pow(0.5, hoursPassed / halfLife);
-
-  // Normalize to 0-1 range (1 = Fresh, 0 = Destroyed)
-  // We clamp fatigue at MAX_MUSCLE_CAPACITY logic
-  const rawScore = 1 - (decayedFatigue / MAX_MUSCLE_CAPACITY[muscle]);
-  const score = Math.max(0, Math.min(1, rawScore));
-
-  let label: 'Prime' | 'Good' | 'Fatigued' | 'Critical' = 'Prime';
-  if (score < 0.4) label = 'Critical';
-  else if (score < 0.7) label = 'Fatigued';
-  else if (score < 0.9) label = 'Good';
-
-  return { score, label };
-};
+export { MAX_MUSCLE_CAPACITY, MUSCLE_RECOVERY_PROFILE, calculateMuscleReadiness } from '../engine/fatigueModel';
 
 /**
  * Hybrid 1RM Formula

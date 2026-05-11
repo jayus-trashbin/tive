@@ -28,44 +28,37 @@ export const MuscleReadiness: React.FC<MuscleReadinessProps> = ({ readiness }) =
     return (
         <section className="shrink-0 pb-6">
             <div className="section-title mb-4">
-                <Battery size={12} className="text-brand-primary" /> Muscle Readiness
+                <Battery size={16} className="text-brand-primary" /> Muscle Readiness
             </div>
 
-            <div className="card-elevated p-4 space-y-5 border-t-2 border-brand-primary/20">
+            <div className="card p-5 space-y-6">
                 {readiness.length > 0 ? (
                     readiness.slice(0, 6).map((item) => (
                         <div key={item.muscle} className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <span className="data-label text-zinc-400">{item.muscle}</span>
+                                <span className="text-sm font-medium text-zinc-300 capitalize">{item.muscle}</span>
                                 <div className="flex items-center gap-2">
-                                    <span className={cn("text-[10px] font-mono font-bold", getReadinessText(item.score))}>
-                                        {Math.round(item.score * 100)}%
-                                    </span>
-                                    <span className={cn("data-label", getReadinessText(item.score))}>
+                                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", getReadinessText(item.score))}>
                                         {item.label}
+                                    </span>
+                                    <span className={cn("text-sm font-bold", getReadinessText(item.score))}>
+                                        {Math.round(item.score * 100)}%
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex gap-0.5 h-2">
-                                {[...Array(10)].map((_, i) => {
-                                    const isActive = (item.score * 10) > i;
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={cn(
-                                                "flex-1 h-full transition-colors duration-500",
-                                                isActive ? getReadinessColor(item.score) : "bg-zinc-800/40"
-                                            )}
-                                        />
-                                    );
-                                })}
+                            <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                <div
+                                    className={cn("h-full transition-all duration-700 ease-out", getReadinessColor(item.score))}
+                                    style={{ width: `${item.score * 100}%` }}
+                                />
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div className="flex items-center gap-3 text-zinc-500 data-label py-6 justify-center">
-                        <AlertCircle size={14} />
-                        Train to calibrate readiness
+                    <div className="flex flex-col items-center justify-center text-zinc-500 py-6 gap-2">
+                        <AlertCircle size={20} className="text-zinc-600 mb-2" />
+                        <span className="text-sm font-medium">No Data Yet</span>
+                        <span className="text-xs">Train to calibrate readiness</span>
                     </div>
                 )}
             </div>

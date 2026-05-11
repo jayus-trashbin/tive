@@ -1,23 +1,44 @@
 
 import { Session, UserStats, WorkoutSet, Routine, RoutineBlock, Exercise, PhysiologyState, MuscleGroup } from '../types';
-import { MUSCLE_RECOVERY_PROFILE, calculateDynamicFatigue } from './formulas';
+import { calculateDynamicFatigue } from './formulas';
+import { calculateSessionFatigue } from '../engine/fatigueModel';
+import { getSmartWeightSuggestion } from '../engine/progression';
 
 // --- A. Injury Prevention (ACWR) ---
 // Acute: Last 7 days load / 7
 // Chronic: Last 28 days load / 28
 export const calculateACWR = (history: Session[]): { acute: number, chronic: number, ratio: number, risk: 'low' | 'optimal' | 'high' } => {
   const now = Date.now();
-  const day = 24 * 60 * 60 * 1000;
+  const dayMs = 24 * 60 * 60 * 1000;
 
-  const getAverageLoad = (days: number) => {
-    const cutoff = now - (days * day);
-    const relevantSessions = history.filter(s => s.date >= cutoff);
-    const totalLoad = relevantSessions.reduce((acc, s) => acc + (s.volumeLoad || 0), 0);
-    return totalLoad / days; // Daily average load
-  };
+  if (!history || history.length === 0) {
+    return { acute: 0, chronic: 0, ratio: 0, risk: 'optimal' };
+  }
 
-  const acute = getAverageLoad(7);
-  const chronic = getAverageLoad(28);
+  const sortedHistory = [...history].sort((a, b) => a.date - b.date);
+  const firstDate = new Date(sortedHistory[0].date).setHours(0, 0, 0, 0);
+  const today = new Date(now).setHours(0, 0, 0, 0);
+  const totalDays = Math.floor((today - firstDate) / dayMs) + 1;
+
+  const loadByDay = new Float64Array(totalDays);
+  for (const session of sortedHistory) {
+    const dayIndex = Math.floor((new Date(session.date).setHours(0, 0, 0, 0) - firstDate) / dayMs);
+    if (dayIndex >= 0 && dayIndex < totalDays) {
+      loadByDay[dayIndex] += (session.volumeLoad || 0);
+    }
+  }
+
+  const lambdaAcute = 2 / (7 + 1);
+  const lambdaChronic = 2 / (28 + 1);
+
+  let acute = 0;
+  let chronic = 0;
+
+  for (let i = 0; i < totalDays; i++) {
+    const load = loadByDay[i];
+    acute = load * lambdaAcute + acute * (1 - lambdaAcute);
+    chronic = load * lambdaChronic + chronic * (1 - lambdaChronic);
+  }
 
   // Prevent division by zero
   const ratio = (chronic === 0 || isNaN(acute) || isNaN(chronic)) ? 0 : acute / chronic;
@@ -86,21 +107,22 @@ export const calculateSymmetry = (history: Session[], exercises: Map<string, any
       if (!ex) return;
 
       const vol = set.weight * set.reps;
-      const lowerName = ex.name.toLowerCase();
-
-      const isPushArm = lowerName.includes('extension') || lowerName.includes('tricep') || lowerName.includes('trícep') || lowerName.includes('push') || lowerName.includes('press');
-      const isPullArm = lowerName.includes('curl') || lowerName.includes('bicep') || lowerName.includes('bícep') || lowerName.includes('rosca') || lowerName.includes('pull');
-
-      if (ex.targetMuscle === 'chest' || ex.targetMuscle === 'shoulders' || (ex.targetMuscle === 'arms' && isPushArm)) {
-        stats.push += vol;
-      } else if (ex.targetMuscle === 'back' || (ex.targetMuscle === 'arms' && !isPushArm)) {
-        // If it's arms and not push, we assume pull by default (biceps/forearms)
-        stats.pull += vol;
-      } else if (ex.targetMuscle === 'upper legs' || ex.targetMuscle === 'lower legs') {
-        stats.legs += vol;
-      } else if (ex.targetMuscle === 'core') {
-        stats.core += vol;
+      
+      let pattern = ex.movementPattern;
+      if (!pattern) {
+        const lowerName = ex.name.toLowerCase();
+        const isPushArm = lowerName.includes('extension') || lowerName.includes('tricep') || lowerName.includes('trícep') || lowerName.includes('push') || lowerName.includes('press');
+        
+        if (ex.targetMuscle === 'chest' || ex.targetMuscle === 'shoulders' || (ex.targetMuscle === 'arms' && isPushArm)) pattern = 'push';
+        else if (ex.targetMuscle === 'back' || ex.targetMuscle === 'arms') pattern = 'pull';
+        else if (ex.targetMuscle === 'upper legs' || ex.targetMuscle === 'lower legs') pattern = 'legs';
+        else if (ex.targetMuscle === 'core') pattern = 'core';
       }
+
+      if (pattern === 'push') stats.push += vol;
+      else if (pattern === 'pull') stats.pull += vol;
+      else if (pattern === 'legs' || ex.targetMuscle === 'upper legs' || ex.targetMuscle === 'lower legs') stats.legs += vol;
+      else if (pattern === 'core' || ex.targetMuscle === 'core') stats.core += vol;
     });
   });
 
@@ -272,13 +294,8 @@ export const getPreviousSetPerformance = (
   return null;
 };
 
-export const getSuggestedWeight = (previousSet: WorkoutSet | null): number | null => {
-  if (!previousSet || previousSet.weight === 0) return null;
-  // Simple heuristic: if RPE < 8 previously, suggest 2.5kg more. Otherwise maintain.
-  if (previousSet.rpe && previousSet.rpe < 8) {
-    return previousSet.weight + 2.5;
-  }
-  return previousSet.weight;
+export const getSuggestedWeight = (previousSet: WorkoutSet | null, history: Session[] = [], exerciseId: string = '', setIndex: number = 0): number | null => {
+  return getSmartWeightSuggestion({ previousSet, recentHistory: history, exerciseId, setIndex });
 };
 
 // --- E-01. Exercise Progression Status Engine ---
@@ -449,28 +466,8 @@ export const processSessionCompletion = (
   const completedSets = activeSession.sets.filter(s => s.isCompleted);
   const totalVolume = completedSets.reduce((acc, s) => acc + (s.weight * s.reps), 0);
 
-  // 1. BIOLOGICAL DECAY
-  const hoursPassed = (now - physiology.lastUpdate) / (1000 * 60 * 60);
-  const decayedFatigue = { ...physiology.muscleFatigue };
-
-  (Object.keys(decayedFatigue) as MuscleGroup[]).forEach(muscle => {
-    const specificHalfLife = MUSCLE_RECOVERY_PROFILE[muscle] || 18;
-    const validHours = isNaN(hoursPassed) ? 0 : hoursPassed;
-    decayedFatigue[muscle] *= Math.pow(0.5, validHours / specificHalfLife);
-  });
-
-  // 2. ACCUMULATE NEW FATIGUE
-  completedSets.forEach((workoutSet, index) => {
-    const ex = exercises.find(e => e.id === workoutSet.exerciseId);
-    if (ex) {
-      const load = workoutSet.weight * workoutSet.reps;
-      const setStress = calculateDynamicFatigue(load, workoutSet.rpe || 8, ex.fatigueFactor || 1, index);
-
-      if (decayedFatigue[ex.targetMuscle] !== undefined && !isNaN(setStress)) {
-        decayedFatigue[ex.targetMuscle] += setStress;
-      }
-    }
-  });
+  // 1 & 2. BIOLOGICAL DECAY & NEW FATIGUE
+  const nextPhysiology = calculateSessionFatigue(completedSets, exercises, physiology);
 
   // 3. UPDATE PERSONAL RECORDS
   const updatedExercises = [...exercises];
@@ -506,9 +503,6 @@ export const processSessionCompletion = (
   return {
     completedSession,
     updatedExercises,
-    updatedPhysiology: {
-      muscleFatigue: decayedFatigue,
-      lastUpdate: now
-    }
+    updatedPhysiology: nextPhysiology
   };
 };

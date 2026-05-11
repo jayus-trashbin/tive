@@ -73,7 +73,7 @@ export const ProfileSettings: React.FC<Props> = ({
                                     type="number"
                                     value={formData.bodyweight}
                                     onChange={(e) => setFormData({ ...formData, bodyweight: Number(e.target.value) })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white font-mono focus:border-brand-primary focus:outline-none transition-colors text-center"
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white font-medium focus:border-brand-primary focus:outline-none transition-colors text-center"
                                 />
                             </div>
 
@@ -162,7 +162,7 @@ export const ProfileSettings: React.FC<Props> = ({
                                         placeholder="AIzaSy..."
                                         value={formData.geminiApiKey || ''}
                                         onChange={(e) => setFormData({ ...formData, geminiApiKey: e.target.value })}
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-4 pr-4 py-3 text-white text-sm font-mono focus:border-brand-primary focus:outline-none transition-colors"
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-4 pr-4 py-3 text-white text-sm font-medium focus:border-brand-primary focus:outline-none transition-colors"
                                     />
                                 </div>
                                 <p className="text-[10px] text-zinc-600 mt-2 px-1">
@@ -210,7 +210,7 @@ export const ProfileSettings: React.FC<Props> = ({
                 <button
                     onClick={onSave}
                     className={cn(
-                        "w-full text-black font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]",
+                        "w-full text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]",
                         statusMsg?.type === 'success' ? "bg-brand-success text-white" :
                             statusMsg?.type === 'error' ? "bg-brand-danger text-white" :
                                 "bg-white hover:bg-zinc-200"

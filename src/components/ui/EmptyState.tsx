@@ -15,7 +15,7 @@ interface EmptyStateProps {
 
 /**
  * EmptyState
- * A premium, standardized empty state component with tech-brutalist styling.
+ * A premium, standardized empty state component.
  */
 const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon, title, description, action, compact = false }) => {
     return (
@@ -28,7 +28,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon, title, description,
                 ${compact ? 'w-16 h-16' : 'w-24 h-24'} 
                 border border-dashed border-zinc-800 
                 flex items-center justify-center mb-6 
-                bg-zinc-950/50 rounded-[4px]
+                bg-zinc-950/50 rounded-2xl
                 shadow-[0px_0px_15px_-3px_rgba(0,0,0,0.5)]
             `}>
                 <Icon
@@ -38,18 +38,18 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon, title, description,
                 />
             </div>
 
-            <h3 className="font-heading font-bold text-lg text-white uppercase tracking-tight mb-2">
+            <h3 className="font-bold text-lg text-white tracking-tight mb-2">
                 {title}
             </h3>
 
-            <p className="data-label text-zinc-500 max-w-[240px] leading-relaxed mb-6">
+            <p className="text-sm font-medium text-zinc-500 max-w-[240px] leading-relaxed mb-6">
                 {description}
             </p>
 
             {action && (
                 <button
                     onClick={action.onClick}
-                    className="btn-tech text-[10px] px-6 py-3"
+                    className="btn-primary text-sm px-6 py-3 rounded-xl"
                 >
                     {action.label}
                 </button>

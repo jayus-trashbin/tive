@@ -37,7 +37,8 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
         theme: userStats.theme || 'dark',
         geminiApiKey: userStats.geminiApiKey || '',
         isAudioEnabled: userStats.isAudioEnabled ?? true,
-        isVibrationEnabled: userStats.isVibrationEnabled ?? true
+        isVibrationEnabled: userStats.isVibrationEnabled ?? true,
+        smartAudio: userStats.smartAudio ?? true
     });
 
     const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -56,7 +57,8 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 theme: userStats.theme || 'dark',
                 geminiApiKey: userStats.geminiApiKey || '',
                 isAudioEnabled: userStats.isAudioEnabled ?? true,
-                isVibrationEnabled: userStats.isVibrationEnabled ?? true
+                isVibrationEnabled: userStats.isVibrationEnabled ?? true,
+                smartAudio: userStats.smartAudio ?? true
             });
         }
     }, [isOpen, userStats]);
@@ -121,7 +123,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: "spring", damping: 30, stiffness: 300, bounce: 0 }}
-                className="w-full max-w-lg bg-zinc-950/95 border-t border-zinc-800 rounded-t-[4px] h-[92vh] flex flex-col pointer-events-auto relative shadow-[0_-10px_60px_rgba(0,0,0,1)] overflow-hidden"
+                className="w-full max-w-lg bg-zinc-950/95 border-t border-zinc-800 rounded-t-[2.5rem] h-[92vh] flex flex-col pointer-events-auto relative shadow-2xl overflow-hidden"
             >
                 {/* Drag Handle */}
                 <div className="w-full flex justify-center pt-4 pb-2 shrink-0 cursor-pointer bg-zinc-950/95" onClick={onClose}>
@@ -131,7 +133,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {/* Header */}
                 <div className="px-6 pb-4 flex justify-between items-center shrink-0 bg-zinc-950/90">
                     <div>
-                        <h2 className="text-2xl font-heading font-black text-white uppercase tracking-tight">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
                             {userStats.name ? userStats.name : 'Athlete Profile'}
                         </h2>
                         <div className="data-label flex items-center gap-1 mt-1">
@@ -142,7 +144,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors rounded-[4px] border border-zinc-800"
+                        className="w-10 h-10 bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors rounded-xl border border-zinc-800"
                     >
                         <X size={20} />
                     </button>
@@ -150,10 +152,10 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
                 {/* Tabs */}
                 <div className="px-6 mb-6 shrink-0 bg-zinc-950/95">
-                    <div className="bg-zinc-900 p-1 rounded-[4px] flex relative border border-zinc-800">
+                    <div className="bg-zinc-900 p-1 rounded-2xl flex relative border border-zinc-800">
                         <motion.div
                             layoutId="profileTab"
-                            className="absolute top-1 bottom-1 bg-zinc-800 rounded-[2px]"
+                            className="absolute top-1 bottom-1 bg-zinc-800 rounded-xl"
                             initial={false}
                             animate={{
                                 left: activeTab === 'stats' ? '4px' : '50%',
@@ -165,7 +167,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         <button
                             onClick={() => setActiveTab('stats')}
                             className={cn(
-                                "flex-1 py-2.5 text-sm font-heading font-bold relative z-10 flex items-center justify-center gap-2 transition-colors uppercase tracking-wider",
+                                "flex-1 py-2.5 text-sm font-bold relative z-10 flex items-center justify-center gap-2 transition-colors uppercase tracking-wider",
                                 activeTab === 'stats' ? "text-white" : "text-zinc-500"
                             )}
                         >
@@ -174,7 +176,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         <button
                             onClick={() => setActiveTab('settings')}
                             className={cn(
-                                "flex-1 py-2.5 text-sm font-heading font-bold relative z-10 flex items-center justify-center gap-2 transition-colors uppercase tracking-wider",
+                                "flex-1 py-2.5 text-sm font-bold relative z-10 flex items-center justify-center gap-2 transition-colors uppercase tracking-wider",
                                 activeTab === 'settings' ? "text-white" : "text-zinc-500"
                             )}
                         >

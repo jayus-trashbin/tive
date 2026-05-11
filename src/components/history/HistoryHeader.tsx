@@ -24,18 +24,18 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
         >
             <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
-                    <div className="section-title">Your Workouts</div>
-                    <h1 className="page-title">
-                        History<span className="text-brand-primary">_</span>
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Your Workouts</div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                        History
                     </h1>
                 </div>
 
                 {/* View Toggle */}
-                <div className="flex p-0.5 bg-zinc-900 border border-zinc-800 rounded-[4px]">
+                <div className="flex p-0.5 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <button
                         onClick={() => setViewMode('journal')}
                         className={cn(
-                            "p-3 rounded-[2px] transition-all",
+                            "p-3 rounded-lg transition-all",
                             viewMode === 'journal' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                         )}
                     >
@@ -44,7 +44,7 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                     <button
                         onClick={() => setViewMode('analytics')}
                         className={cn(
-                            "p-3 rounded-[2px] transition-all",
+                            "p-3 rounded-lg transition-all",
                             viewMode === 'analytics' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                         )}
                     >
@@ -63,12 +63,12 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                             placeholder="Search sessions..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 focus:border-brand-primary text-sm text-zinc-200 font-mono placeholder:text-zinc-600 rounded-[4px] outline-none transition-colors"
+                            className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 focus:border-brand-primary text-sm text-zinc-200 placeholder:text-zinc-600 rounded-xl outline-none transition-colors"
                         />
                     </div>
                     <button
                         onClick={onShowCalendar}
-                        className="px-3 bg-zinc-900 border border-zinc-800 hover:border-brand-primary/50 text-zinc-400 hover:text-brand-primary transition-colors rounded-[4px]"
+                        className="px-3 bg-zinc-900 border border-zinc-800 hover:border-brand-primary/50 text-zinc-400 hover:text-brand-primary transition-colors rounded-xl"
                     >
                         <CalendarIcon size={18} />
                     </button>

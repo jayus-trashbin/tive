@@ -22,6 +22,7 @@ export interface UserStats {
   height?: number;    // cm
   gender: Gender;
   wilksScore: number;
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
 
   // Integrations
   supabaseUrl?: string;
@@ -32,6 +33,7 @@ export interface UserStats {
   theme: 'dark' | 'light' | 'oled';
   isAudioEnabled?: boolean;
   isVibrationEnabled?: boolean;
+  smartAudio?: boolean; // Detect music playing
 }
 
 export interface ProfileFormData {
@@ -46,6 +48,7 @@ export interface ProfileFormData {
   geminiApiKey: string;
   isAudioEnabled: boolean;
   isVibrationEnabled: boolean;
+  smartAudio: boolean;
 }
 
 export interface Exercise {
@@ -57,6 +60,7 @@ export interface Exercise {
   videoUrl?: string; // The Animation (Modern MP4)
   fatigueFactor: number;
   isUnilateral: boolean;
+  movementPattern?: 'push' | 'pull' | 'compound' | 'isolation';
 
   // Extended Details
   instructions?: string[];

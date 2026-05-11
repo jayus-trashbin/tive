@@ -85,19 +85,19 @@ const AnalyticsDashboard: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <BarChart3 size={16} className="text-brand-primary" />
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                             Performance Insights
                         </span>
                     </div>
 
                     {/* Time Filter Pill */}
-                    <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-[4px]">
+                    <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-xl">
                         {ranges.map((range) => (
                             <button
                                 key={range.id}
                                 onClick={() => setTimeRange(range.id as any)}
                                 className={cn(
-                                    "px-3 py-1 text-[9px] font-mono font-bold transition-colors cursor-pointer rounded-[2px]",
+                                    "px-3 py-1 text-[9px] font-bold transition-colors cursor-pointer rounded-lg",
                                     timeRange === range.id
                                         ? "bg-brand-primary text-black"
                                         : "text-zinc-500 hover:text-zinc-300"
@@ -110,7 +110,7 @@ const AnalyticsDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-black text-white tracking-tighter uppercase font-mono">
+                    <h1 className="text-2xl font-bold text-white tracking-tighter uppercase font-medium">
                         Analytics<span className="text-brand-primary">_</span>Lab
                     </h1>
 
@@ -119,21 +119,21 @@ const AnalyticsDashboard: React.FC = () => {
                         <button
                             onClick={handleExportCSV}
                             title="Export as CSV"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-[3px] transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Download size={10} /> CSV
                         </button>
                         <button
                             onClick={handleExportJSON}
                             title="Export backup JSON"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-[3px] transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Download size={10} /> JSON
                         </button>
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             title="Import backup JSON"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-400/30 rounded-[3px] transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-400/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Upload size={10} /> Import
                         </button>
@@ -155,7 +155,7 @@ const AnalyticsDashboard: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             className={cn(
-                                "mt-2 flex items-center gap-2 px-3 py-2 rounded-[3px] border text-[10px] font-bold",
+                                "mt-2 flex items-center gap-2 px-3 py-2 rounded-lg border text-[10px] font-bold",
                                 importMsg.type === 'success'
                                     ? "bg-brand-primary/10 border-brand-primary/20 text-brand-primary"
                                     : "bg-red-500/10 border-red-500/20 text-red-400"
@@ -174,11 +174,11 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 1. Volume Analysis */}
                 <section>
                     <div className="flex items-center justify-between mb-3 px-1">
-                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Activity size={12} className="text-brand-primary" /> Volume Progression
                         </h2>
                     </div>
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4">
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                         <ChartErrorBoundary>
                             <VolumeChart days={getDaysFromRange(timeRange)} />
                         </ChartErrorBoundary>
@@ -189,11 +189,11 @@ const AnalyticsDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section>
                         <div className="flex items-center mb-3 px-1">
-                            <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                 <Filter size={12} className="text-brand-primary" /> 1RM Est. Progress
                             </h2>
                         </div>
-                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4 h-[300px]">
+                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 h-[300px]">
                             <ChartErrorBoundary>
                                 <OneRMProgress />
                             </ChartErrorBoundary>
@@ -202,11 +202,11 @@ const AnalyticsDashboard: React.FC = () => {
 
                     <section>
                         <div className="flex items-center mb-3 px-1">
-                            <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                 <Target size={12} className="text-brand-primary" /> Muscle Distribution
                             </h2>
                         </div>
-                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4 h-[300px]">
+                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 h-[300px]">
                             <ChartErrorBoundary>
                                 <MuscleRadar />
                             </ChartErrorBoundary>
@@ -217,11 +217,11 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 3. A-05: Frequency Heatmap with drill-down */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Calendar size={12} className="text-brand-primary" /> Training Frequency (90 Days)
                         </h2>
                     </div>
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4">
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                         <ChartErrorBoundary>
                             <FrequencyHeatmap />
                         </ChartErrorBoundary>
@@ -231,11 +231,11 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 4. E-03: Weekly Muscle Volume */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <TrendingUp size={12} className="text-brand-primary" /> Weekly Muscle Load
                         </h2>
                     </div>
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-4">
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                         <ChartErrorBoundary>
                             <WeeklyMuscleComparison />
                         </ChartErrorBoundary>
@@ -245,7 +245,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 5. A-04: Top Exercises */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Dumbbell size={12} className="text-brand-primary" /> Top Exercises
                         </h2>
                     </div>
@@ -257,7 +257,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 6. A-08: PR Timeline with filter */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Trophy size={12} className="text-brand-primary" /> PR Achievement Log
                         </h2>
                     </div>
@@ -268,7 +268,7 @@ const AnalyticsDashboard: React.FC = () => {
 
                 {/* Footer */}
                 <div className="py-8 text-center bg-zinc-950">
-                    <p className="text-[8px] font-mono text-zinc-700 uppercase tracking-[0.3em]">
+                    <p className="text-[8px] font-medium text-zinc-700 uppercase tracking-[0.3em]">
                         Systems Operational • Real-time Data Stream • v1.2
                     </p>
                 </div>

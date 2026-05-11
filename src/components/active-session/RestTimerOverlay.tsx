@@ -20,7 +20,7 @@ export const RestTimerOverlay = () => {
 
             if (remaining <= 0) {
                 if (userStats.isAudioEnabled !== false) audio.playTimerFinished();
-                if (userStats.isVibrationEnabled !== false) haptic('medium');
+                if (userStats.isVibrationEnabled !== false) haptic('timer');
                 skipRest(); // Auto close on finish
             } else {
                 setTimeLeft(remaining);
@@ -29,6 +29,14 @@ export const RestTimerOverlay = () => {
 
         return () => clearInterval(interval);
     }, [restTimer.endTime, skipRest]);
+
+    // 3s Audio Countdown
+    useEffect(() => {
+        if (timeLeft > 0 && timeLeft <= 3) {
+            if (userStats.isAudioEnabled !== false) audio.playTimerCountdown();
+            if (userStats.isVibrationEnabled !== false) haptic('light');
+        }
+    }, [timeLeft]);
 
     if (!restTimer.isRunning || !restTimer.endTime) return null;
 
@@ -44,10 +52,10 @@ export const RestTimerOverlay = () => {
             }}
             className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-zinc-800 border border-white/5 active:bg-zinc-700 active:scale-95 transition-all"
         >
-            <span className={cn("text-xs font-black", seconds > 0 ? "text-brand-success" : "text-brand-danger")}>
+            <span className={cn("text-xs font-bold", seconds > 0 ? "text-brand-success" : "text-brand-danger")}>
                 {seconds > 0 ? '+' : ''}{seconds}
             </span>
-            <span className="text-[9px] text-zinc-500 uppercase font-bold">Sec</span>
+            <span className="text-[9px] text-zinc-500 uppercase font-medium">Sec</span>
         </button>
     );
 
@@ -79,11 +87,11 @@ export const RestTimerOverlay = () => {
                     <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Rest In Progress</span>
                 </div>
 
-                {/* Main Timer Display */}
+                    {/* Main Timer Display */}
                 <time
                     aria-live="polite"
                     dateTime={`PT${timeLeft}S`}
-                    className="text-7xl font-black font-mono text-white mb-8 tabular-nums tracking-tighter relative"
+                    className="text-7xl font-bold text-white mb-8 tabular-nums tracking-tight relative"
                 >
                     {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
                 </time>
@@ -106,7 +114,7 @@ export const RestTimerOverlay = () => {
                             if (userStats.isVibrationEnabled !== false && navigator.vibrate) navigator.vibrate(20);
                             skipRest();
                         }}
-                        className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl shadow-glow active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-white text-black font-bold text-lg rounded-2xl shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                     >
                         <ChevronsRight size={24} className="text-black" />
                         SKIP REST

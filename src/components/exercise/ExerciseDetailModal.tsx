@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Exercise } from '../../types';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
@@ -88,7 +89,7 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
 
     if (!localExercise) return null;
 
-    return (
+    const modalContent = (
         <AnimatePresence>
             <>
                 {/* Backdrop */}
@@ -140,6 +141,8 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
             </>
         </AnimatePresence>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ExerciseDetailModal;

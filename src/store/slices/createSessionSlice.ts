@@ -3,6 +3,7 @@ import { WorkoutState, SessionSlice } from '../../types/store';
 import { Session, WorkoutSet, PhysiologyState, MuscleGroup, RoutineBlock, Routine, Exercise } from '../../types';
 import { syncService } from '../../services/SyncService';
 import { processSessionCompletion, getPreviousSetPerformance, getSuggestedWeight } from '../../utils/engine';
+import { useUIStore } from '../useUIStore';
 
 // Initial state helpers
 const initialPhysiology: PhysiologyState = {
@@ -125,11 +126,12 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 _synced: false,
                 updatedAt: Date.now()
             };
-            set({ activeSession: newSession, isMinimized: false, restTimer: { endTime: null, originalDuration: 0, isRunning: false } });
+            set({ activeSession: newSession, restTimer: { endTime: null, originalDuration: 0, isRunning: false } });
+            useUIStore.getState().toggleMinimize(false);
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
         } catch (error) {
             console.error("[Store] startSession failed:", error);
-            get().addNotification("Failed to start session. Please try again.", "error");
+            useUIStore.getState().addNotification("Failed to start session. Please try again.", "error");
         }
     },
 
@@ -149,9 +151,9 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 activeSession: null,
                 exercises: updatedExercises,
                 physiology: updatedPhysiology,
-                restTimer: { endTime: null, originalDuration: 0, isRunning: false },
-                isMinimized: false
+                restTimer: { endTime: null, originalDuration: 0, isRunning: false }
             });
+            useUIStore.getState().toggleMinimize(false);
 
             // Trigger sync in background
             if (typeof window !== 'undefined') {
@@ -163,7 +165,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
             }
         } catch (error) {
             console.error("[Store] finishSession CRITICAL FAILURE:", error);
-            get().addNotification("Error saving workout. Your data is still safe in the active session.", "error");
+            useUIStore.getState().addNotification("Error saving workout. Your data is still safe in the active session.", "error");
         }
     },
 
@@ -237,18 +239,39 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
     },
 
     toggleSetComplete: (setId, isCompleted) => {
-        const { activeSession } = get();
-        if (!activeSession) return;
+        let isPR = false;
 
-        // 1. Update the set status
-        set({
-            activeSession: {
-                ...activeSession,
-                sets: activeSession.sets.map(s => s.id === setId ? { ...s, isCompleted } : s)
-            }
+        set((state) => {
+            const session = state.activeSession;
+            if (!session) return state;
+
+            const updatedSets = session.sets.map(s => {
+                if (s.id === setId) {
+                    // Check PR if completing
+                    let newIsPR = s.isPR;
+                    if (isCompleted) {
+                        const ex = state.exercises.find(e => e.id === s.exerciseId);
+                        if (ex && s.estimated1RM > (ex.personalRecord || 0)) {
+                            newIsPR = true;
+                            isPR = true; // Signal outer scope
+                        }
+                    } else {
+                        newIsPR = false; // Reset if unchecking
+                    }
+                    return { ...s, isCompleted, isPR: newIsPR };
+                }
+                return s;
+            });
+
+            return {
+                activeSession: { ...session, sets: updatedSets }
+            };
         });
 
         // 2. SMART REST LOGIC
+        const { activeSession } = get();
+        if (!activeSession) return;
+
         if (isCompleted) {
             try {
                 const currentSet = activeSession.sets.find(s => s.id === setId);

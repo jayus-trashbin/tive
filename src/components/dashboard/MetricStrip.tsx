@@ -10,13 +10,13 @@ interface MetricPillProps {
 }
 
 export const MetricPill: React.FC<MetricPillProps> = ({ icon: Icon, value, label, accent }) => (
-    <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-[4px] px-4 py-3 min-w-[110px] flex-1">
-        <Icon size={16} className={cn("text-zinc-500 shrink-0", accent)} />
-        <div className="min-w-0">
-            <div className="text-lg font-heading font-black text-white leading-none tracking-tight">
-                {value}
-            </div>
-            <div className="data-label mt-0.5">{label}</div>
+    <div className="card px-4 py-3 min-w-[110px] flex-1 flex flex-col justify-center">
+        <div className="flex items-center gap-2 mb-1">
+            <Icon size={14} className={cn("text-zinc-500", accent)} />
+            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{label}</span>
+        </div>
+        <div className="text-xl font-bold text-white leading-none">
+            {value}
         </div>
     </div>
 );

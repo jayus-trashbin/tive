@@ -63,29 +63,8 @@ export interface RoutineSlice {
   markRoutinesSynced: (ids: string[]) => void;
 }
 
-export interface UISlice {
-  isMinimized: boolean;
-  isRoutineEditorOpen: boolean;
-  isRoutinePreviewOpen: boolean;
-  isProfileOpen: boolean;
-  _hasHydrated: boolean;
-  isSyncing?: boolean;
-  lastSyncError?: string | null;
 
-  setSyncing?: (isSyncing: boolean) => void;
-  setSyncError?: (error: string | null) => void;
-
-  notifications: { id: string, message: string, type: 'info' | 'success' | 'error' }[];
-  addNotification: (message: string, type: 'info' | 'success' | 'error') => void;
-  removeNotification: (id: string) => void;
-
-  toggleMinimize: (minimized?: boolean) => void;
-  setProfileOpen: (isOpen: boolean) => void;
-  setRoutineEditorOpen: (isOpen: boolean) => void;
-  setRoutinePreviewOpen: (isOpen: boolean) => void;
-  setHasHydrated: (state: boolean) => void;
-}
 
 // --- Combined Store Type ---
-export type WorkoutState = SessionSlice & ExerciseSlice & RoutineSlice & UISlice & PhotoSlice;
+export type WorkoutState = SessionSlice & ExerciseSlice & RoutineSlice & PhotoSlice;
 

@@ -154,7 +154,7 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                     textAnchor="middle"
                     fill="#a3e635"
                     fontSize="6"
-                    fontFamily="monospace"
+                    fontFamily="sans-serif"
                     fontWeight="bold"
                     opacity="0.7"
                 >
@@ -167,7 +167,7 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                 <div className="flex gap-1">
                     <button
                         onClick={() => setView('front')}
-                        className={`px-2 py-0.5 font-mono text-[8px] font-black uppercase transition-all ${view === 'front'
+                        className={`px-3 py-1 text-[10px] font-bold uppercase transition-all rounded-l-md ${view === 'front'
                             ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40'
                             : 'text-zinc-600 border border-zinc-800 hover:text-zinc-400'
                             }`}
@@ -176,7 +176,7 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                     </button>
                     <button
                         onClick={() => setView('back')}
-                        className={`px-2 py-0.5 font-mono text-[8px] font-black uppercase transition-all ${view === 'back'
+                        className={`px-3 py-1 text-[10px] font-bold uppercase transition-all rounded-r-md ${view === 'back'
                             ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40'
                             : 'text-zinc-600 border border-zinc-800 hover:text-zinc-400'
                             }`}
@@ -244,7 +244,7 @@ export function renderMuscleOverlayToCanvas(
 
     // Label
     ctx.fillStyle = '#a3e635';
-    ctx.font = 'bold 8px monospace';
+    ctx.font = 'bold 8px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`${activeMuscles.size} MUSCLES`, 50, 97);
 

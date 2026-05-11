@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useUIStore } from "../store/useUIStore";
 import { Routine } from '../types/domain';
 import { Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoutineEditor from './plan-editor/RoutineEditor';
 import RoutinePreviewScreen from './pre-workout/RoutinePreviewScreen';
 import AIRoutineBuilder from './ai/AIRoutineBuilder';
+import RoutineTableBuilder from './ai/RoutineTableBuilder';
+import MesocyclePlanner from './mesocycle/MesocyclePlanner';
 import {
     PlanHeader,
     SelectionBar,
@@ -27,7 +30,8 @@ interface Props {
  * - RoutineCard (Individual Items)
  */
 const PlanManager: React.FC<Props> = ({ onStartSession }) => {
-    const { routines, exercises: storedExercises, setRoutinePreviewOpen, deleteRoutines, saveRoutine } = useWorkoutStore();
+    const { routines, exercises: storedExercises, deleteRoutines, saveRoutine } = useWorkoutStore();
+    const { setRoutinePreviewOpen } = useUIStore();;
 
     const visibleRoutines = useMemo(() =>
         routines.filter(r => !r.deletedAt).sort((a, b) => (b.lastPerformed || 0) - (a.lastPerformed || 0)),
@@ -44,6 +48,8 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
 
     const [showImporter, setShowImporter] = useState(false);
     const [showAIBuilder, setShowAIBuilder] = useState(false);
+    const [showTableBuilder, setShowTableBuilder] = useState(false);
+    const [showMesocycle, setShowMesocycle] = useState(false);
 
     const handleOpenPreview = (id: string) => {
         setPreviewRoutineId(id);
@@ -121,6 +127,10 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
         });
     };
 
+    if (showMesocycle) {
+        return <MesocyclePlanner onBack={() => setShowMesocycle(false)} />;
+    }
+
     if (previewRoutineId) {
         return (
             <RoutinePreviewScreen
@@ -151,12 +161,14 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-black">
-            <PlanHeader 
+            <PlanHeader
                 isSelectionMode={isSelectionMode}
                 toggleSelectionMode={toggleSelectionMode}
                 onShowAIBuilder={() => setShowAIBuilder(true)}
                 onShowImporter={() => setShowImporter(true)}
                 onStartCreate={() => setIsCreating(true)}
+                onShowTableBuilder={() => setShowTableBuilder(true)}
+                onShowMesocycle={() => setShowMesocycle(true)}
                 hasRoutines={visibleRoutines.length > 0}
             />
 
@@ -223,6 +235,9 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                         onClose={() => setShowAIBuilder(false)}
                         onImport={handleImportedRoutine}
                     />
+                )}
+                {showTableBuilder && (
+                    <RoutineTableBuilder onClose={() => setShowTableBuilder(false)} />
                 )}
             </AnimatePresence>
         </div>

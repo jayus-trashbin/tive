@@ -80,10 +80,10 @@ const ExerciseGroup: React.FC<Props> = ({
             >
                 {/* Exercise Card Container */}
                 <div className={cn(
-                    "rounded-[4px] overflow-hidden transition-all duration-300",
+                    "rounded-2xl overflow-hidden transition-all duration-300",
                     allSetsCompleted
                         ? "bg-zinc-950 border border-white/5"
-                        : "bg-zinc-900/40 border border-white/10 shadow-card"
+                        : "bg-zinc-900 border border-white/5"
                 )}>
 
                     {/* Card Header (Clickable) */}
@@ -102,9 +102,9 @@ const ExerciseGroup: React.FC<Props> = ({
                         >
                             <GripVertical size={16} />
                         </div>
-                        <div className="relative w-14 h-14 rounded-[4px] bg-black overflow-hidden border border-white/10 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                        <div className="relative w-14 h-14 rounded-xl bg-black overflow-hidden border border-white/10 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                             <img
-                                src={exercise.staticImageUrl || exercise.gifUrl}
+                                src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')}
                                 className="w-full h-full object-cover opacity-80 mix-blend-screen"
                                 loading="lazy"
                             />
@@ -121,7 +121,7 @@ const ExerciseGroup: React.FC<Props> = ({
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-white font-heading font-black text-lg leading-tight truncate pr-2 group-hover:text-brand-primary transition-colors">
+                            <h3 className="text-white font-bold text-lg leading-tight truncate pr-2 group-hover:text-brand-primary transition-colors">
                                 {exercise.name}
                             </h3>
                             <div className="flex items-center gap-3 mt-1.5">
@@ -132,7 +132,7 @@ const ExerciseGroup: React.FC<Props> = ({
                                     {exercise.targetMuscle}
                                 </span>
                                 {exercise.personalRecord && (
-                                    <span className="flex items-center gap-1 text-[10px] text-zinc-500 font-mono">
+                                    <span className="flex items-center gap-1 text-[10px] text-zinc-500 font-medium">
                                         <Trophy size={10} className="text-brand-warning" />
                                         <span className="text-brand-warning">{exercise.personalRecord}kg</span>
                                     </span>
@@ -180,9 +180,9 @@ const ExerciseGroup: React.FC<Props> = ({
 
                     {/* R-02: Block note from routine plan (read-only) */}
                     {blockNote && (
-                        <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2 bg-amber-500/8 border border-amber-500/20 rounded-[3px]">
+                        <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2 bg-amber-500/8 border border-amber-500/20 rounded-lg">
                             <MessageSquare size={11} className="text-amber-400 mt-0.5 shrink-0" />
-                            <span className="text-[10px] text-amber-300 font-mono leading-relaxed">{blockNote}</span>
+                            <span className="text-[10px] text-amber-300 font-medium leading-relaxed">{blockNote}</span>
                         </div>
                     )}
 
@@ -219,7 +219,7 @@ const ExerciseGroup: React.FC<Props> = ({
                     <div className="p-2 pt-0 flex gap-2">
                         <button
                             onClick={() => handleAddSet(exercise.id)}
-                            className="flex-1 py-3 rounded-[4px] bg-zinc-950/50 hover:bg-brand-primary/10 text-zinc-500 hover:text-brand-primary text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-dashed border-zinc-800 hover:border-brand-primary/30"
+                            className="flex-1 py-3 rounded-xl bg-zinc-900 hover:bg-brand-primary/10 text-zinc-400 hover:text-brand-primary text-sm font-semibold flex items-center justify-center gap-2 transition-all border border-dashed border-zinc-800 hover:border-brand-primary/30"
                         >
                             <Plus size={16} /> Add Set
                         </button>
@@ -227,7 +227,7 @@ const ExerciseGroup: React.FC<Props> = ({
                             <button
                                 onClick={() => handleGenerateWarmups(exercise.id, sets[0].weight)}
                                 title="Generate Warmup Sets"
-                                className="w-12 shrink-0 py-3 rounded-[4px] bg-zinc-950/50 hover:bg-brand-warning/10 text-zinc-500 hover:text-brand-warning flex items-center justify-center transition-all border border-dashed border-zinc-800 hover:border-brand-warning/30"
+                                className="w-12 shrink-0 py-3 rounded-xl bg-zinc-900 hover:bg-brand-warning/10 text-zinc-500 hover:text-brand-warning flex items-center justify-center transition-all border border-dashed border-zinc-800 hover:border-brand-warning/30"
                             >
                                 <Flame size={16} />
                             </button>

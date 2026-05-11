@@ -95,7 +95,7 @@ export const CloudSyncSection: React.FC<Props> = ({ formData, setFormData, userS
                                 Go to the <strong className="text-white">SQL Editor</strong> and run this query to set up your tables:
                             </p>
                             <div className="bg-zinc-950 p-3 rounded-lg border border-white/10 relative group">
-                                <pre className="text-[9px] font-mono text-zinc-300 overflow-x-auto whitespace-pre-wrap">
+                                <pre className="text-[9px] font-medium text-zinc-300 overflow-x-auto whitespace-pre-wrap">
                                     {SQL_SETUP_QUERY}
                                 </pre>
                                 <button
@@ -118,7 +118,7 @@ export const CloudSyncSection: React.FC<Props> = ({ formData, setFormData, userS
                         placeholder="Supabase Project URL"
                         value={formData.supabaseUrl}
                         onChange={(e) => setFormData({ ...formData, supabaseUrl: e.target.value })}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-xs font-mono focus:border-brand-primary focus:outline-none transition-colors"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-xs font-medium focus:border-brand-primary focus:outline-none transition-colors"
                     />
                 </div>
                 <div className="relative group">
@@ -128,7 +128,7 @@ export const CloudSyncSection: React.FC<Props> = ({ formData, setFormData, userS
                         placeholder="Supabase Anon Key"
                         value={formData.supabaseKey}
                         onChange={(e) => setFormData({ ...formData, supabaseKey: e.target.value })}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-white text-xs font-mono focus:border-brand-primary focus:outline-none transition-colors"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-white text-xs font-medium focus:border-brand-primary focus:outline-none transition-colors"
                     />
                     <button
                         onClick={() => setShowKey(!showKey)}

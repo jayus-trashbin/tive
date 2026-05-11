@@ -37,14 +37,14 @@ describe('formulas', () => {
         it('decays fatigue exactly 50% after one half-life period', () => {
             const muscle = 'chest';
             const halfLife = MUSCLE_RECOVERY_PROFILE[muscle]; // 18 hours
-            const initialFatigue = 1500; // max capacity for chest
+            const initialFatigue = 4000; // max capacity for chest
             
             // Time is in the past by exactly one half-life
             const lastUpdate = Date.now() - (halfLife * 60 * 60 * 1000);
             
             const result = calculateMuscleReadiness(initialFatigue, lastUpdate, muscle);
             
-            // Expected fatigue = 750. Max is 1500. Score = 1 - (750/1500) = 0.5
+            // Expected fatigue = 2000. Max is 4000. Score = 1 - (2000/4000) = 0.5
             expect(result.score).toBeCloseTo(0.5, 2);
             expect(result.label).toBe('Fatigued');
         });

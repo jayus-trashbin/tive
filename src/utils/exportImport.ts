@@ -13,9 +13,9 @@ export function exportToCSV(sessions: Session[], exercises: Exercise[]): string 
     const exerciseMap = new Map(exercises.map(e => [e.id, e]));
 
     const header = [
-        'date', 'session_name', 'routine_id',
-        'exercise', 'muscle', 'set_index', 'type',
-        'weight_kg', 'reps', 'rpe', 'estimated_1rm', 'is_pr', 'volume'
+        'data', 'nome_sessao', 'id_rotina',
+        'exercicio', 'musculo_alvo', 'numero_serie', 'tipo_serie',
+        'peso_kg', 'repeticoes', 'rpe', '1rm_estimado', 'pr', 'volume'
     ].join(',');
 
     const rows: string[] = [header];
@@ -91,7 +91,7 @@ export interface ImportResult {
 }
 
 /**
- * Parses a Tive backup JSON file.
+ * Parses a Tive backup JSON file with strict schema validation.
  * Returns sessions and exercises arrays, or an error message.
  */
 export function parseBackupJSON(jsonString: string): ImportResult {
@@ -100,15 +100,42 @@ export function parseBackupJSON(jsonString: string): ImportResult {
 
         // Support both flat backup {history, exercises} and nested Zustand persist format
         const state = parsed.state ?? parsed;
-        const sessions: Session[] = Array.isArray(state.history) ? state.history : [];
-        const exercises: Exercise[] = Array.isArray(state.exercises) ? state.exercises : [];
+        const rawSessions = Array.isArray(state.history) ? state.history : [];
+        const rawExercises = Array.isArray(state.exercises) ? state.exercises : [];
 
-        if (sessions.length === 0 && exercises.length === 0) {
-            return { sessions: [], exercises: [], error: 'No data found in this file.' };
+        if (rawSessions.length === 0 && rawExercises.length === 0) {
+            return { sessions: [], exercises: [], error: 'Nenhum dado encontrado no arquivo.' };
         }
 
-        return { sessions, exercises };
+        // Schema validation
+        const isValidSession = (s: any) => typeof s === 'object' && s !== null && typeof s.id === 'string' && typeof s.date === 'number' && Array.isArray(s.sets);
+        const isValidExercise = (e: any) => typeof e === 'object' && e !== null && typeof e.id === 'string' && typeof e.name === 'string';
+
+        const invalidSessions = rawSessions.filter((s: any) => !isValidSession(s));
+        const invalidExercises = rawExercises.filter((e: any) => !isValidExercise(e));
+
+        if (invalidSessions.length > 0 || invalidExercises.length > 0) {
+            return { sessions: [], exercises: [], error: 'Arquivo JSON corrompido ou formato inválido.' };
+        }
+
+        return { sessions: rawSessions as Session[], exercises: rawExercises as Exercise[] };
     } catch (e) {
-        return { sessions: [], exercises: [], error: 'Invalid JSON file. Please select a valid Tive backup.' };
+        return { sessions: [], exercises: [], error: 'Arquivo JSON inválido. Verifique se o arquivo não está corrompido.' };
     }
+}
+
+/**
+ * Placeholder for Hevy CSV Import
+ */
+export function parseHevyCSV(csvString: string): ImportResult {
+    // TODO: Phase 3.4 - Map Hevy headers (Date, Workout Name, Exercise Name, Set Order, Weight, Reps)
+    return { sessions: [], exercises: [], error: 'Importação do Hevy ainda em desenvolvimento.' };
+}
+
+/**
+ * Placeholder for Strong CSV Import
+ */
+export function parseStrongCSV(csvString: string): ImportResult {
+    // TODO: Phase 3.4 - Map Strong headers (Date, Workout Name, Exercise Name, Set Order, Weight, Reps)
+    return { sessions: [], exercises: [], error: 'Importação do Strong ainda em desenvolvimento.' };
 }

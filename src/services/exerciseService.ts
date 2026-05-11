@@ -4,184 +4,242 @@ import { FALLBACK_EXERCISES } from '../data/fallbackExercises';
 import { NetworkClient } from '../utils/network';
 import { logger } from '../utils/logger';
 
-const API_BASE_URL = import.meta.env.VITE_EXERCISE_API_URL ?? 'https://exercisedbv2.ascendapi.com/api/v1';
-const BATCH_SIZE = Number(import.meta.env.VITE_EXERCISE_API_BATCH_SIZE) || 20;
+// OSS ExerciseDB — https://oss.exercisedb.dev/api/v1
+// Free, no auth required. Limit: max 25 per request.
+const API_BASE_URL = import.meta.env.VITE_EXERCISE_API_URL ?? 'https://oss.exercisedb.dev/api/v1';
+const BATCH_SIZE = Math.min(Number(import.meta.env.VITE_EXERCISE_API_BATCH_SIZE) || 20, 25);
 
-// --- MAPPING HELPERS ---
+// ─── OSS bodyParts reference (lowercase, exactly as the API returns them) ──────
+// neck | lower arms | shoulders | cardio | upper arms | chest | lower legs | back | upper legs | waist
 
 /**
- * Maps the specific API body part (e.g. "QUADRICEPS") to the internal application MuscleGroup (e.g. "upper legs")
- * Used for fatigue tracking and symmetry analysis stats.
+ * Maps an OSS API bodyPart string to the app's internal MuscleGroup.
+ * Input is lowercase as returned by the OSS API.
  */
 export const mapBodyPartToMuscle = (apiBodyPart: string): MuscleGroup => {
-    const normalized = (apiBodyPart || '').toUpperCase();
+    const normalized = (apiBodyPart || '').toLowerCase().trim();
 
     switch (normalized) {
-        case 'CHEST':
+        case 'chest':
             return 'chest';
 
-        case 'BACK':
-        case 'NECK':
+        case 'back':
+        case 'neck':
             return 'back';
 
-        case 'SHOULDERS':
+        case 'shoulders':
             return 'shoulders';
 
-        case 'WAIST':
+        case 'waist':
             return 'core';
 
-        case 'ARMS':
-        case 'UPPER ARMS':
-        case 'BICEPS':
-        case 'TRICEPS':
-        case 'FOREARMS':
-        case 'HANDS':
+        case 'upper arms':
+        case 'lower arms':
             return 'arms';
 
-        case 'UPPER LEGS':
-        case 'THIGHS':
-        case 'HAMSTRINGS':
-        case 'QUADRICEPS':
-        case 'HIPS':
+        case 'upper legs':
             return 'upper legs';
 
-        case 'LOWER LEGS':
-        case 'CALVES':
-        case 'FEET':
+        case 'lower legs':
             return 'lower legs';
 
-        case 'CARDIO':
-        case 'FULL BODY':
+        case 'cardio':
             return 'cardio';
 
         default:
+            // targetMuscle names occasionally appear here in cached V2 data — handle gracefully
+            if (normalized.includes('pectoral') || normalized.includes('chest')) return 'chest';
+            if (normalized.includes('quad') || normalized.includes('hamstring') || normalized.includes('glute') || normalized.includes('thigh') || normalized.includes('hip')) return 'upper legs';
+            if (normalized.includes('calf') || normalized.includes('calves') || normalized.includes('shin')) return 'lower legs';
+            if (normalized.includes('delt') || normalized.includes('shoulder')) return 'shoulders';
+            if (normalized.includes('bicep') || normalized.includes('tricep') || normalized.includes('forearm') || normalized.includes('arm')) return 'arms';
+            if (normalized.includes('lat') || normalized.includes('back') || normalized.includes('trap') || normalized.includes('rhomboid')) return 'back';
+            if (normalized.includes('abs') || normalized.includes('oblique') || normalized.includes('core') || normalized.includes('waist')) return 'core';
             return 'cardio';
     }
 };
 
 /**
- * Translates UI selection to API Query Parameter.
- * Documentation: "Filter exercises by body parts. Use comma-separated values."
+ * Translates the app's MuscleGroup / filter value to the OSS API `bodyParts` query param.
+ * OSS API accepts lowercase exact bodyPart names, comma-separated for multiple.
+ *
+ * OSS bodyParts: chest | back | shoulders | upper arms | lower arms | upper legs | lower legs | waist | cardio | neck
  */
 export const getApiBodyParts = (muscle: string): string => {
     if (!muscle || muscle === 'all') return '';
-    const lower = muscle.toLowerCase();
+    const lower = muscle.toLowerCase().trim();
 
-    // 1. Aggregates (App-Specific Groupings for easier browsing)
-    if (lower === 'arms') return 'UPPER ARMS,FOREARMS,BICEPS,TRICEPS';
-    if (lower === 'upper legs') return 'THIGHS,HAMSTRINGS,QUADRICEPS,HIPS';
-    if (lower === 'lower legs') return 'CALVES,FEET';
-    if (lower === 'core') return 'WAIST';
-    if (lower === 'back') return 'BACK,NECK';
-    if (lower === 'cardio') return 'FULL BODY';
+    switch (lower) {
+        // App convenience groupings → comma-separated OSS bodyParts
+        case 'arms':        return 'upper arms,lower arms';
+        case 'upper legs':  return 'upper legs';
+        case 'lower legs':  return 'lower legs';
+        case 'core':
+        case 'waist':       return 'waist';
+        case 'back':        return 'back';
+        case 'cardio':      return 'cardio';
+        case 'shoulders':   return 'shoulders';
+        case 'chest':       return 'chest';
+        case 'neck':        return 'neck';
 
-    // 2. Specific API Keys (Direct passthrough - ensures exact match with API enums)
-    return muscle.toUpperCase();
+        // Specific V2 legacy values — map to closest OSS bodyPart
+        case 'biceps':
+        case 'triceps':
+        case 'forearms':    return 'upper arms,lower arms';
+        case 'quadriceps':
+        case 'hamstrings':
+        case 'hips':
+        case 'thighs':
+        case 'glutes':      return 'upper legs';
+        case 'calves':
+        case 'feet':        return 'lower legs';
+        case 'full body':   return 'cardio';
+
+        // OSS passthrough — assume caller already uses a valid OSS bodyPart
+        default:            return lower;
+    }
 };
+
+// ─── Movement Pattern Heuristic ─────────────────────────────────────────────
+
+const detectMovementPattern = (
+    name: string,
+    secondaryMuscles: string[]
+): Exercise['movementPattern'] => {
+    const n = name.toLowerCase();
+    const hasMany = secondaryMuscles.length > 1;
+
+    if (hasMany && (n.includes('squat') || n.includes('deadlift') || n.includes('bench') || n.includes('press') || n.includes('row') || n.includes('pull'))) {
+        return 'compound';
+    }
+    if (n.includes('press') || n.includes('push') || n.includes('fly') || n.includes('flye') || n.includes('raise') || n.includes('extension')) {
+        return 'push';
+    }
+    if (n.includes('row') || n.includes('pull') || n.includes('curl') || n.includes('face pull') || n.includes('pulldown')) {
+        return 'pull';
+    }
+    return 'isolation';
+};
+
+// ─── Fatigue Factor ──────────────────────────────────────────────────────────
+
+const calcFatigueFactor = (equipment: string, secondaryMuscles: string[]): number => {
+    const e = equipment.toLowerCase();
+    const isCompound = secondaryMuscles.length > 1;
+    const isBarbell = e === 'barbell' || e === 'olympic barbell' || e === 'ez barbell' || e === 'trap bar';
+    const isMachine = e.includes('machine') || e === 'cable' || e === 'sled machine' || e === 'leverage machine';
+    const isBodyweight = e === 'body weight' || e === 'assisted' || e === 'weighted';
+
+    if (isBarbell && isCompound) return 1.5;
+    if (isBarbell) return 1.2;
+    if (isMachine) return 0.9;
+    if (isBodyweight) return 0.8;
+    return 1.0;
+};
+
+// ─── API → Exercise Model ────────────────────────────────────────────────────
 
 const mapApiToModel = (apiEx: ApiExercise): Exercise => {
     try {
-        const bodyPart = apiEx.bodyParts?.[0] || '';
-        const name = apiEx.name?.toLowerCase() || 'unknown';
-        const equipment = apiEx.equipments?.[0]?.toLowerCase() || 'unknown';
+        const bodyPart = apiEx.bodyParts?.[0] ?? '';
+        const name = apiEx.name ?? 'Unknown';
+        const nameLower = name.toLowerCase();
+        const equipment = (apiEx.equipments?.[0] ?? 'body weight').toLowerCase();
+        const secondaryMuscles = apiEx.secondaryMuscles ?? [];
 
-        let targetMuscle: MuscleGroup = mapBodyPartToMuscle(bodyPart);
+        const targetMuscle: MuscleGroup = mapBodyPartToMuscle(bodyPart);
 
-        // Fatigue Logic Calculation
-        let fatigueFactor = 1.0;
-        const isCompound = (apiEx.secondaryMuscles?.length || 0) > 1;
-        const isBarbell = equipment === 'barbell';
-        const isMachine = equipment.includes('machine') || equipment === 'cable';
-
-        if (isBarbell && isCompound) fatigueFactor = 1.5;
-        else if (isBarbell) fatigueFactor = 1.2;
-        else if (isMachine) fatigueFactor = 0.9;
-        else if (equipment === 'body weight') fatigueFactor = 0.8;
-
-        // Resolve Best Image (Priority: 1080p > 720p > ImageUrl > GifUrl)
-        const bestImage =
-            apiEx.imageUrls?.['1080p'] ||
-            apiEx.imageUrls?.['720p'] ||
-            apiEx.imageUrls?.['480p'] ||
-            apiEx.imageUrl ||
+        // OSS GIF URL: always https://static.exercisedb.dev/media/{exerciseId}.gif
+        // Prefer the API-supplied gifUrl; construct from exerciseId if missing.
+        const gifUrl =
             apiEx.gifUrl ||
+            (apiEx.exerciseId ? `https://static.exercisedb.dev/media/${apiEx.exerciseId}.gif` : '') ||
+            apiEx.imageUrl || // V2 compat
+            (apiEx.imageUrls?.['480p'] ?? '') || // V2 compat
             '';
 
+        // "Single", "one arm/leg", "unilateral" → truly unilateral
+        // Note: "dumbbell" alone does NOT mean unilateral
+        const isUnilateral =
+            nameLower.includes('single') ||
+            nameLower.includes('one arm') ||
+            nameLower.includes('one-arm') ||
+            nameLower.includes('unilateral') ||
+            nameLower.includes('single-arm') ||
+            nameLower.includes('single leg') ||
+            nameLower.includes('one leg');
+
         return {
             id: apiEx.exerciseId || crypto.randomUUID(),
-            name: apiEx.name ? apiEx.name.replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown',
+            name: name.replace(/\b\w/g, l => l.toUpperCase()),
             targetMuscle,
-            gifUrl: apiEx.gifUrl || bestImage, // Fallback for low-bandwidth
-            staticImageUrl: bestImage,
-            videoUrl: apiEx.videoUrl || '',
-            fatigueFactor,
-            isUnilateral: name.includes('dumbbell') || name.includes('single') || name.includes('one arm'),
-            instructions: apiEx.instructions || [],
-            overview: apiEx.overview || '',
-            tips: apiEx.exerciseTips || [],
-            variations: apiEx.variations || [],
-            equipment: equipment,
-            secondaryMuscles: apiEx.secondaryMuscles || []
+            gifUrl,
+            staticImageUrl: gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(gifUrl)}&n=1&output=png` : '', // OSS only supplies GIFs; generate PNG preview
+            videoUrl: apiEx.videoUrl ?? '',
+            fatigueFactor: calcFatigueFactor(equipment, secondaryMuscles),
+            isUnilateral,
+            movementPattern: detectMovementPattern(nameLower, secondaryMuscles),
+            instructions: apiEx.instructions ?? [],
+            overview: apiEx.overview ?? '',
+            tips: apiEx.exerciseTips ?? [],
+            variations: apiEx.variations ?? [],
+            equipment,
+            secondaryMuscles,
         };
     } catch (error) {
-        logger.warn('ExerciseService', 'Mapping error', error);
+        logger.warn('ExerciseService', 'mapApiToModel error', error);
         return {
-            id: apiEx.exerciseId || crypto.randomUUID(),
-            name: apiEx.name || 'Unknown',
+            id: apiEx?.exerciseId || crypto.randomUUID(),
+            name: apiEx?.name || 'Unknown',
             targetMuscle: 'cardio',
-            gifUrl: '',
+            gifUrl: apiEx?.gifUrl ?? '',
             fatigueFactor: 1,
-            isUnilateral: false
+            isUnilateral: false,
         };
     }
 };
+
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 export interface PaginatedResult {
     data: Exercise[];
     nextCursor: string | null;
+    total?: number;
 }
 
 /**
- * UNIFIED FETCHER
- * Handles Search, Filtering, and Pagination.
+ * Unified fetcher — search, muscle filter, and cursor-based pagination.
+ *
+ * OSS params:
+ *   name        fuzzy search (same as search)
+ *   bodyParts   comma-separated lowercase bodyPart names
+ *   limit       1-25 (default 10)
+ *   after       exerciseId cursor for next page
  */
-export const getExercises = async (
-    options: {
-        search?: string;
-        muscle?: string;
-        cursor?: string;
-    }
-): Promise<PaginatedResult> => {
+export const getExercises = async (options: {
+    search?: string;
+    muscle?: string;
+    cursor?: string;
+}): Promise<PaginatedResult> => {
     const { search, muscle, cursor } = options;
 
-    // Build Query Params
     const params: Record<string, string | number> = {
         limit: BATCH_SIZE,
     };
 
-    if (cursor) {
-        params.after = cursor;
-    }
+    if (cursor) params.after = cursor;
 
-    if (search && search.trim().length > 0) {
-        params.name = search.trim();
-    }
+    if (search?.trim()) params.name = search.trim();
 
     if (muscle && muscle !== 'all') {
         const bodyParts = getApiBodyParts(muscle);
-        if (bodyParts) {
-            params.bodyParts = bodyParts;
-        }
+        if (bodyParts) params.bodyParts = bodyParts;
     }
 
-    // --- CACHING STRATEGY (CRITICAL FOR RATE LIMITS) ---
-    // Generate a unique key for this specific request combination.
-    // If the user comes back to "Chest" -> "Page 1" tomorrow, we verify cache.
-    const cacheKey = `req_v2_${JSON.stringify(params)}`;
-    const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 Hours
+    const cacheKey = `req_oss_${JSON.stringify(params)}`;
+    const CACHE_TTL = 1000 * 60 * 60 * 24; // 24h
 
     try {
-        // Single Page Fetch with Cache
         const response = await NetworkClient.get<ApiResponse>(
             `${API_BASE_URL}/exercises`,
             { params },
@@ -189,55 +247,82 @@ export const getExercises = async (
             CACHE_TTL
         );
 
-        const items = Array.isArray(response.data) ? response.data : [];
+        const items = Array.isArray(response?.data) ? response.data : [];
 
         return {
             data: items.map(mapApiToModel),
-            nextCursor: response.meta?.nextCursor || null
+            nextCursor: response?.meta?.nextCursor ?? null,
+            total: response?.meta?.total,
         };
-
     } catch (error: unknown) {
-        logger.warn('ExerciseService', 'Fetch failed — offline or rate limited', error);
-
-        // Graceful degradation: Return empty instead of crashing UI
+        logger.warn('ExerciseService', 'getExercises failed', error);
         return { data: [], nextCursor: null };
     }
 };
 
 /**
- * Get Single Exercise
+ * Fetch a single exercise by ID.
+ * Checks store's FALLBACK_EXERCISES first, then hits the detail endpoint.
  */
 export const getExerciseById = async (id: string): Promise<Exercise | null> => {
     const local = FALLBACK_EXERCISES.find(e => e.id === id);
     if (local) return local;
 
-    const cacheKey = `ex_detail_${id}`;
+    const cacheKey = `ex_detail_oss_${id}`;
 
     try {
         const response = await NetworkClient.get<ApiResponse>(
             `${API_BASE_URL}/exercises/${id}`,
             {},
             cacheKey,
-            1000 * 60 * 60 * 24 * 7 // 7 Days Cache for details
+            1000 * 60 * 60 * 24 * 7 // 7d cache for details
         );
 
-        if (response && response.data && !Array.isArray(response.data)) {
-            return mapApiToModel(response.data);
+        const item = response?.data;
+        if (item && !Array.isArray(item)) {
+            return mapApiToModel(item as ApiExercise);
         }
         return null;
     } catch (error) {
+        logger.warn('ExerciseService', `getExerciseById(${id}) failed`, error);
         return null;
     }
 };
 
-// --- LEGACY WRAPPERS ---
-export const fetchExercises = async (cursor?: string): Promise<PaginatedResult> => {
-    return getExercises({ cursor });
+/**
+ * Search exercises using the dedicated fuzzy-search endpoint.
+ * Falls back to the main endpoint search if needed.
+ */
+export const searchExercises = async (
+    query: string,
+    threshold = 0.4
+): Promise<Exercise[]> => {
+    if (!query.trim()) return [];
+
+    const cacheKey = `search_oss_${query.toLowerCase()}_${threshold}`;
+    const CACHE_TTL = 1000 * 60 * 60 * 6; // 6h for search results
+
+    try {
+        const response = await NetworkClient.get<ApiResponse>(
+            `${API_BASE_URL}/exercises/search`,
+            { params: { search: query.trim(), threshold } },
+            cacheKey,
+            CACHE_TTL
+        );
+
+        const items = Array.isArray(response?.data) ? response.data : [];
+        return items.map(mapApiToModel);
+    } catch {
+        // Fallback to main endpoint with name param
+        const result = await getExercises({ search: query });
+        return result.data;
+    }
 };
-export const searchExercises = async (query: string): Promise<Exercise[]> => {
-    const result = await getExercises({ search: query });
-    return result.data;
-};
-export const getExercisesByMuscle = async (muscle: string, cursor?: string): Promise<PaginatedResult> => {
-    return getExercises({ muscle, cursor });
-};
+
+// ─── Legacy Wrappers (kept for backward compat with existing callers) ────────
+
+export const fetchExercises = (cursor?: string): Promise<PaginatedResult> =>
+    getExercises({ cursor });
+
+export const getExercisesByMuscle = (muscle: string, cursor?: string): Promise<PaginatedResult> =>
+    getExercises({ muscle, cursor });

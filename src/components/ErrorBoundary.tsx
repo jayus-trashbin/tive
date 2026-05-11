@@ -74,7 +74,7 @@ class ErrorBoundary extends React.Component<Props, State> {
             <AlertTriangle size={40} className="text-red-500" />
           </div>
           
-          <h1 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">System Failure</h1>
+          <h1 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">System Failure</h1>
           <p className="text-zinc-500 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
             We encountered a critical error. The application state has been preserved safely.
           </p>
@@ -82,7 +82,7 @@ class ErrorBoundary extends React.Component<Props, State> {
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
                 onClick={this.handleReload}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-black font-black rounded-xl active:scale-95 transition-transform shadow-glow"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform shadow-glow"
             >
                 <RefreshCw size={18} /> RELOAD APP
             </button>
@@ -97,7 +97,7 @@ class ErrorBoundary extends React.Component<Props, State> {
             {this.state.confirmingClear ? (
               <button
                 onClick={this.handleClearData}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-red-600 text-white font-black rounded-xl active:scale-95 transition-transform"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-red-600 text-white font-bold rounded-xl active:scale-95 transition-transform"
               >
                 <Trash2 size={18} /> CONFIRM — WIPE ALL DATA
               </button>
@@ -115,7 +115,7 @@ class ErrorBoundary extends React.Component<Props, State> {
           {(process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') && this.state.error && (
             <div className="mt-8 p-4 bg-black/80 rounded-xl border border-red-900/30 text-left max-w-md w-full overflow-x-auto shadow-inner">
               <p className="text-red-400 font-bold text-xs mb-2 uppercase">Developer Diagnostics:</p>
-              <code className="text-[10px] text-red-300/80 font-mono whitespace-pre-wrap break-all">
+              <code className="text-[10px] text-red-300/80 font-medium whitespace-pre-wrap break-all">
                 {this.state.error.toString()}
                 {this.state.errorInfo?.componentStack}
               </code>

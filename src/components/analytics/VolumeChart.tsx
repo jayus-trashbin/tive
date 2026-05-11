@@ -43,8 +43,8 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
         if (active && payload && payload.length) {
             const date = new Date(label);
             return (
-                <div className="bg-zinc-900 border border-zinc-800 p-3 font-mono">
-                    <p className="text-xs text-zinc-500 uppercase mb-1">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
+                    <p className="text-xs font-bold text-zinc-500 uppercase mb-1 tracking-wider">
                         {date.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
                     </p>
                     <p className="text-lg font-bold text-brand-primary">
@@ -62,16 +62,16 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black font-mono text-white">
+                        <span className="text-4xl font-bold text-white">
                             {formatVolume(totalVolume)}
                         </span>
-                        <span className="text-xs font-mono text-zinc-600 uppercase">kg / {days}d</span>
+                        <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">kg / {days}d</span>
                     </div>
                 </div>
 
                 {/* Trend Indicator */}
                 <div className={cn(
-                    "flex items-center gap-1 px-2 py-1 text-xs font-mono font-bold",
+                    "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold",
                     trend.direction === 'up' && "bg-brand-success/10 text-brand-success",
                     trend.direction === 'down' && "bg-brand-danger/10 text-brand-danger",
                     trend.direction === 'neutral' && "bg-zinc-800 text-zinc-500"
@@ -96,14 +96,14 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
                         <XAxis
                             dataKey="date"
                             tickFormatter={formatXAxis}
-                            tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }}
+                            tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'sans-serif' }}
                             axisLine={{ stroke: '#27272a' }}
                             tickLine={false}
                             tickCount={5}
                         />
                         <YAxis
                             tickFormatter={(v) => formatVolume(v)}
-                            tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }}
+                            tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'sans-serif' }}
                             axisLine={false}
                             tickLine={false}
                             width={40}
@@ -122,7 +122,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
             </div>
 
             {/* Subtitle */}
-            <p className="text-[10px] font-mono text-zinc-600 text-center mt-2 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-zinc-500 text-center mt-2 uppercase tracking-widest">
                 Daily Training Volume (Weight × Reps)
             </p>
         </div>

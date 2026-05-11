@@ -9,6 +9,7 @@ export interface TimeSeriesPoint {
 export interface HeatmapPoint {
     date: string; // YYYY-MM-DD
     count: number;
+    volume: number;
 }
 
 export interface MuscleVolumePoint {
@@ -105,11 +106,12 @@ export function getFrequencyHeatmap(sessions: Session[]): HeatmapPoint[] {
     const validSessions = sessions.filter(s => s.date >= cutoff && !s.deletedAt && s.isCompleted);
 
     const dailyCount = new Map<string, number>();
+    const dailyVolume = new Map<string, number>();
 
     validSessions.forEach(session => {
         const dayKey = new Date(session.date).toISOString().split('T')[0];
-        const current = dailyCount.get(dayKey) || 0;
-        dailyCount.set(dayKey, current + 1);
+        dailyCount.set(dayKey, (dailyCount.get(dayKey) || 0) + 1);
+        dailyVolume.set(dayKey, (dailyVolume.get(dayKey) || 0) + session.volumeLoad);
     });
 
     const result: HeatmapPoint[] = [];
@@ -121,7 +123,8 @@ export function getFrequencyHeatmap(sessions: Session[]): HeatmapPoint[] {
         const dayKey = d.toISOString().split('T')[0];
         result.push({
             date: dayKey,
-            count: dailyCount.get(dayKey) || 0
+            count: dailyCount.get(dayKey) || 0,
+            volume: dailyVolume.get(dayKey) || 0
         });
     }
 

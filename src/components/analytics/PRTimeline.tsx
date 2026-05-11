@@ -39,11 +39,11 @@ const PRTimeline: React.FC = () => {
 
     if (allPRs.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 text-center bg-zinc-900/30 border border-zinc-800 rounded-[4px]">
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-zinc-900/30 border border-zinc-800 rounded-xl">
                 <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center mb-3">
                     <Trophy size={20} className="text-zinc-600" />
                 </div>
-                <p className="text-xs font-mono text-zinc-500 uppercase">No PRs recorded yet</p>
+                <p className="text-xs font-medium text-zinc-500 uppercase">No PRs recorded yet</p>
                 <p className="text-[10px] text-zinc-600 mt-1 max-w-[200px]">Push your limits to see your achievements here.</p>
             </div>
         );
@@ -58,7 +58,7 @@ const PRTimeline: React.FC = () => {
                     <button
                         onClick={() => setDropdownOpen(v => !v)}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-[3px] border transition-colors",
+                            "flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-lg border transition-colors",
                             activeEx
                                 ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary"
                                 : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -77,7 +77,7 @@ const PRTimeline: React.FC = () => {
                                     initial={{ opacity: 0, y: 4 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 4 }}
-                                    className="absolute top-full left-0 mt-1 w-56 bg-zinc-900 border border-zinc-800 rounded-[4px] shadow-2xl z-20 overflow-hidden max-h-48 overflow-y-auto"
+                                    className="absolute top-full left-0 mt-1 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-20 overflow-hidden max-h-48 overflow-y-auto"
                                 >
                                     <button
                                         onClick={() => { setFilterExId(null); setDropdownOpen(false); }}
@@ -111,7 +111,7 @@ const PRTimeline: React.FC = () => {
                     </button>
                 )}
 
-                <span className="ml-auto text-[9px] text-zinc-700 font-mono">{filtered.length} PR{filtered.length !== 1 ? 's' : ''}</span>
+                <span className="ml-auto text-[9px] text-zinc-700 font-medium">{filtered.length} PR{filtered.length !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Timeline */}
@@ -138,26 +138,26 @@ const PRTimeline: React.FC = () => {
                                         : 'bg-zinc-900 border-zinc-700'
                                 )} />
 
-                                <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-[4px] hover:border-zinc-700 transition-colors">
+                                <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl hover:border-zinc-700 transition-colors">
                                     <div className="flex justify-between items-start mb-1">
-                                        <h3 className="text-xs font-bold text-white font-mono uppercase truncate mr-2">{pr.exerciseName}</h3>
-                                        <span className="text-[9px] font-mono text-zinc-500 flex items-center gap-1 shrink-0">
+                                        <h3 className="text-xs font-bold text-white font-medium uppercase truncate mr-2">{pr.exerciseName}</h3>
+                                        <span className="text-[9px] font-medium text-zinc-500 flex items-center gap-1 shrink-0">
                                             <Calendar size={9} />
                                             {date.toLocaleDateString()}
                                         </span>
                                     </div>
 
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-lg font-black text-brand-primary font-mono tracking-tighter">
+                                        <span className="text-lg font-bold text-brand-primary font-medium tracking-tighter">
                                             {pr.estimated1RM} <span className="text-[10px] text-zinc-600">KG (1RM)</span>
                                         </span>
-                                        <span className="text-[10px] font-mono text-zinc-500">
+                                        <span className="text-[10px] font-medium text-zinc-500">
                                             {pr.weight}kg × {pr.reps}
                                         </span>
                                     </div>
 
                                     {isRecent && (
-                                        <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-[2px]">
+                                        <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-lg">
                                             <Trophy size={10} className="text-brand-primary" />
                                             <span className="text-[8px] font-bold text-brand-primary uppercase tracking-wider">New Record</span>
                                         </div>

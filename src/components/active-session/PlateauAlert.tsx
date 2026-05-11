@@ -72,14 +72,14 @@ const PlateauAlert: React.FC<Props> = ({ status, suggestions }) => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 className={cn(
-                    'mx-3 mb-2 rounded-[4px] border overflow-hidden',
+                    'mx-3 mb-2 rounded-xl border overflow-hidden',
                     config.bgColor, config.borderColor
                 )}
             >
                 {/* Header row */}
                 <div className="flex items-center gap-2 px-3 py-2">
                     <div className={cn('flex items-center gap-1.5 flex-1 min-w-0', config.color)}>
-                        <span className="text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-[10px] font-bold uppercase tracking-widest">
                             ⚠ {config.label}
                         </span>
                         <span className="text-[10px] text-zinc-500 truncate hidden sm:inline">
@@ -124,7 +124,7 @@ const PlateauAlert: React.FC<Props> = ({ status, suggestions }) => {
                                     return (
                                         <div
                                             key={i}
-                                            className="flex items-start gap-2 bg-white/5 rounded-[4px] p-2"
+                                            className="flex items-start gap-2 bg-white/5 rounded-xl p-2"
                                         >
                                             <div className={cn('mt-0.5 shrink-0', config.color)}>
                                                 <Icon size={12} />

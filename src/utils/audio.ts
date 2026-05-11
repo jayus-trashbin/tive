@@ -1,6 +1,15 @@
+import { useWorkoutStore } from '../store/useWorkoutStore';
 
 // A simple browser-native synthesizer for workout timers
 // No external assets required.
+
+export const isMusicPlaying = (): boolean => {
+    // Check if the OS/browser reports media playing
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+        return navigator.mediaSession.playbackState === 'playing';
+    }
+    return false;
+};
 
 class AudioEngine {
   private ctx: AudioContext | null = null;
@@ -12,7 +21,22 @@ class AudioEngine {
     return this.ctx;
   }
 
+  private shouldPlayAudio(): boolean {
+      const stats = useWorkoutStore.getState().userStats;
+      // If audio is explicitly disabled
+      if (stats.isAudioEnabled === false) return false;
+      
+      // If smartAudio is enabled (default true) and music is playing
+      const smartAudio = stats.smartAudio !== false;
+      if (smartAudio && isMusicPlaying()) {
+          return false;
+      }
+      return true;
+  }
+
   public playBeep(frequency: number = 880, duration: number = 0.1, type: OscillatorType = 'sine') {
+    if (!this.shouldPlayAudio()) return;
+
     try {
       const ctx = this.getContext();
       const osc = ctx.createOscillator();
@@ -45,6 +69,8 @@ class AudioEngine {
   }
 
   public playPR() {
+    if (!this.shouldPlayAudio()) return;
+    
     // Victory sound
     const ctx = this.getContext();
     const now = ctx.currentTime;

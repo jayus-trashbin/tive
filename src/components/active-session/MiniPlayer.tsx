@@ -1,12 +1,16 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
-import { Maximize2, Timer, Dumbbell } from 'lucide-react';
+import { useUIStore } from "../../store/useUIStore";
+import { Maximize2, Timer, Dumbbell, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
 
 /** U-02 — Enhanced MiniPlayer with current exercise, set progress, and completion ring. */
 export const MiniPlayer = () => {
-    const { activeSession, toggleMinimize, restTimer, exercises } = useWorkoutStore();
+    const { activeSession, restTimer, exercises } = useWorkoutStore();
+    const { toggleMinimize } = useUIStore();
+    const { handleCompleteSet } = useWorkoutLogic();
     const [duration, setDuration] = useState('0:00');
     const [restRemaining, setRestRemaining] = useState(0);
 
@@ -46,7 +50,20 @@ export const MiniPlayer = () => {
             : null;
 
         const progressPct = total > 0 ? (completed / total) : 0;
-        return { completed, total, currentExercise, progressPct };
+        
+        // Find the index of the firstIncompleteSet within its exercise
+        let currentSetIndex = -1;
+        if (firstIncompleteSet) {
+            const exerciseSets = allSets.filter(s => s.exerciseId === firstIncompleteSet.exerciseId);
+            currentSetIndex = exerciseSets.findIndex(s => s.id === firstIncompleteSet.id);
+        }
+
+        const totalExercises = Array.from(new Set(allSets.map(s => s.exerciseId)));
+
+        return { 
+            completed, total, currentExercise, progressPct, 
+            nextSet: firstIncompleteSet, currentSetIndex, totalExercises 
+        };
     }, [activeSession, exercises]);
 
     if (!activeSession || !sessionInfo) return null;
@@ -61,6 +78,13 @@ export const MiniPlayer = () => {
     const RING_C = 2 * Math.PI * RING_R;
     const ringOffset = RING_C * (1 - sessionInfo.progressPct);
 
+    // Handle Swipe Up
+    const handleDragEnd = (event: any, info: any) => {
+        if (info.offset.y < -50) {
+            toggleMinimize(false);
+        }
+    };
+
     return (
         <motion.div
             initial={{ y: 150, opacity: 0, scale: 0.95 }}
@@ -70,9 +94,14 @@ export const MiniPlayer = () => {
             className="fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
             style={{ bottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}
         >
-            <div
+            <motion.div
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={{ top: 0.5, bottom: 0 }}
+                onDragEnd={handleDragEnd}
                 onClick={() => toggleMinimize(false)}
                 className="w-full max-w-lg md:max-w-2xl pointer-events-auto cursor-pointer group"
+                style={{ touchAction: 'none' }}
             >
                 <div className="relative overflow-hidden bg-black/85 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.6)] px-4 py-3 flex items-center justify-between gap-4">
 
@@ -113,14 +142,14 @@ export const MiniPlayer = () => {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                             <span className={cn(
-                                "text-[9px] font-mono font-black uppercase tracking-widest",
+                                "text-[9px] font-bold uppercase tracking-widest",
                                 isResting ? "text-amber-400" : "text-brand-primary"
                             )}>
                                 {isResting
                                     ? `Rest ${Math.floor(restRemaining / 60)}:${String(restRemaining % 60).padStart(2, '0')}`
                                     : duration}
                             </span>
-                            <span className="text-[8px] font-mono text-zinc-600">
+                            <span className="text-[8px] font-medium text-zinc-600">
                                 {sessionInfo.completed}/{sessionInfo.total} sets
                             </span>
                         </div>
@@ -132,14 +161,30 @@ export const MiniPlayer = () => {
                         </p>
                     </div>
 
-                    {/* Right: expand */}
-                    <div className="shrink-0 pl-3 border-l border-white/10">
-                        <button className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-primary/20 flex items-center justify-center text-zinc-400 hover:text-brand-primary transition-colors group-active:scale-95">
-                            <Maximize2 size={17} />
+                    {/* Right: Quick Complete & Expand */}
+                    <div className="shrink-0 pl-3 flex items-center gap-2 border-l border-white/10">
+                        {sessionInfo.nextSet && sessionInfo.currentExercise && (
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCompleteSet(
+                                        sessionInfo.nextSet!, 
+                                        sessionInfo.currentExercise!.id, 
+                                        sessionInfo.currentSetIndex, 
+                                        sessionInfo.totalExercises
+                                    );
+                                }}
+                                className="w-10 h-10 rounded-full bg-brand-primary/10 hover:bg-brand-primary/20 flex items-center justify-center text-brand-primary transition-all active:scale-95"
+                            >
+                                <Check size={18} strokeWidth={3} />
+                            </button>
+                        )}
+                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95 hidden sm:flex">
+                            <Maximize2 size={16} />
                         </button>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 };

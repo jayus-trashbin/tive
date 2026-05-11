@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-type HapticType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error';
+type HapticType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'pr' | 'timer';
 
 /**
  * useHaptic
@@ -22,13 +22,19 @@ export const useHaptic = () => {
                 navigator.vibrate(40); // Firm press
                 break;
             case 'success':
-                navigator.vibrate([10, 30, 10]); // Da-da-da
+                navigator.vibrate([20, 50, 20]); // 2 pulses for set complete
                 break;
             case 'warning':
                 navigator.vibrate([30, 50, 10]);
                 break;
             case 'error':
                 navigator.vibrate([50, 100, 50]); // Buzz-buzz-buzz
+                break;
+            case 'pr':
+                navigator.vibrate([100, 50, 150]); // Long triumphant pulse
+                break;
+            case 'timer':
+                navigator.vibrate([10, 50, 20, 50, 40]); // 3 ascending pulses
                 break;
         }
     }, []);

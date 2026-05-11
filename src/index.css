@@ -38,56 +38,44 @@
   input,
   select,
   textarea {
-    @apply bg-zinc-900 border border-zinc-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none text-base text-zinc-100 rounded-none px-3 py-3;
+    @apply bg-zinc-900 border border-zinc-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none text-base text-zinc-100 rounded-xl px-4 py-3 transition-colors;
+    touch-action: manipulation;
+  }
+
+  button {
+    touch-action: manipulation;
   }
 }
 
 @layer components {
 
   /* --- Card System --- */
-  .card-elevated {
-    @apply bg-zinc-900 border border-zinc-800 shadow-card;
-    border-radius: 4px;
+  .card {
+    @apply bg-zinc-900 border border-zinc-800/50 rounded-2xl shadow-card transition-colors;
   }
 
-  .card-elevated:hover {
-    @apply shadow-card-hover border-zinc-700;
-  }
-
-  .card-subtle {
-    @apply bg-zinc-900/50 border border-zinc-800/60;
-    border-radius: 4px;
+  .card:hover {
+    @apply border-zinc-700/80;
   }
 
   /* --- Typography --- */
   .section-title {
-    @apply text-[10px] font-heading font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2;
+    @apply text-sm font-semibold text-zinc-400 tracking-normal capitalize flex items-center gap-2;
   }
 
   .page-title {
-    @apply text-3xl font-heading font-black text-white uppercase tracking-tight leading-none;
+    @apply text-2xl font-bold text-white tracking-tight leading-tight;
   }
 
-  .data-label {
-    @apply text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider;
+  /* --- Buttons --- */
+  .btn-primary {
+    @apply px-5 py-3 bg-brand-primary text-black font-semibold rounded-xl hover:bg-brand-primaryHover transition-all active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
-  /* --- Legacy Utilities --- */
-  .glass-panel {
-    @apply bg-zinc-900/90 border border-zinc-800 backdrop-blur-md;
-  }
-
-  .tech-card {
-    @apply bg-zinc-950 border border-zinc-800 hover:border-brand-primary/50 transition-colors duration-200 relative;
-  }
-
-  .tech-border {
-    @apply border border-zinc-800;
-  }
-
-  .btn-tech {
-    @apply px-4 py-2 bg-brand-primary text-black font-mono font-bold uppercase tracking-wider hover:bg-brand-primaryHover transition-all active:translate-y-[1px];
-    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  .gpu-accelerated {
+    @apply transform-gpu;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
   }
 }
 
@@ -125,4 +113,4 @@ html.oled .bg-black { background-color: #000 !important; }
 html.oled .bg-black\/80 { background-color: rgba(0,0,0,0.8) !important; }
 html.oled .bg-black\/85 { background-color: rgba(0,0,0,0.85) !important; }
 html.oled .bg-black\/95 { background-color: rgba(0,0,0,0.95) !important; }
-html.oled .card-elevated { background-color: #060606 !important; }
+html.oled .card { background-color: #060606 !important; }

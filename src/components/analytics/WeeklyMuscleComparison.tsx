@@ -97,11 +97,11 @@ const WeeklyMuscleComparison: React.FC = () => {
                                 ) : (
                                     <span className="text-[9px] text-zinc-600">—</span>
                                 )}
-                                <span className="text-[9px] text-zinc-600 font-mono">
+                                <span className="text-[9px] text-zinc-600 font-medium">
                                     {formatVolume(thisWeek)} kg
                                 </span>
                                 {sets > 0 && (
-                                    <span className="text-[9px] text-zinc-700 font-mono">
+                                    <span className="text-[9px] text-zinc-700 font-medium">
                                         {sets}s
                                     </span>
                                 )}

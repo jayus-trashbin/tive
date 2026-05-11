@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Trophy, Clock, Dumbbell, Flame, TrendingUp, TrendingDown,
@@ -8,6 +8,7 @@ import { Session, MuscleGroup, Exercise } from '../../types';
 import MuscleOverlay from '../progress/MuscleOverlay';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
 import { calculateACWR } from '../../utils/engine';
+import { calculateHybrid1RM } from '../../utils/formulas';
 import ACWRCard from '../analytics/ACWRCard';
 import { cn } from '../../lib/utils';
 
@@ -111,30 +112,59 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
         return { volumeDiff, volumePercent, setDiff };
     }, [previousSession, stats]);
 
-    // U-01: Per-exercise volume comparison vs previousSession
+    // U-01: Per-exercise volume & e1RM comparison vs previousSession
     const perExerciseDelta = useMemo(() => {
         if (!previousSession) return [];
-        const current = new Map<string, number>();
-        const prev = new Map<string, number>();
+        
+        type ExStats = { vol: number; maxE1RM: number };
+        const current = new Map<string, ExStats>();
+        const prev = new Map<string, ExStats>();
 
         session.sets.filter(s => s.isCompleted).forEach(s => {
-            current.set(s.exerciseId, (current.get(s.exerciseId) || 0) + s.weight * s.reps);
+            const stats = current.get(s.exerciseId) || { vol: 0, maxE1RM: 0 };
+            const e1rm = calculateHybrid1RM(s.weight, s.reps, s.rpe);
+            current.set(s.exerciseId, {
+                vol: stats.vol + (s.weight * s.reps),
+                maxE1RM: Math.max(stats.maxE1RM, e1rm)
+            });
         });
+        
         previousSession.sets.filter(s => s.isCompleted).forEach(s => {
-            prev.set(s.exerciseId, (prev.get(s.exerciseId) || 0) + s.weight * s.reps);
+            const stats = prev.get(s.exerciseId) || { vol: 0, maxE1RM: 0 };
+            const e1rm = calculateHybrid1RM(s.weight, s.reps, s.rpe);
+            prev.set(s.exerciseId, {
+                vol: stats.vol + (s.weight * s.reps),
+                maxE1RM: Math.max(stats.maxE1RM, e1rm)
+            });
         });
 
         const ids = Array.from(new Set([...current.keys(), ...prev.keys()]));
         return ids.map(id => {
-            const curr = current.get(id) || 0;
-            const p = prev.get(id) || 0;
-            const diff = curr - p;
-            const pct = p > 0 ? Math.round((diff / p) * 100) : null;
-            return { id, curr, prev: p, diff, pct };
-        }).filter(d => d.curr > 0 || d.prev > 0)
-          .sort((a, b) => b.curr - a.curr)
+            const curr = current.get(id) || { vol: 0, maxE1RM: 0 };
+            const p = prev.get(id) || { vol: 0, maxE1RM: 0 };
+            
+            const diff = curr.vol - p.vol;
+            const pct = p.vol > 0 ? Math.round((diff / p.vol) * 100) : null;
+            
+            const e1rmDiff = curr.maxE1RM - p.maxE1RM;
+            
+            return { id, curr, prev: p, diff, pct, e1rmDiff };
+        }).filter(d => d.curr.vol > 0 || d.prev.vol > 0)
+          .sort((a, b) => b.curr.vol - a.curr.vol)
           .slice(0, 5);
     }, [session, previousSession]);
+
+    // Compute Badges
+    const badges = useMemo(() => {
+        const b = [];
+        if (comparison && comparison.volumePercent > 0) {
+            b.push({ id: 'volume', icon: Flame, label: 'Volume PR', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' });
+        }
+        if (perExerciseDelta.some(d => d.e1rmDiff > 0)) {
+            b.push({ id: 'intensity', icon: Zap, label: 'Intensity PR', color: 'text-brand-primary', bg: 'bg-brand-primary/10', border: 'border-brand-primary/20' });
+        }
+        return b;
+    }, [comparison, perExerciseDelta]);
 
     // Trigger confetti if PRs
     useEffect(() => {
@@ -149,6 +179,13 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
         const simulatedSession = { ...session, volumeLoad: stats.totalVolume, isCompleted: true };
         return calculateACWR([...history, simulatedSession]);
     }, [history, session, stats.totalVolume]);
+
+    // Check consistency badge
+    useEffect(() => {
+        if (acwr && acwr.ratio >= 0.8 && acwr.ratio <= 1.3 && badges.findIndex(b => b.id === 'consistency') === -1) {
+            badges.push({ id: 'consistency', icon: Target, label: 'Consistent', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' });
+        }
+    }, [acwr, badges]);
 
     return (
         <motion.div
@@ -212,16 +249,37 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', delay: 0.3 }}
-                        className="w-12 h-12 bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-3"
+                        className="w-12 h-12 bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-3 rounded-2xl"
                     >
                         <Trophy size={24} className="text-brand-primary" />
                     </motion.div>
-                    <h2 className="font-mono text-xl font-black text-white uppercase tracking-wider">
+                    <h2 className="text-3xl font-bold text-white tracking-tight mb-1">
                         Workout Complete
                     </h2>
-                    <p className="font-mono text-[10px] text-zinc-500 mt-1 uppercase">
-                        {session.name || 'Free Session'} â€¢ {new Date(session.date).toLocaleDateString()}
+                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                        {session.name || 'Free Session'} • {new Date(session.date).toLocaleDateString()}
                     </p>
+
+                    {/* Badges Row */}
+                    {badges.length > 0 && (
+                        <div className="flex gap-2 mt-4 flex-wrap">
+                            {badges.map((b, i) => (
+                                <motion.div
+                                    key={b.id}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: 0.5 + i * 0.1, type: "spring", stiffness: 400 }}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider",
+                                        b.bg, b.border, b.color
+                                    )}
+                                >
+                                    <b.icon size={12} />
+                                    {b.label}
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Main Stats Grid */}
@@ -234,10 +292,10 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="bg-zinc-950 p-4"
                     >
                         <div className="flex items-center gap-1.5 mb-1">
-                            <Clock size={12} className="text-zinc-500" />
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold">Duration</span>
+                            <Clock size={14} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Duration</span>
                         </div>
-                        <div className="font-mono text-2xl font-black text-white">
+                        <div className="text-3xl font-bold text-white">
                             {formatDuration(stats.duration)}
                         </div>
                     </motion.div>
@@ -250,10 +308,10 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="bg-zinc-950 p-4"
                     >
                         <div className="flex items-center gap-1.5 mb-1">
-                            <Dumbbell size={12} className="text-zinc-500" />
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold">Volume</span>
+                            <Dumbbell size={14} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Volume</span>
                         </div>
-                        <div className="font-mono text-2xl font-black text-white">
+                        <div className="text-3xl font-bold text-white">
                             <AnimatedNumber
                                 value={stats.totalVolume}
                                 suffix={stats.totalVolume >= 1000 ? '' : 'kg'}
@@ -270,7 +328,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 1.5 }}
                                 className={cn(
-                                    "flex items-center gap-0.5 mt-1 font-mono text-[10px] font-bold",
+                                    "flex items-center gap-0.5 mt-1 font-medium text-[10px] font-bold",
                                     comparison.volumePercent >= 0 ? "text-brand-primary" : "text-red-400"
                                 )}
                             >
@@ -291,10 +349,10 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="bg-zinc-950 p-4"
                     >
                         <div className="flex items-center gap-1.5 mb-1">
-                            <Target size={12} className="text-zinc-500" />
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold">Sets</span>
+                            <Target size={14} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Sets</span>
                         </div>
-                        <div className="font-mono text-2xl font-black text-white">
+                        <div className="text-3xl font-bold text-white">
                             <AnimatedNumber value={stats.totalSets} />
                         </div>
                         {comparison && comparison.setDiff !== 0 && (
@@ -303,7 +361,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 1.6 }}
                                 className={cn(
-                                    "font-mono text-[10px] font-bold mt-1",
+                                    "font-medium text-[10px] font-bold mt-1",
                                     comparison.setDiff > 0 ? "text-brand-primary" : "text-red-400"
                                 )}
                             >
@@ -320,10 +378,10 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="bg-zinc-950 p-4"
                     >
                         <div className="flex items-center gap-1.5 mb-1">
-                            <Zap size={12} className="text-zinc-500" />
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold">Exercises</span>
+                            <Zap size={14} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Exercises</span>
                         </div>
-                        <div className="font-mono text-2xl font-black text-white">
+                        <div className="text-3xl font-bold text-white">
                             <AnimatedNumber value={stats.uniqueExercises} />
                         </div>
                     </motion.div>
@@ -338,8 +396,8 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="px-6 py-4 border-b border-zinc-800/50 bg-brand-primary/5"
                     >
                         <div className="flex items-center gap-2 mb-2">
-                            <Flame size={14} className="text-brand-primary" />
-                            <span className="font-mono text-xs font-black text-brand-primary uppercase">
+                            <Flame size={16} className="text-brand-primary" />
+                            <span className="text-xs font-bold text-brand-primary uppercase tracking-wide">
                                 {stats.prs.length} Personal Record{stats.prs.length > 1 ? 's' : ''}!
                             </span>
                         </div>
@@ -354,11 +412,11 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                         transition={{ delay: 1 + i * 0.15 }}
                                         className="flex items-center justify-between"
                                     >
-                                        <span className="font-mono text-[11px] text-zinc-300 truncate mr-2">
+                                        <span className="text-xs text-zinc-300 truncate mr-2 font-medium">
                                             {ex?.name || 'Exercise'}
                                         </span>
-                                        <span className="font-mono text-[11px] font-bold text-white whitespace-nowrap">
-                                            {pr.weight}kg Ã— {pr.reps}
+                                        <span className="text-xs font-bold text-white whitespace-nowrap">
+                                            {pr.weight}kg × {pr.reps}
                                         </span>
                                     </motion.div>
                                 );
@@ -376,42 +434,55 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         className="px-6 py-4 border-b border-zinc-800/50"
                     >
                         <div className="flex items-center gap-2 mb-3">
-                            <TrendingUp size={12} className="text-zinc-500" />
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold tracking-wider">vs Last Session</span>
+                            <TrendingUp size={14} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">vs Last Session</span>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {perExerciseDelta.map((d, i) => {
                                 const ex = exercises.get(d.id);
                                 const isUp = d.diff >= 0;
+                                const isE1RMUp = d.e1rmDiff > 0;
+                                
                                 return (
                                     <motion.div
                                         key={d.id}
                                         initial={{ x: -8, opacity: 0 }}
                                         animate={{ x: 0, opacity: 1 }}
                                         transition={{ delay: 1.1 + i * 0.08 }}
-                                        className="flex items-center gap-2"
                                     >
-                                        <span className="flex-1 font-mono text-[10px] text-zinc-400 truncate">{ex?.name ?? d.id}</span>
-                                        <div className="flex items-center gap-1">
-                                            {d.prev === 0 ? (
-                                                <span className="font-mono text-[9px] text-zinc-600">New</span>
-                                            ) : (
-                                                <>
-                                                    {isUp
-                                                        ? <TrendingUp size={9} className="text-brand-primary" />
-                                                        : <TrendingDown size={9} className="text-red-400" />
-                                                    }
-                                                    <span className={cn(
-                                                        "font-mono text-[10px] font-bold",
-                                                        isUp ? "text-brand-primary" : "text-red-400"
-                                                    )}>
-                                                        {isUp ? '+' : ''}{d.pct}%
-                                                    </span>
-                                                </>
-                                            )}
-                                            <span className="font-mono text-[9px] text-zinc-600">
-                                                {d.curr >= 1000 ? `${(d.curr/1000).toFixed(1)}t` : `${d.curr}kg`}
-                                            </span>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="flex-1 font-medium text-[11px] text-zinc-300 truncate">{ex?.name ?? d.id}</span>
+                                            <div className="flex items-center gap-2">
+                                                {/* Volume Delta */}
+                                                <div className="flex items-center gap-1">
+                                                    <span className="font-medium text-[9px] text-zinc-600">VOL:</span>
+                                                    {d.prev.vol === 0 ? (
+                                                        <span className="font-medium text-[9px] text-zinc-600">New</span>
+                                                    ) : (
+                                                        <>
+                                                            <span className={cn(
+                                                                "font-medium text-[10px] font-bold",
+                                                                isUp ? "text-brand-primary" : "text-red-400"
+                                                            )}>
+                                                                {isUp ? '+' : ''}{d.pct}%
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* e1RM Delta */}
+                                                {(d.prev.maxE1RM > 0 && d.e1rmDiff !== 0) && (
+                                                    <div className="flex items-center gap-1 border-l border-zinc-800 pl-2">
+                                                        <span className="font-medium text-[9px] text-zinc-600">e1RM:</span>
+                                                        <span className={cn(
+                                                            "font-medium text-[10px] font-bold",
+                                                            isE1RMUp ? "text-brand-primary" : "text-red-400"
+                                                        )}>
+                                                            {isE1RMUp ? '+' : ''}{d.e1rmDiff.toFixed(1)}kg
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 );
@@ -434,14 +505,14 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                             size={64}
                         />
                         <div className="flex-1">
-                            <span className="font-mono text-[9px] text-zinc-500 uppercase font-bold block mb-2">
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-2">
                                 Muscles Trained
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                                 {muscleGroups.map(mg => (
                                     <span
                                         key={mg}
-                                        className="px-2 py-0.5 bg-brand-primary/10 border border-brand-primary/20 font-mono text-[9px] text-brand-primary uppercase font-black"
+                                        className="px-2.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-[10px] text-brand-primary uppercase font-bold tracking-widest"
                                     >
                                         {mg}
                                     </span>
@@ -473,18 +544,18 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                 <div className="flex">
                     <button
                         onClick={onDismiss}
-                        className="flex-1 px-4 py-4 font-mono text-sm text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors text-center"
+                        className="flex-1 px-4 py-4 font-medium text-sm text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors text-center"
                     >
                         Done
                     </button>
                     <div className="w-px bg-zinc-800" />
                     <button
                         onClick={onContinue}
-                        className="flex-1 px-4 py-4 bg-brand-primary font-mono text-sm font-black text-black flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+                        className="flex-1 px-4 py-4 bg-brand-primary font-bold text-sm text-black flex items-center justify-center gap-2 hover:brightness-110 transition-all uppercase tracking-wider"
                     >
                         <Camera size={16} />
                         <span>Take Photo</span>
-                        <ChevronRight size={14} />
+                        <ChevronRight size={16} />
                     </button>
                 </div>
             </motion.div>

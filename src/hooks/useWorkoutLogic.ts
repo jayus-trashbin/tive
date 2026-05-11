@@ -40,7 +40,7 @@ export const useWorkoutLogic = () => {
             // Try to find historical data using the engine
             const lastPerf = getPreviousSetPerformance(history, currentSession.routineId, exerciseId, 0);
             if (lastPerf) {
-                defaultWeight = getSuggestedWeight(lastPerf) || lastPerf.weight;
+                defaultWeight = getSuggestedWeight(lastPerf, history, exerciseId, 0) || lastPerf.weight;
                 defaultReps = lastPerf.reps;
             }
         }
@@ -124,12 +124,19 @@ export const useWorkoutLogic = () => {
         toggleSetComplete(set.id, isCompleting);
 
         if (isCompleting) {
-            // Haptics - slightly stronger for feedback on Android
-            haptic('success');
+            const currentSession = useWorkoutStore.getState().activeSession;
+            const updatedSet = currentSession?.sets.find(s => s.id === set.id);
+
+            // Audio & Haptics
+            if (updatedSet?.isPR) {
+                haptic('pr');
+                audio.playPR();
+            } else {
+                haptic('success');
+            }
 
             // --- CASCADE FILL LOGIC ---
             // If the NEXT set exists and is "empty" (0 weight/reps), auto-fill it with THIS set's values.
-            const currentSession = useWorkoutStore.getState().activeSession;
             if (currentSession) {
                 const setsOfEx = currentSession.sets.filter(s => s.exerciseId === exerciseId);
                 const nextSet = setsOfEx[setIndex + 1];

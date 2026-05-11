@@ -98,7 +98,7 @@ const SetRow: React.FC<Props> = ({
                     <button
                         onClick={handleTypeToggle}
                         className={cn(
-                            "h-full min-h-[44px] flex items-center justify-center rounded-xl text-xs font-bold font-mono border",
+                            "h-full min-h-[44px] flex items-center justify-center rounded-xl text-xs font-bold border",
                             getTypeStyle(set.type)
                         )}
                     >
@@ -126,7 +126,7 @@ const SetRow: React.FC<Props> = ({
                             onChange={(e) => handleChange(e, 'weight')}
                             onFocus={(e) => e.target.select()}
                             className={cn(
-                                "w-full bg-transparent text-center text-lg font-bold font-mono focus:outline-none placeholder:text-zinc-800",
+                                "w-full bg-transparent text-center text-lg font-bold focus:outline-none placeholder:text-zinc-800",
                                 isCompleted ? "text-brand-success" : "text-white",
                                 previousSet && !isCompleted ? "leading-none mt-2" : ""
                             )}
@@ -137,7 +137,7 @@ const SetRow: React.FC<Props> = ({
                                     const suggested = getSuggestedWeight(previousSet);
                                     if (suggested) onUpdate('weight', suggested);
                                 }}
-                                className="text-[9px] text-zinc-500 font-mono mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
+                                className="text-[9px] text-zinc-500 font-medium mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
                             >
                                 Suggest: {getSuggestedWeight(previousSet)}
                             </button>
@@ -164,7 +164,7 @@ const SetRow: React.FC<Props> = ({
                             onChange={(e) => handleChange(e, 'reps')}
                             onFocus={(e) => e.target.select()}
                             className={cn(
-                                "w-full bg-transparent text-center text-lg font-bold font-mono focus:outline-none placeholder:text-zinc-800",
+                                "w-full bg-transparent text-center text-lg font-bold focus:outline-none placeholder:text-zinc-800",
                                 isCompleted ? "text-brand-success" : "text-white",
                                 previousSet && !isCompleted ? "leading-none mt-2" : ""
                             )}
@@ -174,7 +174,7 @@ const SetRow: React.FC<Props> = ({
                                 onClick={() => {
                                     if (previousSet.reps) onUpdate('reps', previousSet.reps);
                                 }}
-                                className="text-[9px] text-zinc-500 font-mono mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
+                                className="text-[9px] text-zinc-500 font-medium mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
                             >
                                 Prev: {previousSet.reps}
                             </button>
@@ -186,7 +186,7 @@ const SetRow: React.FC<Props> = ({
                         <button
                             onClick={() => setShowRpePicker(true)}
                             className={cn(
-                                "w-full h-full min-h-[44px] rounded-xl text-[10px] font-bold font-mono flex flex-col items-center justify-center border gap-0.5",
+                                "w-full h-full min-h-[44px] rounded-xl text-[10px] font-bold flex flex-col items-center justify-center border gap-0.5",
                                 set.rpe >= 9
                                     ? "border-brand-danger/30 text-brand-danger bg-brand-danger/5"
                                     : "border-zinc-800 text-zinc-500 bg-zinc-900"

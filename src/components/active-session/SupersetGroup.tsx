@@ -45,7 +45,7 @@ const SupersetGroup: React.FC<Props> = ({
 
     return (
         <div className={cn(
-            'relative rounded-[4px] transition-all duration-500',
+            'relative rounded-xl transition-all duration-500',
             'border-2',
             allDone ? 'border-brand-success/30 opacity-60 grayscale-[0.3]' : 'border-amber-500/40'
         )}>
@@ -59,7 +59,7 @@ const SupersetGroup: React.FC<Props> = ({
                     <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 font-heading">
                         Superset
                     </span>
-                    <span className="hidden text-[9px] text-amber-500/60 font-mono sm:inline truncate max-w-[160px]">
+                    <span className="hidden text-[9px] text-amber-500/60 font-medium sm:inline truncate max-w-[160px]">
                         {exerciseNames}
                     </span>
                 </div>
@@ -69,7 +69,7 @@ const SupersetGroup: React.FC<Props> = ({
                             ✓ Done
                         </span>
                     ) : (
-                        <span className="flex items-center gap-1 text-[9px] text-amber-400 font-mono font-bold">
+                        <span className="flex items-center gap-1 text-[9px] text-amber-400 font-bold">
                             <Zap size={9} />
                             {items.length} exercises
                         </span>
@@ -89,7 +89,7 @@ const SupersetGroup: React.FC<Props> = ({
                         )}
 
                         {/* Round label pill in top-left */}
-                        <div className="absolute top-4 left-3 z-20 w-5 h-5 rounded-sm bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[9px] font-black flex items-center justify-center font-mono">
+                        <div className="absolute top-4 left-3 z-20 w-5 h-5 rounded-sm bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[9px] font-bold flex items-center justify-center font-medium">
                             {String.fromCharCode(65 + index)}{/* A, B, C… */}
                         </div>
 

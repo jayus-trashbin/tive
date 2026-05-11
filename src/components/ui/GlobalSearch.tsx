@@ -59,7 +59,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
 
     const SectionHeader = ({ label }: { label: string }) => (
         <div className="px-4 py-2 flex items-center gap-2">
-            <span className="text-[9px] font-mono font-black text-zinc-600 uppercase tracking-widest">{label}</span>
+            <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
             <div className="flex-1 h-px bg-zinc-800" />
         </div>
     );
@@ -82,7 +82,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
             )}
         >
             {iconFor(item.section)}
-            <span className="flex-1 text-sm text-white font-mono truncate">{item.label}</span>
+            <span className="flex-1 text-sm text-white font-medium truncate">{item.label}</span>
             {item.sub && <span className="text-[9px] text-zinc-600 uppercase font-bold shrink-0">{item.sub}</span>}
             <ChevronRight size={13} className="text-zinc-700 shrink-0 ml-1" />
         </button>
@@ -105,7 +105,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: -8, opacity: 0, scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-                    className="w-full max-w-lg mx-auto bg-zinc-950 border border-zinc-800 rounded-[4px] overflow-hidden shadow-2xl"
+                    className="w-full max-w-lg mx-auto bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl"
                     onClick={e => e.stopPropagation()}
                 >
                     <SearchContent
@@ -208,7 +208,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck={false}
-                className="flex-1 bg-transparent text-white font-mono placeholder:text-zinc-600 focus:outline-none text-base py-3"
+                className="flex-1 bg-transparent text-white font-medium placeholder:text-zinc-600 focus:outline-none text-base py-3"
             />
             {query ? (
                 // 44px touch target for clear button
@@ -220,7 +220,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
                     <X size={16} />
                 </button>
             ) : showKbd ? (
-                <kbd className="flex items-center px-1.5 py-0.5 text-[9px] font-mono text-zinc-600 border border-zinc-800 rounded">ESC</kbd>
+                <kbd className="flex items-center px-1.5 py-0.5 text-[9px] font-bold text-zinc-600 border border-zinc-800 rounded">ESC</kbd>
             ) : null}
         </div>
 
@@ -229,13 +229,13 @@ const SearchContent: React.FC<SearchContentProps> = ({
             {q.length < 2 && (
                 <div className="px-4 py-10 text-center">
                     <Search size={28} className="text-zinc-800 mx-auto mb-3" />
-                    <p className="text-zinc-600 text-xs font-mono">Type to search exercises, sessions or routines</p>
+                    <p className="text-zinc-600 text-xs font-medium">Type to search exercises, sessions or routines</p>
                 </div>
             )}
 
             {q.length >= 2 && allResults.length === 0 && (
                 <div className="px-4 py-10 text-center">
-                    <p className="text-zinc-500 text-sm font-mono">No results for "<span className="text-white">{query}</span>"</p>
+                    <p className="text-zinc-500 text-sm font-medium">No results for "<span className="text-white">{query}</span>"</p>
                 </div>
             )}
 
@@ -273,10 +273,10 @@ const SearchContent: React.FC<SearchContentProps> = ({
         {/* Keyboard hints (desktop only) */}
         {showKbd && allResults.length > 0 && (
             <div className="flex items-center justify-center gap-4 py-2 border-t border-zinc-900">
-                <span className="text-[9px] font-mono text-zinc-700 flex items-center gap-1">
+                <span className="text-[9px] font-bold text-zinc-700 flex items-center gap-1">
                     <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-[8px]">↑↓</kbd> navigate
                 </span>
-                <span className="text-[9px] font-mono text-zinc-700 flex items-center gap-1">
+                <span className="text-[9px] font-bold text-zinc-700 flex items-center gap-1">
                     <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-[8px]">↵</kbd> select
                 </span>
             </div>

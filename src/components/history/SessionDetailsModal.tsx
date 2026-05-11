@@ -105,7 +105,7 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                     exit={{ y: "100%" }}
                     transition={{ type: "spring", damping: 25, stiffness: 200 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-lg h-[90vh] bg-zinc-950 border-t sm:border border-white/10 rounded-t-[4px] sm:rounded-[4px] flex flex-col shadow-2xl overflow-hidden"
+                    className="w-full max-w-lg h-[90vh] bg-zinc-950 border-t sm:border border-white/10 rounded-t-3xl sm:rounded-2xl flex flex-col shadow-2xl overflow-hidden"
                 >
                     {/* Header */}
                     <div
@@ -116,7 +116,7 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                             <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 flex items-center gap-1">
                                 <Calendar size={12} /> {dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </div>
-                            <h2 className="text-2xl font-black text-white leading-tight max-w-[250px]">
+                            <h2 className="text-3xl font-bold text-white leading-tight max-w-[250px]">
                                 {session.name}
                             </h2>
                         </div>
@@ -135,7 +135,7 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                         <div className="grid grid-cols-3 gap-3">
                             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 flex flex-col items-center justify-center gap-1">
                                 <Dumbbell size={16} className="text-brand-primary" />
-                                <span className="text-lg font-black text-white">
+                                <span className="text-2xl font-bold text-white">
                                     {session.volumeLoad > 1000 ? (session.volumeLoad / 1000).toFixed(1) + 'k' : session.volumeLoad}
                                 </span>
                                 <span className="text-[9px] text-zinc-500 uppercase font-bold">Volume (kg)</span>
@@ -152,21 +152,21 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                             </div>
                             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 flex flex-col items-center justify-center gap-1">
                                 <Clock size={16} className="text-blue-400" />
-                                <span className="text-lg font-black text-white">{duration || '--'}</span>
+                                <span className="text-2xl font-bold text-white">{duration || '--'}</span>
                                 <span className="text-[9px] text-zinc-500 uppercase font-bold">Duration</span>
                             </div>
                             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 flex flex-col items-center justify-center gap-1">
                                 <Trophy size={16} className="text-brand-warning" />
-                                <span className="text-lg font-black text-white">{session.sets.filter(s => s.isPR).length}</span>
+                                <span className="text-2xl font-bold text-white">{session.sets.filter(s => s.isPR).length}</span>
                                 <span className="text-[9px] text-zinc-500 uppercase font-bold">Records</span>
                             </div>
                         </div>
 
                         {/* A-03: Previous session comparison banner */}
                         {previousSession && (
-                            <div className="bg-zinc-900/50 border border-zinc-800 rounded-[4px] p-3">
-                                <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                    <TrendingUp size={9} className="text-brand-primary" />
+                            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-3">
+                                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                    <TrendingUp size={10} className="text-brand-primary" />
                                     vs. {new Date(previousSession.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
@@ -175,9 +175,9 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                                         const volDiff = comp.currVol - comp.prevVol;
                                         const rmDiff = comp.currBest1RM - comp.prevBest1RM;
                                         return (
-                                            <div key={exId} className="bg-zinc-900 rounded-[3px] p-2">
+                                            <div key={exId} className="bg-zinc-900 rounded-lg p-2">
                                                 <div className="text-[9px] text-zinc-400 font-bold truncate mb-1">{ex?.name || 'Exercise'}</div>
-                                                <div className={cn("text-[10px] font-black flex items-center gap-0.5", volDiff >= 0 ? "text-brand-primary" : "text-red-400")}>
+                                                <div className={cn("text-[10px] font-bold flex items-center gap-0.5", volDiff >= 0 ? "text-brand-primary" : "text-red-400")}>
                                                     {volDiff >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
                                                     {volDiff >= 0 ? '+' : ''}{volDiff.toFixed(0)} kg vol
                                                 </div>
@@ -228,15 +228,15 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                                             )}>
                                                 <div className="flex justify-center">
                                                     <span className={cn(
-                                                        "w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold font-mono",
+                                                        "w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold",
                                                         set.type === 'warmup' ? "bg-yellow-500/20 text-yellow-500" :
                                                             set.type === 'failure' ? "bg-red-500/20 text-red-500" :
                                                                 "bg-zinc-800 text-zinc-400"
                                                     )}>{idx + 1}</span>
                                                 </div>
-                                                <div className="text-center font-mono font-bold text-sm text-white">{set.weight}</div>
-                                                <div className="text-center font-mono font-bold text-sm text-white">{set.reps}</div>
-                                                <div className="text-center font-mono text-xs text-zinc-500">
+                                                <div className="text-center font-bold text-sm text-white">{set.weight}</div>
+                                                <div className="text-center font-bold text-sm text-white">{set.reps}</div>
+                                                <div className="text-center text-xs font-medium text-zinc-500">
                                                     {set.isPR ? (
                                                         <span className="text-brand-warning font-bold flex items-center justify-center gap-1">
                                                             {set.estimated1RM} <Trophy size={8} />

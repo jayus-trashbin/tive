@@ -7,8 +7,8 @@ import { credentialsStore } from '../utils/credentialsStore';
 import { createSessionSlice } from './slices/createSessionSlice';
 import { createExerciseSlice } from './slices/createExerciseSlice';
 import { createRoutineSlice } from './slices/createRoutineSlice';
-import { createUISlice } from './slices/createUISlice';
 import { createPhotoSlice } from './slices/createPhotoSlice';
+import { useUIStore } from './useUIStore';
 
 export const useWorkoutStore = create<WorkoutState>()(
   persist(
@@ -16,7 +16,6 @@ export const useWorkoutStore = create<WorkoutState>()(
       ...createSessionSlice(...a),
       ...createExerciseSlice(...a),
       ...createRoutineSlice(...a),
-      ...createUISlice(...a),
       ...createPhotoSlice(...a),
     }),
     {
@@ -33,26 +32,37 @@ export const useWorkoutStore = create<WorkoutState>()(
         state.history = Array.isArray(state.history) ? state.history : [];
         state.photos = Array.isArray(state.photos) ? state.photos : [];
 
+        // Ensure base objects exist to prevent null reference errors
+        if (!state.userStats) {
+          state.userStats = {
+            name: '', email: '', isOnboarded: false, bodyweight: 80, gender: 'male', 
+            wilksScore: 0, supabaseUrl: '', supabaseKey: '', unitSystem: 'metric', theme: 'dark',
+            isAudioEnabled: true, isVibrationEnabled: true, geminiApiKey: ''
+          };
+        }
+        if (!state.physiology) {
+          state.physiology = {
+            muscleFatigue: { chest: 0, back: 0, 'upper legs': 0, 'lower legs': 0, shoulders: 0, arms: 0, core: 0, cardio: 0 },
+            lastUpdate: Date.now()
+          };
+        }
+
+        if (state.restTimer === undefined) {
+          state.restTimer = { endTime: null, originalDuration: 0, isRunning: false };
+        }
+
         // Handle migration from previous versions
         if (version < 8) {
-          if (!state.userStats) {
-             state.userStats = {
-                name: '', email: '', isOnboarded: false, bodyweight: 80, gender: 'male', 
-                wilksScore: 0, supabaseUrl: '', supabaseKey: '', unitSystem: 'metric', theme: 'dark'
-             };
-          }
-          if (!state.physiology) {
-             state.physiology = {
-                muscleFatigue: { chest: 0, back: 0, 'upper legs': 0, 'lower legs': 0, shoulders: 0, arms: 0, core: 0, cardio: 0 },
-                lastUpdate: Date.now()
-             };
-          }
+          // Legacy migration logic if any
         }
 
         if (version < 9) {
-          // Initialize newly added fields in v9
-          if (state.userStats && !state.userStats.theme) state.userStats.theme = 'dark';
-          if (state.userStats && !state.userStats.unitSystem) state.userStats.unitSystem = 'metric';
+          // Initialize newly added fields in v9+
+          if (!state.userStats.theme) state.userStats.theme = 'dark';
+          if (!state.userStats.unitSystem) state.userStats.unitSystem = 'metric';
+          if (state.userStats.isAudioEnabled === undefined) state.userStats.isAudioEnabled = true;
+          if (state.userStats.isVibrationEnabled === undefined) state.userStats.isVibrationEnabled = true;
+          if (state.userStats.geminiApiKey === undefined) state.userStats.geminiApiKey = '';
         }
 
         return state;
@@ -84,10 +94,10 @@ export const useWorkoutStore = create<WorkoutState>()(
           if (supabaseUrl || supabaseKey || geminiApiKey) {
             state?.updateUserStats({ supabaseUrl, supabaseKey, geminiApiKey });
           }
-          state?.setHasHydrated(true);
-          state?.setProfileOpen(false);
-          state?.setRoutineEditorOpen(false);
-          state?.setRoutinePreviewOpen(false);
+          useUIStore.getState().setHasHydrated(true);
+          useUIStore.getState().setProfileOpen(false);
+          useUIStore.getState().setRoutineEditorOpen(false);
+          useUIStore.getState().setRoutinePreviewOpen(false);
 
           if (typeof window !== 'undefined') {
             if ('requestIdleCallback' in window) {

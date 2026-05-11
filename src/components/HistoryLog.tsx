@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { Dumbbell, TrendingUp, BarChart3, LayoutGrid } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     HistoryHeader,
@@ -68,23 +69,27 @@ const HistoryLog: React.FC = () => {
                             description={searchQuery ? 'Try a different search term' : 'Complete your first workout to see it logged here'}
                         />
                     ) : (
-                        <motion.div
-                            initial="hidden"
-                            animate="show"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                show: { opacity: 1, transition: { staggerChildren: 0.05 } }
-                            }}
-                            className="space-y-2 mt-4"
-                        >
-                            {filteredSessions.map((session) => (
-                                <SessionCard 
-                                    key={session.id} 
-                                    session={session} 
-                                    onClick={() => setSelectedSessionId(session.id)}
-                                />
-                            ))}
-                        </motion.div>
+                        <div className="mt-4 flex-1 h-full w-full">
+                            <List
+                                height={window.innerHeight - 150} // Approximate height remaining
+                                itemCount={filteredSessions.length}
+                                itemSize={80} // Approx card height including gap
+                                width="100%"
+                                className="no-scrollbar"
+                            >
+                                {({ index, style }: ListChildComponentProps) => {
+                                    const session = filteredSessions[index];
+                                    return (
+                                        <SessionCard 
+                                            key={session.id} 
+                                            session={session} 
+                                            onClick={() => setSelectedSessionId(session.id)}
+                                            style={style}
+                                        />
+                                    );
+                                }}
+                            </List>
+                        </div>
                     )
                 ) : (
                     <div className="space-y-6 mt-6">
@@ -95,13 +100,13 @@ const HistoryLog: React.FC = () => {
                                         <div className="section-title flex items-center gap-2">
                                             <TrendingUp size={12} className="text-brand-primary" /> Volume Progression
                                         </div>
-                                        <div className="flex bg-zinc-900 border border-zinc-800 p-0.5 rounded-[4px]">
+                                        <div className="flex bg-zinc-900 border border-zinc-800 p-0.5 rounded-xl">
                                             {(['7D', '30D', '90D'] as const).map((r) => (
                                                 <button
                                                     key={r}
                                                     onClick={() => setPerformanceRange(r)}
                                                     className={cn(
-                                                        "px-2.5 py-1 text-[9px] font-mono font-bold transition-colors cursor-pointer rounded-[2px]",
+                                                        "px-2.5 py-1 text-[9px] font-bold transition-colors cursor-pointer rounded-lg",
                                                         performanceRange === r ? "bg-brand-primary text-black" : "text-zinc-500 hover:text-zinc-300"
                                                     )}
                                                 >

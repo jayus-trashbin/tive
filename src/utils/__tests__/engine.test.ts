@@ -1,9 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
     calculateCurrentStreak,
     calculateACWR,
     processSessionCompletion,
-    SessionCompletionResult
+    SessionCompletionResult,
+    calculateWilks,
+    checkAutoRegulation,
+    calculateSymmetry,
+    getWeeklyStats,
+    estimateRoutineDuration,
+    getExerciseProgressStatus
 } from '../engine';
 import { Session, Exercise, PhysiologyState, MuscleGroup } from '../../types';
 
@@ -48,6 +54,126 @@ describe('engine.ts utilities', () => {
             ];
             const result = calculateACWR(history);
             expect(result.risk).toBeDefined();
+        });
+
+        it('should return optimal for empty history', () => {
+            expect(calculateACWR([]).risk).toBe('optimal');
+        });
+    });
+
+    describe('calculateWilks', () => {
+        it('calculates for male', () => {
+            expect(calculateWilks(500, 80, 'male')).toBeGreaterThan(0);
+        });
+        it('calculates for female', () => {
+            expect(calculateWilks(300, 60, 'female')).toBeGreaterThan(0);
+        });
+        it('returns 0 for 0 bodyweight', () => {
+            expect(calculateWilks(500, 0, 'male')).toBe(0);
+        });
+    });
+
+    describe('checkAutoRegulation', () => {
+        it('suggests dropping weight if RPE is overshot', () => {
+            const set = { rpe: 10 } as any;
+            const res = checkAutoRegulation(set, 7);
+            expect(res.dropPercent).toBe(0.05);
+            expect(res.suggestion).toContain("Drop weight");
+        });
+        it('suggests increasing weight if RPE is undershot', () => {
+            const set = { rpe: 4 } as any;
+            const res = checkAutoRegulation(set, 7);
+            expect(res.dropPercent).toBe(-0.025);
+            expect(res.suggestion).toContain("Increase load");
+        });
+        it('suggests nothing if on target', () => {
+            const set = { rpe: 7.5 } as any;
+            const res = checkAutoRegulation(set, 7);
+            expect(res.suggestion).toBeNull();
+        });
+    });
+
+    describe('calculateSymmetry', () => {
+        it('calculates symmetry distribution correctly', () => {
+            const history = [
+                {
+                    sets: [
+                        { exerciseId: 'push1', weight: 100, reps: 10 },
+                        { exerciseId: 'pull1', weight: 50, reps: 10 }
+                    ]
+                }
+            ] as Session[];
+            
+            const exercises = new Map<string, any>();
+            exercises.set('push1', { name: 'Bench Press', targetMuscle: 'chest' });
+            exercises.set('pull1', { name: 'Pull Up', targetMuscle: 'back' });
+
+            const result = calculateSymmetry(history, exercises);
+            const push = result.find(r => r.subject === 'Push');
+            const pull = result.find(r => r.subject === 'Pull');
+            
+            expect(push?.A).toBeCloseTo(66.67, 1);
+            expect(pull?.A).toBeCloseTo(33.33, 1);
+        });
+    });
+
+    describe('getWeeklyStats', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('calculates weekly stats correctly', () => {
+            // Set time to a Thursday
+            const thursday = new Date(2023, 10, 16, 12, 0, 0); // Nov 16, 2023 is Thursday
+            vi.setSystemTime(thursday);
+
+            const today = thursday.getTime();
+            const history = [
+                { date: today, volumeLoad: 1000 },
+                { date: today - 86400000, volumeLoad: 500 }
+            ] as Session[];
+
+            const result = getWeeklyStats(history);
+            expect(result.count).toBe(2);
+            expect(result.volume).toBe(1500);
+        });
+    });
+
+    describe('estimateRoutineDuration', () => {
+        it('estimates duration correctly for basic routine', () => {
+            const routine = {
+                blocks: [
+                    {
+                        restSeconds: 60,
+                        sets: [{ targetReps: '10' }, { targetReps: '10' }]
+                    }
+                ]
+            } as any;
+            // setup: 45s, sets: 2 * 10 * 4 = 80s, rest: 60s
+            // total = 185s -> ~3 mins
+            expect(estimateRoutineDuration(routine)).toBe(3);
+        });
+    });
+
+    describe('getExerciseProgressStatus', () => {
+        it('returns new for empty history', () => {
+            const res = getExerciseProgressStatus([], 'ex1');
+            expect(res.status).toBe('new');
+        });
+
+        it('detects progressing trend', () => {
+            const history = [
+                { date: 1000, isCompleted: true, sets: [{ exerciseId: 'ex1', isCompleted: true, estimated1RM: 100 }] },
+                { date: 2000, isCompleted: true, sets: [{ exerciseId: 'ex1', isCompleted: true, estimated1RM: 100 }] },
+                { date: 3000, isCompleted: true, sets: [{ exerciseId: 'ex1', isCompleted: true, estimated1RM: 105 }] },
+                { date: 4000, isCompleted: true, sets: [{ exerciseId: 'ex1', isCompleted: true, estimated1RM: 110 }] }
+            ] as any[];
+            const res = getExerciseProgressStatus(history, 'ex1');
+            expect(res.status).toBe('progressing');
+            expect(res.trend).toBeGreaterThan(0);
         });
     });
 

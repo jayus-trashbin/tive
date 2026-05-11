@@ -35,7 +35,7 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
         }}
         className="relative bg-zinc-900 grid grid-cols-[26px_54px_1fr_1fr_44px] gap-1.5 items-center py-3 px-2"
       >
-        <span className="text-xs text-zinc-500 font-mono text-center">{idx + 1}</span>
+        <span className="text-xs text-zinc-500 font-medium text-center">{idx + 1}</span>
 
         {/* Type Selector */}
         <button
@@ -78,12 +78,12 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
         <div className="flex flex-col items-center gap-0.5">
           <button
             onClick={() => onUpdate(set.id, 'targetRpe', Math.min(10, (set.targetRpe || 8) + 1))}
-            className="w-full text-[9px] font-black text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+            className="w-full text-[9px] font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
           >▲</button>
-          <span className="text-xs font-black text-zinc-300 font-mono">{set.targetRpe || 8}</span>
+          <span className="text-xs font-bold text-zinc-300 font-medium">{set.targetRpe || 8}</span>
           <button
             onClick={() => onUpdate(set.id, 'targetRpe', Math.max(1, (set.targetRpe || 8) - 1))}
-            className="w-full text-[9px] font-black text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+            className="w-full text-[9px] font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
           >▼</button>
         </div>
       </motion.div>
@@ -174,7 +174,7 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
 
           {/* Thumbnail */}
           <div className="w-10 h-10 rounded bg-black overflow-hidden shrink-0">
-            <img src={exercise.staticImageUrl || exercise.gifUrl} className="w-full h-full object-cover opacity-80" />
+            <img src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" />
           </div>
 
           <div className="flex-1 min-w-0">

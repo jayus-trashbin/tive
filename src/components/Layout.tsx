@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
-import { motion, PanInfo, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Home, ClipboardList, History, Image } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useUIStore } from "../store/useUIStore";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -18,9 +19,8 @@ interface LayoutProps {
  * - Smooth layoutId animations
  */
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => {
-    const { activeSession, isMinimized, isRoutineEditorOpen, isRoutinePreviewOpen, isProfileOpen } = useWorkoutStore();
-    const navRef = useRef<HTMLDivElement>(null);
-
+    const { activeSession } = useWorkoutStore();
+    const { isMinimized, isRoutineEditorOpen, isRoutinePreviewOpen, isProfileOpen } = useUIStore();;
     const tabs = [
         { id: 'dashboard', icon: Home, label: 'Home' },
         { id: 'plans', icon: ClipboardList, label: 'Routines' },
@@ -32,20 +32,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
         !isRoutineEditorOpen &&
         !isRoutinePreviewOpen &&
         !isProfileOpen;
-
-    const handlePan = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        if (!navRef.current) return;
-        const rect = navRef.current.getBoundingClientRect();
-        const x = info.point.x - rect.left;
-        const sectionWidth = rect.width / tabs.length;
-        const index = Math.max(0, Math.min(tabs.length - 1, Math.floor(x / sectionWidth)));
-        const targetTab = tabs[index].id as any;
-
-        if (activeTab !== targetTab) {
-            if (navigator.vibrate) navigator.vibrate(10);
-            onTabChange(targetTab);
-        }
-    };
 
     return (
         <div className="flex justify-center h-[100dvh] w-full overflow-hidden bg-black">
@@ -73,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                     )} />
                 </main>
 
-                {/* FLOATING PILL NAV */}
+                {/* BOTTOM TAB BAR */}
                 <motion.div
                     initial={false}
                     animate={{
@@ -81,84 +67,48 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                         opacity: isVisible ? 1 : 0
                     }}
                     transition={{ type: "spring", damping: 28, stiffness: 320 }}
-                    className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-6"
-                    style={{ paddingBottom: `calc(env(safe-area-inset-bottom, 12px) + 8px)` }}
+                    className="absolute bottom-0 left-0 right-0 z-50 flex justify-center w-full"
                 >
-                    <div
-                        ref={navRef}
-                        className="pointer-events-auto w-full max-w-[340px]"
+                    <nav
+                        role="navigation"
+                        aria-label="Navegação principal"
+                        className="
+                            w-full h-[64px] pb-[env(safe-area-inset-bottom)]
+                            bg-zinc-900 border-t border-zinc-800/50
+                            flex items-center justify-around
+                        "
                     >
-                        <motion.nav
-                            role="navigation"
-                            aria-label="Navegação principal"
-                            onPan={handlePan}
-                            className="
-                                relative h-[56px]
-                                bg-zinc-900/90 backdrop-blur-xl
-                                border border-zinc-800/60
-                                rounded-2xl
-                                shadow-nav
-                                flex items-center
-                                px-1.5 transform-gpu
-                            "
-                        >
-                            {tabs.map((tab) => {
-                                const isActive = activeTab === tab.id;
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => {
-                                            if (navigator.vibrate) navigator.vibrate(5);
-                                            onTabChange(tab.id as any);
-                                        }}
-                                        aria-label={tab.label}
-                                        aria-current={isActive ? 'page' : undefined}
+                        {tabs.map((tab) => {
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => {
+                                        if (navigator.vibrate) navigator.vibrate(5);
+                                        onTabChange(tab.id as any);
+                                    }}
+                                    aria-label={tab.label}
+                                    aria-current={isActive ? 'page' : undefined}
+                                    className="relative flex-1 h-full flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
+                                >
+                                    <tab.icon
+                                        size={22}
+                                        strokeWidth={isActive ? 2.5 : 2}
                                         className={cn(
-                                            "relative h-[44px] flex items-center justify-center z-10 cursor-pointer transition-all duration-200",
-                                            isActive ? "flex-[1.6]" : "flex-1"
+                                            "transition-colors duration-200",
+                                            isActive ? "text-brand-primary" : "text-zinc-500"
                                         )}
-                                    >
-                                        {/* Active Background Pill */}
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="navActivePill"
-                                                className="absolute inset-y-[4px] inset-x-[2px] z-0 bg-zinc-800/90 rounded-xl"
-                                                transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-                                            />
-                                        )}
-
-                                        {/* Icon + Label */}
-                                        <div className="relative z-10 flex items-center gap-1.5">
-                                            <tab.icon
-                                                size={20}
-                                                strokeWidth={isActive ? 2.5 : 1.8}
-                                                className={cn(
-                                                    "transition-colors duration-200",
-                                                    isActive ? "text-brand-primary" : "text-zinc-500"
-                                                )}
-                                            />
-
-                                            {/* Animated Label — only visible on active */}
-                                            <AnimatePresence mode="wait">
-                                                {isActive && (
-                                                    <motion.span
-                                                        key={tab.id}
-                                                        initial={{ opacity: 0, width: 0 }}
-                                                        animate={{ opacity: 1, width: 'auto' }}
-                                                        exit={{ opacity: 0, width: 0 }}
-                                                        transition={{ duration: 0.2, ease: 'easeOut' }}
-                                                        className="text-[11px] font-heading font-bold uppercase tracking-wide text-brand-primary overflow-hidden whitespace-nowrap"
-                                                    >
-                                                        {tab.label}
-                                                    </motion.span>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </motion.nav>
-                    </div>
+                                    />
+                                    <span className={cn(
+                                        "text-[10px] font-medium transition-colors duration-200",
+                                        isActive ? "text-brand-primary" : "text-zinc-500"
+                                    )}>
+                                        {tab.label}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </nav>
                 </motion.div>
             </div>
         </div>

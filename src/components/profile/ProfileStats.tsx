@@ -46,14 +46,14 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                         <Scale size={16} />
                         <span className="text-[10px] font-bold uppercase">Workouts</span>
                     </div>
-                    <div className="text-3xl font-black text-white">{totalWorkouts}</div>
+                    <div className="text-3xl font-bold text-white">{totalWorkouts}</div>
                 </div>
                 <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-3xl">
                     <div className="flex items-center gap-2 text-zinc-500 mb-2">
                         <BarChart3 size={16} />
                         <span className="text-[10px] font-bold uppercase">Wilks Score</span>
                     </div>
-                    <div className="text-3xl font-black text-white">{calculatedWilks > 0 ? calculatedWilks : '--'}</div>
+                    <div className="text-3xl font-bold text-white">{calculatedWilks > 0 ? calculatedWilks : '--'}</div>
                     {calculatedWilks > 0 && (() => {
                         const level =
                             calculatedWilks >= 400 ? { label: 'Elite', color: 'text-amber-400', pct: 100 } :
@@ -84,7 +84,7 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                     <Scale size={100} />
                 </div>
                 <span className="text-xs font-bold text-zinc-500 uppercase">Total Lifetime Volume</span>
-                <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-white mt-1 relative z-10">
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-white mt-1 relative z-10">
                     {(totalVolume / 1000).toFixed(0)}k <span className="text-lg text-zinc-600 font-medium">kg</span>
                 </div>
             </div>

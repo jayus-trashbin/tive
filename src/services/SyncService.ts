@@ -4,6 +4,7 @@ import { useWorkoutStore } from '../store/useWorkoutStore';
 import { Session, Routine, Exercise } from '../types';
 import { logger } from '../utils/logger';
 import { credentialsStore } from '../utils/credentialsStore';
+import { useUIStore } from '../store/useUIStore';
 
 class SyncService {
     private client: SupabaseClient | null = null;
@@ -190,6 +191,8 @@ class SyncService {
         if (!client) return;
 
         this.isSyncing = true;
+        useUIStore.getState().setSyncing(true);
+        useUIStore.getState().setSyncError(null);
 
         try {
             await this.pull(client);
@@ -197,8 +200,10 @@ class SyncService {
             useWorkoutStore.getState().updateUserStats({ lastSyncTime: Date.now() });
         } catch (err) {
             logger.warn('SyncService', 'Sync cycle incomplete', err);
+            useUIStore.getState().setSyncError(err instanceof Error ? err.message : String(err));
         } finally {
             this.isSyncing = false;
+            useUIStore.getState().setSyncing(false);
         }
     }
 

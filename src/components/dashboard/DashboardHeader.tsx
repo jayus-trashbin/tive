@@ -1,23 +1,22 @@
 import React from 'react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
+import { useUIStore } from '../../store/useUIStore';
 
 export const DashboardHeader: React.FC = () => {
     const userStats = useWorkoutStore(s => s.userStats);
-    const setProfileOpen = useWorkoutStore(s => s.setProfileOpen);
+    const setProfileOpen = useUIStore(s => s.setProfileOpen);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 6) return "Night Owl Mode";
-        if (hour < 12) return "Rise & Grind";
-        if (hour < 17) return "Afternoon Push";
-        if (hour < 21) return "Evening Session";
-        return "Late Night Gains";
+        if (hour < 12) return "Good morning,";
+        if (hour < 18) return "Good afternoon,";
+        return "Good evening,";
     };
 
     return (
-        <header className="flex justify-between items-start shrink-0">
-            <div className="space-y-1">
-                <div className="section-title">
+        <header className="flex justify-between items-center shrink-0">
+            <div className="space-y-0.5">
+                <div className="text-sm font-medium text-zinc-400">
                     {getGreeting()}
                 </div>
                 <h1 className="page-title truncate max-w-[220px]">
@@ -29,12 +28,11 @@ export const DashboardHeader: React.FC = () => {
                 onClick={() => setProfileOpen(true)}
                 className="group relative shrink-0"
             >
-                <div className="w-11 h-11 bg-zinc-900 border border-zinc-800 flex items-center justify-center transition-all group-active:translate-y-[1px] group-hover:border-brand-primary rounded-[4px]">
-                    <span className="font-heading font-bold text-sm text-brand-primary uppercase">
+                <div className="w-12 h-12 bg-zinc-800 flex items-center justify-center rounded-full transition-transform active:scale-95 group-hover:bg-zinc-700">
+                    <span className="font-bold text-sm text-zinc-300 uppercase">
                         {userStats.name ? userStats.name.substring(0, 2) : 'AT'}
                     </span>
                 </div>
-                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-brand-primary shadow-glow rounded-full" />
             </button>
         </header>
     );

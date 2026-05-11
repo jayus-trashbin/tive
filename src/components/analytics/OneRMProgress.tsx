@@ -48,10 +48,10 @@ const OneRMProgress: React.FC = () => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-xl">
-                    <p className="text-[10px] text-zinc-500 font-mono mb-1 uppercase">
+                    <p className="text-[10px] text-zinc-500 font-medium mb-1 uppercase">
                         {new Date(label).toLocaleDateString()}
                     </p>
-                    <p className="text-sm font-black text-brand-primary font-mono">
+                    <p className="text-sm font-bold text-brand-primary font-medium">
                         {payload[0].value} kg
                     </p>
                 </div>
@@ -63,7 +63,7 @@ const OneRMProgress: React.FC = () => {
     if (topExercises.length === 0) return (
         <div className="h-full flex flex-col items-center justify-center text-zinc-700">
             <Dumbbell size={24} className="mb-2 opacity-50" />
-            <span className="text-xs font-mono uppercase">Not enough data</span>
+            <span className="text-xs font-medium uppercase">Not enough data</span>
         </div>
     );
 
@@ -74,7 +74,7 @@ const OneRMProgress: React.FC = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center gap-2 text-sm font-bold text-white uppercase font-mono bg-zinc-800/50 px-3 py-1.5 rounded-[4px] hover:bg-zinc-800 transition-colors"
+                        className="flex items-center gap-2 text-sm font-bold text-white uppercase font-medium bg-zinc-800/50 px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors"
                     >
                         {selectedExercise?.name || 'Select Exercise'}
                         <ChevronDown size={14} className={cn("transition-transform", isDropdownOpen && "rotate-180")} />
@@ -88,7 +88,7 @@ const OneRMProgress: React.FC = () => {
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 5 }}
-                                    className="absolute top-full left-0 mt-1 w-56 bg-zinc-900 border border-zinc-800 rounded-[4px] shadow-2xl z-20 overflow-hidden"
+                                    className="absolute top-full left-0 mt-1 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-20 overflow-hidden"
                                 >
                                     {topExercises.map(ex => (
                                         <button
@@ -97,7 +97,7 @@ const OneRMProgress: React.FC = () => {
                                                 setSelectedExerciseId(ex.id);
                                                 setIsDropdownOpen(false);
                                             }}
-                                            className="w-full text-left px-4 py-3 text-xs font-mono font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 uppercase transition-colors border-b border-zinc-800 last:border-0"
+                                            className="w-full text-left px-4 py-3 text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 uppercase transition-colors border-b border-zinc-800 last:border-0"
                                         >
                                             {ex.name}
                                         </button>
@@ -109,7 +109,7 @@ const OneRMProgress: React.FC = () => {
                 </div>
 
                 <div className="text-right">
-                    <div className="text-2xl font-black font-mono text-white leading-none">
+                    <div className="text-2xl font-bold text-white leading-none">
                         {current1RM}<span className="text-xs text-zinc-600 ml-1">KG</span>
                     </div>
                 </div>

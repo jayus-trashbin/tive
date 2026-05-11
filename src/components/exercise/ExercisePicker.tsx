@@ -16,28 +16,20 @@ interface Props {
   multiSelect?: boolean;
 }
 
-// Full mapping of ExerciseDB V2 Bodyparts + Useful Groupings
+// OSS ExerciseDB bodyParts (exact lowercase values from the API):
+// chest | back | shoulders | upper arms | lower arms | upper legs | lower legs | waist | cardio | neck
+// "arms" and "core" are convenience aliases handled by getApiBodyParts()
 const MUSCLE_FILTERS: { label: string; value: string }[] = [
-  { label: 'All', value: 'all' },
-
-  // Common Groupings
-  { label: 'Chest', value: 'chest' },
-  { label: 'Back', value: 'back' },
-  { label: 'Legs', value: 'upper legs' }, // Maps to thighs, hams, quads, hips
-  { label: 'Arms', value: 'arms' }, // Maps to biceps, triceps, forearms
-  { label: 'Shoulders', value: 'shoulders' },
-  { label: 'Core', value: 'waist' },
-
-  // Specific V2 Bodyparts
-  { label: 'Biceps', value: 'biceps' },
-  { label: 'Triceps', value: 'triceps' },
-  { label: 'Forearms', value: 'forearms' },
-  { label: 'Quadriceps', value: 'quadriceps' },
-  { label: 'Hamstrings', value: 'hamstrings' },
-  { label: 'Calves', value: 'calves' },
-  { label: 'Glutes/Hips', value: 'hips' },
-  { label: 'Cardio', value: 'cardio' },
-  { label: 'Neck', value: 'neck' },
+  { label: 'All',        value: 'all' },
+  { label: 'Chest',      value: 'chest' },
+  { label: 'Back',       value: 'back' },
+  { label: 'Shoulders',  value: 'shoulders' },
+  { label: 'Arms',       value: 'arms' },       // → upper arms + lower arms
+  { label: 'Legs',       value: 'upper legs' }, // → upper legs
+  { label: 'Calves',     value: 'lower legs' }, // → lower legs
+  { label: 'Core',       value: 'core' },       // → waist
+  { label: 'Cardio',     value: 'cardio' },
+  { label: 'Neck',       value: 'neck' },
 ];
 
 const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelect = true }) => {
@@ -173,7 +165,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
             {/* Header */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-b border-white/5 z-10">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-black text-white">Add Exercise</h2>
+                <h2 className="text-xl font-bold text-white">Add Exercise</h2>
                 <button onClick={onClose} className="p-2 bg-zinc-900 rounded-full text-zinc-400 hover:text-white">
                   <X size={20} />
                 </button>
@@ -303,7 +295,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
             <div className="shrink-0 px-4 pb-3 border-t border-zinc-900 pt-3">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-[11px] font-mono font-bold uppercase tracking-widest transition-all rounded-[2px]"
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-[11px] font-bold uppercase tracking-widest transition-all rounded-lg"
               >
                 <PenLine size={12} /> Create Custom Exercise
               </button>
@@ -320,7 +312,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                 >
                   <button
                     onClick={handleConfirm}
-                    className="w-full bg-white text-black font-black py-4 rounded-xl shadow-glow active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                    className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-glow active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                   >
                     <Plus size={20} className="text-black" />
                     ADD {selectedIds.length} EXERCISES

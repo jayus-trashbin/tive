@@ -176,7 +176,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                        <h2 className="font-heading font-black text-white text-lg uppercase tracking-tight">
+                        <h2 className="font-heading font-bold text-white text-lg uppercase tracking-tight">
                             Add Routine
                         </h2>
                         <button
@@ -194,7 +194,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={cn(
-                                    'flex-1 flex items-center justify-center gap-1.5 py-2 font-mono text-[10px] font-black uppercase tracking-widest transition-all',
+                                    'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-[10px] font-bold uppercase tracking-widest transition-all',
                                     activeTab === tab.id
                                         ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30'
                                         : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
@@ -222,7 +222,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                 >
                                     <Check size={48} className="text-brand-primary" />
                                 </motion.div>
-                                <span className="font-mono text-sm font-bold text-brand-primary uppercase">
+                                <span className="font-medium text-sm font-bold text-brand-primary uppercase">
                                     Routine Created!
                                 </span>
                             </motion.div>
@@ -242,10 +242,10 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="font-heading font-black text-white text-sm uppercase">
+                                                <div className="font-heading font-bold text-white text-sm uppercase">
                                                     {template.name}
                                                 </div>
-                                                <div className="font-mono text-[10px] text-zinc-500 mt-0.5">
+                                                <div className="font-medium text-[10px] text-zinc-500 mt-0.5">
                                                     {template.category} · {template.exerciseCount} exercises
                                                 </div>
                                             </div>
@@ -262,7 +262,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                 {uniqueSessions.length === 0 ? (
                                     <div className="text-center py-10">
                                         <History size={32} className="text-zinc-700 mx-auto mb-2" />
-                                        <p className="font-mono text-xs text-zinc-500">
+                                        <p className="font-medium text-xs text-zinc-500">
                                             No workout history yet.
                                         </p>
                                     </div>
@@ -278,10 +278,10 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div>
-                                                        <div className="font-heading font-black text-white text-sm uppercase">
+                                                        <div className="font-heading font-bold text-white text-sm uppercase">
                                                             {session.name}
                                                         </div>
-                                                        <div className="font-mono text-[10px] text-zinc-500 mt-0.5">
+                                                        <div className="font-medium text-[10px] text-zinc-500 mt-0.5">
                                                             {exerciseCount} exercises · {setCount} sets · {new Date(session.date).toLocaleDateString()}
                                                         </div>
                                                     </div>
@@ -297,7 +297,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                         {/* JSON Import Tab */}
                         {activeTab === 'json' && (
                             <div className="space-y-4">
-                                <p className="font-mono text-[10px] text-zinc-400 leading-relaxed">
+                                <p className="font-medium text-[10px] text-zinc-400 leading-relaxed">
                                     Paste a JSON export from Hevy, Strong, or any app with exercise data.
                                     We'll detect the format automatically.
                                 </p>
@@ -305,10 +305,10 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                     value={jsonInput}
                                     onChange={(e) => { setJsonInput(e.target.value); setJsonError(null); }}
                                     placeholder='{"name": "My Routine", "exerciseIds": ["0025", "0027"]}'
-                                    className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-mono text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
+                                    className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-medium text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
                                 />
                                 {jsonError && (
-                                    <div className="flex items-center gap-2 text-red-400 font-mono text-[10px]">
+                                    <div className="flex items-center gap-2 text-red-400 font-medium text-[10px]">
                                         <AlertTriangle size={12} />
                                         {jsonError}
                                     </div>
@@ -317,7 +317,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                     onClick={handleJsonImport}
                                     disabled={!jsonInput.trim()}
                                     className={cn(
-                                        'w-full py-3 font-mono text-xs font-black uppercase tracking-widest transition-all',
+                                        'w-full py-3 font-medium text-xs font-bold uppercase tracking-widest transition-all',
                                         jsonInput.trim()
                                             ? 'btn-tech text-zinc-950'
                                             : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'

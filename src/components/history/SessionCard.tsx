@@ -7,9 +7,10 @@ import { Session, WorkoutSet } from '../../types';
 interface SessionCardProps {
     session: Session;
     onClick: () => void;
+    style?: React.CSSProperties;
 }
 
-export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick }) => {
+export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick, style }) => {
     const completedSets = session.sets.filter(s => s.isCompleted);
     const completedCount = completedSets.length;
     const isBestSet = session.sets.some(s => s.isPR);
@@ -49,6 +50,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick }) =>
 
     return (
         <motion.div
+            style={style}
             variants={{
                 hidden: { opacity: 0, y: 20 },
                 show: { opacity: 1, y: 0 }
@@ -58,13 +60,13 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick }) =>
             onClick={onClick}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
             aria-label={`Ver sessão: ${session.name}, ${formatDate(session.date)}`}
-            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 active:scale-[0.98] transition-all cursor-pointer hover:border-zinc-700"
+            className="p-1" // Wrapper padding for virtualized items
         >
-            <div className="w-full text-left p-0 overflow-hidden flex group cursor-pointer">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl active:scale-[0.98] transition-all cursor-pointer hover:border-zinc-700 w-full h-full text-left p-0 overflow-hidden flex group">
                 <div className={cn("w-1 shrink-0", getAccentColor(session.name))} />
                 <div className="flex-1 px-4 py-3.5 flex items-center gap-3">
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-heading font-bold text-white uppercase tracking-tight truncate group-hover:text-brand-primary transition-colors flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate group-hover:text-brand-primary transition-colors flex items-center gap-2">
                             {session.name}
                             {isBestSet && <Trophy size={12} className="text-yellow-500 fill-yellow-500/20" />}
                         </h3>
@@ -78,11 +80,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick }) =>
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                            <div className="text-sm font-heading font-bold text-white">{completedCount}</div>
+                            <div className="text-sm font-bold text-white">{completedCount}</div>
                             <div className="data-label">Sets</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm font-heading font-bold text-brand-primary flex items-center gap-1 justify-end">
+                            <div className="text-sm font-bold text-brand-primary flex items-center gap-1 justify-end">
                                 <TrendingUp size={10} />{getTotalVolume(completedSets)}
                             </div>
                             <div className="data-label">Vol</div>

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Zap } from 'lucide-react';
 
@@ -81,7 +81,7 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                             className="absolute inset-0 rounded-full pointer-events-none"
                             style={{ background: 'radial-gradient(circle, rgba(190,242,100,0.3) 0%, transparent 70%)' }}
                         />
-                        <div className="relative bg-zinc-950 border-2 border-brand-primary px-5 py-3 flex items-center gap-3 shadow-[0_0_40px_rgba(190,242,100,0.4)]">
+                        <div className="relative bg-zinc-950 border border-brand-primary/50 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg">
                             <motion.div
                                 initial={{ rotate: -25, scale: 0 }}
                                 animate={{ rotate: [-25, 15, -8, 5, 0], scale: 1 }}
@@ -91,21 +91,21 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                             </motion.div>
                             <div>
                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                    <Zap size={8} className="text-brand-primary" />
-                                    <span className="font-mono text-[9px] font-black text-brand-primary uppercase tracking-[0.2em]">
+                                    <Zap size={10} className="text-brand-primary" />
+                                    <span className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">
                                         New PR!
                                     </span>
                                 </div>
                                 {exerciseName && (
-                                    <div className="font-mono text-sm text-white font-bold leading-tight">
+                                    <div className="text-sm text-white font-bold leading-tight">
                                         {weight}kg x {reps}
                                     </div>
                                 )}
                                 {exerciseName && (
-                                    <div className="font-mono text-[9px] text-zinc-400 truncate max-w-[160px]">
+                                    <div className="text-xs text-zinc-400 truncate max-w-[160px] mt-0.5">
                                         {exerciseName}
                                         {estimated1RM && (
-                                            <span className="text-zinc-600"> e1RM {Math.round(estimated1RM)}kg</span>
+                                            <span className="text-zinc-600 ml-1"> e1RM {Math.round(estimated1RM)}kg</span>
                                         )}
                                     </div>
                                 )}
