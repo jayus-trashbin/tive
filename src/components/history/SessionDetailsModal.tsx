@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Session, Exercise } from '../../types';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
-import { X, Calendar, Clock, Dumbbell, Trophy, Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { X, Calendar, Clock, Dumbbell, Trophy, Trash2, TrendingUp, TrendingDown, Minus, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface Props {
@@ -196,60 +196,71 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
 
                         {/* Exercises Detail */}
                         <div className="space-y-6">
-                            {sessionExercises.map(({ exercise, sets }, i) => (
-                                <div key={i} className="animate-in slide-in-from-bottom-2 fade-in fill-mode-backwards" style={{ animationDelay: `${i * 50}ms` }}>
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 overflow-hidden shrink-0">
-                                            {exercise?.staticImageUrl || exercise?.gifUrl ? (
-                                                <img src={exercise?.staticImageUrl || exercise?.gifUrl} className="w-full h-full object-cover opacity-80" loading="lazy" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Dumbbell size={16} className="text-zinc-700" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-white text-sm">{exercise?.name || 'Unknown Exercise'}</h3>
-                                            <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{exercise?.targetMuscle}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="border border-white/5 rounded-2xl overflow-hidden bg-zinc-900/50">
-                                        <div className="grid grid-cols-[30px_1fr_1fr_1fr] bg-zinc-900 border-b border-white/5 py-1.5 px-3">
-                                            <div className="text-[9px] font-bold text-zinc-600 text-center">#</div>
-                                            <div className="text-[9px] font-bold text-zinc-600 text-center">KG</div>
-                                            <div className="text-[9px] font-bold text-zinc-600 text-center">REPS</div>
-                                            <div className="text-[9px] font-bold text-zinc-600 text-center">1RM</div>
-                                        </div>
-                                        {sets.map((set, idx) => (
-                                            <div key={set.id} className={cn(
-                                                "grid grid-cols-[30px_1fr_1fr_1fr] py-2 px-3 items-center border-b border-white/5 last:border-0",
-                                                set.isPR && "bg-brand-warning/5"
-                                            )}>
-                                                <div className="flex justify-center">
-                                                    <span className={cn(
-                                                        "w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold",
-                                                        set.type === 'warmup' ? "bg-yellow-500/20 text-yellow-500" :
-                                                            set.type === 'failure' ? "bg-red-500/20 text-red-500" :
-                                                                "bg-zinc-800 text-zinc-400"
-                                                    )}>{idx + 1}</span>
-                                                </div>
-                                                <div className="text-center font-bold text-sm text-white">{set.weight}</div>
-                                                <div className="text-center font-bold text-sm text-white">{set.reps}</div>
-                                                <div className="text-center text-xs font-medium text-zinc-500">
-                                                    {set.isPR ? (
-                                                        <span className="text-brand-warning font-bold flex items-center justify-center gap-1">
-                                                            {set.estimated1RM} <Trophy size={8} />
-                                                        </span>
-                                                    ) : (
-                                                        set.estimated1RM
-                                                    )}
-                                                </div>
+                            {sessionExercises.map(({ exercise, sets }, i) => {
+                                const note = exercise ? session.notes?.[exercise.id] : undefined;
+                                return (
+                                    <div key={i} className="animate-in slide-in-from-bottom-2 fade-in fill-mode-backwards" style={{ animationDelay: `${i * 50}ms` }}>
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 overflow-hidden shrink-0">
+                                                {exercise?.staticImageUrl || exercise?.gifUrl ? (
+                                                    <img src={exercise?.staticImageUrl || exercise?.gifUrl} className="w-full h-full object-cover opacity-80" loading="lazy" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <Dumbbell size={16} className="text-zinc-700" />
+                                                    </div>
+                                                )}
                                             </div>
-                                        ))}
+                                            <div>
+                                                <h3 className="font-bold text-white text-sm">{exercise?.name || 'Unknown Exercise'}</h3>
+                                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{exercise?.targetMuscle}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-zinc-900/50">
+                                            <div className="grid grid-cols-[30px_1fr_1fr_1fr] bg-zinc-900 border-b border-white/5 py-1.5 px-3">
+                                                <div className="text-[9px] font-bold text-zinc-600 text-center">#</div>
+                                                <div className="text-[9px] font-bold text-zinc-600 text-center">KG</div>
+                                                <div className="text-[9px] font-bold text-zinc-600 text-center">REPS</div>
+                                                <div className="text-[9px] font-bold text-zinc-600 text-center">1RM</div>
+                                            </div>
+                                            {sets.map((set, idx) => (
+                                                <div key={set.id} className={cn(
+                                                    "grid grid-cols-[30px_1fr_1fr_1fr] py-2 px-3 items-center border-b border-white/5 last:border-0",
+                                                    set.isPR && "bg-brand-warning/5"
+                                                )}>
+                                                    <div className="flex justify-center">
+                                                        <span className={cn(
+                                                            "w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold",
+                                                            set.type === 'warmup' ? "bg-yellow-500/20 text-yellow-500" :
+                                                                set.type === 'failure' ? "bg-red-500/20 text-red-500" :
+                                                                    "bg-zinc-800 text-zinc-400"
+                                                        )}>{idx + 1}</span>
+                                                    </div>
+                                                    <div className="text-center font-bold text-sm text-white">{set.weight}</div>
+                                                    <div className="text-center font-bold text-sm text-white">{set.reps}</div>
+                                                    <div className="text-center text-xs font-medium text-zinc-500">
+                                                        {set.isPR ? (
+                                                            <span className="text-brand-warning font-bold flex items-center justify-center gap-1">
+                                                                {set.estimated1RM} <Trophy size={8} />
+                                                            </span>
+                                                        ) : (
+                                                            set.estimated1RM
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Session note for this exercise */}
+                                        {note && (
+                                            <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-zinc-900/60 border border-zinc-800 rounded-xl">
+                                                <FileText size={11} className="text-zinc-500 mt-0.5 shrink-0" />
+                                                <p className="text-[11px] text-zinc-300 leading-relaxed">{note}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <div className="pt-8 flex justify-center" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 2rem)` }}>

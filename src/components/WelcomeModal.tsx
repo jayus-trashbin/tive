@@ -96,7 +96,8 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
 
       {/* Progress Header */}
       {step < 4 && (
-        <div className="relative z-10 px-6 pt-safe mt-8 flex justify-between items-center max-w-md mx-auto w-full">
+        <div className="relative z-10 px-6 pt-safe mt-12 flex justify-between items-center max-w-md mx-auto w-full">
+
             <div className="flex gap-2">
                 {[1, 2, 3].map(i => (
                     <motion.div 
@@ -158,7 +159,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                     key={g}
                                     onClick={() => setGender(g)}
                                     className={cn(
-                                        "flex-1 py-3 text-sm font-bold uppercase tracking-wider rounded-xl transition-all",
+                                        "flex-1 py-4 text-sm font-bold uppercase tracking-wider rounded-xl transition-all",
                                         gender === g 
                                             ? "bg-white text-black shadow-lg" 
                                             : "text-zinc-500 hover:text-white"
@@ -166,6 +167,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                 >
                                     {g}
                                 </button>
+
                             ))}
                         </div>
 

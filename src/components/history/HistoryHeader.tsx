@@ -34,6 +34,7 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                 <div className="flex p-0.5 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <button
                         onClick={() => setViewMode('journal')}
+                        aria-label="Journal View"
                         className={cn(
                             "p-3 rounded-lg transition-all",
                             viewMode === 'journal' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
@@ -41,8 +42,10 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                     >
                         <List size={20} />
                     </button>
+
                     <button
                         onClick={() => setViewMode('analytics')}
+                        aria-label="Analytics View"
                         className={cn(
                             "p-3 rounded-lg transition-all",
                             viewMode === 'analytics' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
@@ -50,6 +53,7 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                     >
                         <BarChart3 size={20} />
                     </button>
+
                 </div>
             </div>
 
@@ -68,10 +72,12 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                     </div>
                     <button
                         onClick={onShowCalendar}
+                        aria-label="Show Calendar"
                         className="px-3 bg-zinc-900 border border-zinc-800 hover:border-brand-primary/50 text-zinc-400 hover:text-brand-primary transition-colors rounded-xl"
                     >
                         <CalendarIcon size={18} />
                     </button>
+
                 </div>
             )}
         </header>

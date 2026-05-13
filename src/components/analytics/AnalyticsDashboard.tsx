@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { BarChart3, Activity, Calendar, TrendingUp, Filter, Target, Dumbbell, Download, Upload, Trophy, AlertCircle } from 'lucide-react';
+import { BarChart3, Activity, Calendar, TrendingUp, Filter, Target, Dumbbell, Download, Upload, Trophy, AlertCircle, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import VolumeChart from './VolumeChart';
 import OneRMProgress from './OneRMProgress';
@@ -9,8 +9,9 @@ import PRTimeline from './PRTimeline';
 import WeeklyMuscleComparison from './WeeklyMuscleComparison';
 import TopExercises from './TopExercises';
 import ChartErrorBoundary from './ChartErrorBoundary';
+import RecoveryTimeline from './RecoveryTimeline';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
-import { exportToCSV, downloadCSV, downloadJSON, parseBackupJSON } from '../../utils/exportImport';
+import { exportToCSV, downloadCSV, downloadJSON, parseBackupJSON, parseHevyCSV, parseStrongCSV } from '../../utils/exportImport';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -23,6 +24,8 @@ const AnalyticsDashboard: React.FC = () => {
     const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D' | 'ALL'>('30D');
     const [importMsg, setImportMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const hevyInputRef = useRef<HTMLInputElement>(null);
+    const strongInputRef = useRef<HTMLInputElement>(null);
 
     const history = useWorkoutStore(s => s.history);
     const exercises = useWorkoutStore(s => s.exercises);
@@ -56,25 +59,45 @@ const AnalyticsDashboard: React.FC = () => {
         downloadJSON(backup, `tive-backup-${date}.json`);
     };
 
-    // A-07: Import JSON
+    const applyImportResult = (result: ReturnType<typeof parseBackupJSON>, ref: React.RefObject<HTMLInputElement>) => {
+        if (result.error) {
+            setImportMsg({ type: 'error', text: result.error });
+        } else {
+            const newSessions = result.sessions.filter(s => !history.find(h => h.id === s.id));
+            mergeRemoteData(newSessions, [], result.exercises);
+            setImportMsg({
+                type: 'success',
+                text: `Imported ${newSessions.length} sessions & ${result.exercises.length} exercises.`,
+            });
+        }
+        setTimeout(() => setImportMsg(null), 5000);
+        if (ref.current) ref.current.value = '';
+    };
+
+    // A-07: Import JSON (Tive backup)
     const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            const text = ev.target?.result as string;
-            const result = parseBackupJSON(text);
-            if (result.error) {
-                setImportMsg({ type: 'error', text: result.error });
-            } else {
-                // Merge sessions and exercises using the existing store action
-                const newSessions = result.sessions.filter(s => !history.find(h => h.id === s.id));
-                mergeRemoteData(newSessions, [], result.exercises);
-                setImportMsg({ type: 'success', text: `Imported ${newSessions.length} new sessions & ${result.exercises.length} exercises.` });
-            }
-            setTimeout(() => setImportMsg(null), 4000);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        };
+        reader.onload = ev => applyImportResult(parseBackupJSON(ev.target?.result as string), fileInputRef);
+        reader.readAsText(file);
+    };
+
+    // A-07b: Import Hevy CSV
+    const handleImportHevy = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => applyImportResult(parseHevyCSV(ev.target?.result as string), hevyInputRef);
+        reader.readAsText(file);
+    };
+
+    // A-07c: Import Strong CSV
+    const handleImportStrong = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => applyImportResult(parseStrongCSV(ev.target?.result as string), strongInputRef);
         reader.readAsText(file);
     };
 
@@ -132,18 +155,28 @@ const AnalyticsDashboard: React.FC = () => {
                         </button>
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            title="Import backup JSON"
+                            title="Import Tive backup JSON"
                             className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-400/30 rounded-lg transition-all bg-zinc-900"
                         >
-                            <Upload size={10} /> Import
+                            <Upload size={10} /> JSON
                         </button>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".json"
-                            className="hidden"
-                            onChange={handleImportJSON}
-                        />
+                        <button
+                            onClick={() => hevyInputRef.current?.click()}
+                            title="Import Hevy CSV"
+                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-blue-400 border border-zinc-800 hover:border-blue-400/30 rounded-lg transition-all bg-zinc-900"
+                        >
+                            <Upload size={10} /> Hevy
+                        </button>
+                        <button
+                            onClick={() => strongInputRef.current?.click()}
+                            title="Import Strong CSV"
+                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-purple-400 border border-zinc-800 hover:border-purple-400/30 rounded-lg transition-all bg-zinc-900"
+                        >
+                            <Upload size={10} /> Strong
+                        </button>
+                        <input ref={fileInputRef}  type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
+                        <input ref={hevyInputRef}  type="file" accept=".csv"  className="hidden" onChange={handleImportHevy} />
+                        <input ref={strongInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportStrong} />
                     </div>
                 </div>
 
@@ -264,6 +297,20 @@ const AnalyticsDashboard: React.FC = () => {
                     <ChartErrorBoundary>
                         <PRTimeline />
                     </ChartErrorBoundary>
+                </section>
+
+                {/* 7. Recovery Timeline — 14-day muscle readiness */}
+                <section>
+                    <div className="flex items-center mb-3 px-1">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <Zap size={12} className="text-brand-primary" /> 14-Day Recovery Timeline
+                        </h2>
+                    </div>
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                        <ChartErrorBoundary>
+                            <RecoveryTimeline />
+                        </ChartErrorBoundary>
+                    </div>
                 </section>
 
                 {/* Footer */}

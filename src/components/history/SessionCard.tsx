@@ -27,9 +27,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick, styl
 
     const formatDuration = () => {
         if (completedCount === 0) return '—';
-        const lastTimestamp = Math.max(...completedSets.map(s => s.timestamp));
-        const diff = Math.floor((lastTimestamp - session.date) / 60000);
-        return `${diff}m`;
+        const end = session.endTime ?? Math.max(...completedSets.map(s => s.timestamp));
+        const diff = Math.floor((end - session.date) / 60000);
+        return diff > 0 ? `${diff}m` : '—';
     };
 
     const getTotalVolume = (sets: WorkoutSet[]) => {

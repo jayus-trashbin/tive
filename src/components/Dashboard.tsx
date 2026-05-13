@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useActiveSessions } from '../store/selectors';
 import { logger } from '../utils/logger';
 import { calculateCurrentStreak, getWeeklyStats, calculateACWR } from '../utils/engine';
 import { usePhysiology } from '../hooks/usePhysiology';
@@ -11,6 +12,7 @@ import {
     NextMission,
     MuscleReadiness
 } from './dashboard/index';
+import { getAvgSessionDuration } from '../utils/analytics';
 import ACWRCard from './analytics/ACWRCard';
 import { InsightsPanel } from './analytics/InsightsPanel';
 import { StrengthStandards } from './analytics/StrengthStandards';
@@ -26,7 +28,7 @@ import SocialHub from './social/SocialHub';
  *   4. MuscleReadiness (Fatigue / Recovery)
  */
 const Dashboard: React.FC = () => {
-    const history = useWorkoutStore(s => s.history);
+    const history = useActiveSessions();
     const userStats = useWorkoutStore(s => s.userStats);
     const routines = useWorkoutStore(s => s.routines);
     const startSession = useWorkoutStore(s => s.startSession);
@@ -81,6 +83,11 @@ const Dashboard: React.FC = () => {
         } catch (e) { logger.warn('Dashboard', 'Readiness calculation failed', e); return []; }
     }, [calculateReadiness]);
 
+    const avgDurationMin = useMemo(() => {
+        try { return getAvgSessionDuration(history); }
+        catch (e) { return null; }
+    }, [history]);
+
     const acwr = useMemo(() => {
         try { return calculateACWR(history); }
         catch (e) { return null; }
@@ -93,9 +100,10 @@ const Dashboard: React.FC = () => {
         >
             <DashboardHeader />
 
-            <MetricStrip 
-                sessionCount={weeklyStats.count} 
+            <MetricStrip
+                sessionCount={weeklyStats.count}
                 formattedVolume={formattedVolume}
+                avgDurationMin={avgDurationMin}
                 streakCard={<StreakCard streak={streak} history={history} />}
             />
 

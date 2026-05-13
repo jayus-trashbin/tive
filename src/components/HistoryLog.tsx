@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
-import { Dumbbell, TrendingUp, BarChart3, LayoutGrid } from 'lucide-react';
+import { useActiveSessions } from '../store/selectors';
+import { startOfDay, endOfDay } from '../utils/date';
+import { Calendar, Search, TrendingUp, LayoutGrid, Dumbbell, BarChart3, Filter } from 'lucide-react';
+import { Button, EmptyState } from './ui';
 import { cn } from '../lib/utils';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +15,6 @@ import {
 } from './history';
 import VolumeChart from './analytics/VolumeChart';
 import MuscleRadar from './analytics/MuscleRadar';
-import EmptyState from './ui/EmptyState';
 
 /**
  * History Log — Training Journal & Analytics
@@ -22,7 +24,7 @@ import EmptyState from './ui/EmptyState';
  * - SessionDetailsModal & CalendarModal
  */
 const HistoryLog: React.FC = () => {
-    const history = useWorkoutStore(s => s.history);
+    const history = useActiveSessions();
     const exercises = useWorkoutStore(s => s.exercises);
 
     const [viewMode, setViewMode] = useState<'journal' | 'analytics'>('journal');
@@ -64,9 +66,10 @@ const HistoryLog: React.FC = () => {
                 {viewMode === 'journal' ? (
                     filteredSessions.length === 0 ? (
                         <EmptyState
-                            icon={Dumbbell}
+                            icon={searchQuery ? Filter : Dumbbell}
                             title={searchQuery ? 'No Matches' : 'Your Journey Starts Here'}
                             description={searchQuery ? 'Try a different search term' : 'Complete your first workout to see it logged here'}
+                            subtitle={searchQuery ? 'Filtered' : undefined}
                         />
                     ) : (
                         <div className="mt-4 flex-1 h-full w-full">
@@ -102,16 +105,15 @@ const HistoryLog: React.FC = () => {
                                         </div>
                                         <div className="flex bg-zinc-900 border border-zinc-800 p-0.5 rounded-xl">
                                             {(['7D', '30D', '90D'] as const).map((r) => (
-                                                <button
+                                                <Button
                                                     key={r}
+                                                    variant={performanceRange === r ? 'primary' : 'ghost'}
+                                                    size="sm"
                                                     onClick={() => setPerformanceRange(r)}
-                                                    className={cn(
-                                                        "px-2.5 py-1 text-[9px] font-bold transition-colors cursor-pointer rounded-lg",
-                                                        performanceRange === r ? "bg-brand-primary text-black" : "text-zinc-500 hover:text-zinc-300"
-                                                    )}
+                                                    className="px-3 py-1 text-caption-xs font-bold"
                                                 >
                                                     {r}
-                                                </button>
+                                                </Button>
                                             ))}
                                         </div>
                                     </div>
@@ -130,11 +132,12 @@ const HistoryLog: React.FC = () => {
                                 </div>
                             </>
                         ) : (
-                            <EmptyState
-                                icon={BarChart3}
-                                title="No Data Yet"
-                                description="Complete workouts to unlock analytics"
-                            />
+                             <EmptyState
+                                 icon={BarChart3}
+                                 title="No Data Yet"
+                                 description="Complete workouts to unlock analytics"
+                                 subtitle="Analytics"
+                             />
                         )}
                     </div>
                 )}
@@ -156,8 +159,8 @@ const HistoryLog: React.FC = () => {
                 onSelectDate={(date) => {
                     setSelectedDate(date);
                     if (date) {
-                        const dayStart = new Date(date).setHours(0, 0, 0, 0);
-                        const dayEnd = new Date(date).setHours(23, 59, 59, 999);
+                        const dayStart = startOfDay(date.getTime());
+                        const dayEnd = endOfDay(date.getTime());
                         const match = history.find(s => s.date >= dayStart && s.date <= dayEnd);
                         if (match) {
                             setShowCalendar(false);

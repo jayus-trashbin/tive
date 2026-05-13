@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { useUIStore } from "../store/useUIStore";
 import { Exercise, WorkoutSet, MuscleGroup, Session } from '../types';
-import { ChevronDown, Calculator, CheckCircle2, Plus, Dumbbell } from 'lucide-react';
+import { ChevronDown, Calculator, CheckCircle2, Plus, Dumbbell, AlertTriangle, TrendingDown } from 'lucide-react';
 import ExerciseGroup from './active-session/ExerciseGroup';
 import SupersetGroup from './active-session/SupersetGroup';
 import PlateCalculator from './active-session/PlateCalculator';
 import { RestTimerOverlay } from './active-session/RestTimerOverlay';
 import { useAutoScroll } from '../hooks/useAutoScroll';
+import { useAutoRegulation } from '../hooks/useAutoRegulation';
 import { useSessionTimer } from '../hooks/useSessionTimer';
 import ExercisePicker from './exercise/ExercisePicker';
 import { usePhysiology } from '../hooks/usePhysiology';
@@ -16,6 +17,7 @@ import { getExerciseById } from '../services/exerciseService';
 import { cn } from '../lib/utils';
 import LiveMuscleHeatmap from './active-session/LiveMuscleHeatmap';
 import PRCelebration from './active-session/PRCelebration';
+import { Button, EmptyState } from './ui';
 
 import {
     DndContext,
@@ -87,6 +89,8 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     const [prEvent, setPrEvent] = useState<{ id: string; name: string; weight: number; reps: number } | null>(null);
     const [seenSetIds, setSeenSetIds] = useState<Set<string>>(new Set());
 
+    const { message: autoRegMessage, analyzeSet: analyzeAutoReg, clearMessage: clearAutoReg } = useAutoRegulation();
+
     const { registerRef, scrollToExercise } = useAutoScroll();
 
     // DND Sensors
@@ -103,6 +107,21 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
             reorderExercises(oldIndex, newIndex);
         }
     };
+
+    // --- AUTO-REGULATION: Analyse each newly completed set for RPE feedback ---
+    useEffect(() => {
+        if (!activeSession) return;
+        const completedSets = activeSession.sets.filter(s => s.isCompleted);
+        const newSets = completedSets.filter(s => !seenSetIds.has(s.id));
+        if (newSets.length === 0) return;
+
+        // Use the last completed set (most recent) for the analysis
+        const latest = newSets[newSets.length - 1];
+        if (latest.rpe > 0) {
+            const targetRpe = latest.targetRpe ?? 7;
+            analyzeAutoReg(latest, targetRpe);
+        }
+    }, [activeSession?.sets.filter(s => s.isCompleted).length]);
 
     // --- PR DETECTION: Check new completed sets against history ---
     useEffect(() => {
@@ -260,6 +279,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
 
             // Finish the session in store (clears activeSession)
             finishSession();
+            useUIStore.getState().addNotification('Workout completed! Stay strong. 🔥', 'success');
 
             // Trigger photo prompt
             if (muscleGroups.length > 0) {
@@ -281,6 +301,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
         }
         onFinish();
     };
+
 
     const handleAddExercises = (newIds: string[]) => {
         newIds.forEach(id => {
@@ -335,12 +356,13 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         <span className="text-sm font-medium text-zinc-300 tabular-nums">
                             {duration}
                         </span>
-                        <button
+                        <Button
+                            variant="primary"
+                            size="sm"
                             onClick={() => setShowFinishModal(true)}
-                            className="px-4 py-2 bg-brand-primary text-black font-semibold text-sm rounded-full active:scale-95 transition-transform"
                         >
                             Finish
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -353,6 +375,34 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         transition={{ duration: 0.5 }}
                     />
                 </div>
+
+                {/* Auto-Regulation Banner */}
+                <AnimatePresence>
+                    {autoRegMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden mt-2"
+                        >
+                            <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] font-bold text-amber-400">
+                                {autoRegMessage.includes('High') ? (
+                                    <TrendingDown size={12} className="shrink-0" />
+                                ) : (
+                                    <AlertTriangle size={12} className="shrink-0" />
+                                )}
+                                <span className="flex-1">{autoRegMessage}</span>
+                                <button
+                                    onClick={clearAutoReg}
+                                    className="text-amber-600 hover:text-amber-400 transition-colors ml-1"
+                                    aria-label="Dismiss"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </header>
 
             {/* ──── EXERCISE LIST ──── */}
@@ -381,13 +431,12 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     {/* Exercises */}
                     <div className="space-y-4">
                         {sessionExercises.length === 0 ? (
-                            <div className="card border-dashed border-zinc-700/50 p-8 text-center flex flex-col items-center justify-center bg-zinc-900/50">
-                                <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                                    <Dumbbell className="text-zinc-500" size={20} />
-                                </div>
-                                <h3 className="text-white font-semibold text-lg mb-1">Session Empty</h3>
-                                <p className="text-zinc-400 text-sm mb-5 max-w-[200px]">Add an exercise to get started</p>
-                            </div>
+                            <EmptyState
+                                icon={Dumbbell}
+                                title="Session Empty"
+                                description="Add an exercise to get started"
+                                compact
+                            />
                         ) : (
                             renderGroups.map((group) => {
                                 if (group.type === 'superset') {
@@ -435,12 +484,16 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     </div>
 
                     {/* Add Exercise */}
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="lg"
+                        fullWidth
+                        iconLeft={Plus}
                         onClick={() => setShowExercisePicker(true)}
-                        className="w-full py-4 border border-dashed border-zinc-800 hover:border-brand-primary hover:text-brand-primary text-zinc-400 transition-all flex items-center justify-center gap-2 font-medium text-sm rounded-2xl active:scale-[0.99] bg-zinc-900/50"
+                        className="border-dashed border-zinc-800 hover:border-brand-primary bg-zinc-900/30"
                     >
-                        <Plus size={18} /> Add Exercise
-                    </button>
+                        Add Exercise
+                    </Button>
                 </div>
             </div>
 
@@ -480,7 +533,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                 {showFinishModal && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+                        className="fixed inset-0 z-modal bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
@@ -495,18 +548,22 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                             </p>
 
                             <div className="flex flex-col gap-3">
-                                <button
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    fullWidth
                                     onClick={handleFinish}
-                                    className="w-full py-4 btn-primary text-sm rounded-xl"
                                 >
                                     Finish Workout
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="md"
+                                    fullWidth
                                     onClick={() => setShowFinishModal(false)}
-                                    className="w-full py-3 bg-zinc-900 text-zinc-400 font-bold text-sm uppercase hover:text-white transition-colors rounded-xl border border-zinc-800"
                                 >
                                     Keep Going
-                                </button>
+                                </Button>
                             </div>
                         </motion.div>
                     </motion.div>

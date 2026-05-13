@@ -35,7 +35,7 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
           {/* Backdrop (Invisible hit area to close) */}
           <div 
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px]"
+            className="fixed inset-0 z-modal bg-black/20 backdrop-blur-[2px]"
           />
 
           {/* Floating Compact Bar */}
@@ -44,7 +44,7 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 100, opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-safe left-4 right-4 z-[101] mb-4"
+            className="fixed bottom-safe left-4 right-4 z-overlay mb-4"
           >
             <div className="bg-zinc-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-2">
                 

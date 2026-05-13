@@ -2,8 +2,8 @@ import React from 'react';
 import { Target, Play, Dumbbell, Zap, Calendar, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Routine } from '../../types';
-import { cn } from '../../lib/utils';
 import { estimateRoutineDuration } from '../../utils/engine';
+import { Button, EmptyState } from '../ui';
 
 interface NextMissionProps {
     nextRoutine: Routine | null;
@@ -60,14 +60,14 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
 };
 
 const EmptyMission: React.FC = () => (
-    <div className="card border-dashed border-zinc-700/50 p-8 text-center flex flex-col items-center justify-center bg-zinc-900/50">
-        <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-            <Calendar size={20} className="text-zinc-500" />
-        </div>
-        <h3 className="text-white font-semibold text-lg mb-1">No Routine Scheduled</h3>
-        <p className="text-zinc-400 text-sm mb-5 max-w-[200px]">Create a routine to start tracking your progress.</p>
-        <button className="btn-primary py-2 px-4 text-sm w-full max-w-[180px]">
-            <Plus size={16} /> New Routine
-        </button>
-    </div>
+    <EmptyState
+        icon={Calendar}
+        title="No Routine Scheduled"
+        description="Create a routine to start tracking your progress."
+        action={{
+            label: "New Routine",
+            onClick: () => { /* Handle new routine */ },
+            icon: Plus
+        }}
+    />
 );

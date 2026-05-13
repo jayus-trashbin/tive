@@ -5,12 +5,17 @@ import {
     X, Settings, Activity, CheckCircle2
 } from 'lucide-react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useActiveSessions } from '../store/selectors';
+import { useUIStore } from '../store/useUIStore';
 import { syncService } from '../services/SyncService';
+
 import { photoSyncService } from '../services/PhotoSyncService';
 import { credentialsStore } from '../utils/credentialsStore';
 import { cn } from '../lib/utils';
 import { ProfileStats } from './profile/ProfileStats';
 import { ProfileSettings } from './profile/ProfileSettings';
+import { IconButton } from './ui';
+
 
 interface Props {
     isOpen: boolean;
@@ -20,7 +25,7 @@ interface Props {
 const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const userStats = useWorkoutStore(state => state.userStats);
     const updateUserStats = useWorkoutStore(state => state.updateUserStats);
-    const history = useWorkoutStore(state => state.history);
+    const activeSessions = useActiveSessions();
     const exercises = useWorkoutStore(state => state.exercises);
     const resetStorage = useWorkoutStore(state => state.resetStorage);
     const [activeTab, setActiveTab] = useState<'stats' | 'settings'>('stats');
@@ -84,15 +89,19 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
             if (isValid) {
                 setStatusMsg({ type: 'success', text: 'Connection Successful! Syncing...' });
+                useUIStore.getState().addNotification('Cloud connection successful. Sync started.', 'success');
                 syncService.sync();
                 setTimeout(() => setStatusMsg(null), 3000);
             } else {
                 setStatusMsg({ type: 'error', text: 'Connection Failed. Check URL/Key.' });
+                useUIStore.getState().addNotification('Cloud connection failed. Please check your credentials.', 'error');
             }
         } else {
             setStatusMsg({ type: 'success', text: 'Settings Saved' });
+            useUIStore.getState().addNotification('Settings saved locally.', 'success');
             setTimeout(() => setStatusMsg(null), 2000);
         }
+
     };
 
     const handleReset = () => {
@@ -107,7 +116,8 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center pointer-events-none">
+        <div className="fixed inset-0 z-modal flex items-end justify-center pointer-events-none">
+
             {/* Backdrop with heavy blur */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -142,12 +152,13 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                             ) : 'Local Storage Only'}
                         </div>
                     </div>
-                    <button
+                    <IconButton
+                        icon={X}
+                        aria-label="Close Profile"
+                        variant="default"
                         onClick={onClose}
-                        className="w-10 h-10 bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors rounded-xl border border-zinc-800"
-                    >
-                        <X size={20} />
-                    </button>
+                    />
+
                 </div>
 
                 {/* Tabs */}
@@ -188,7 +199,7 @@ const ProfileModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {/* Scrollable Content Container */}
                 {activeTab === 'stats' ? (
                     <div className="flex-1 overflow-y-auto px-6 space-y-6 bg-gradient-to-b from-zinc-950/0 to-zinc-950/50 pb-safe">
-                        <ProfileStats history={history} exercises={exercises} userStats={userStats} />
+                        <ProfileStats history={activeSessions} exercises={exercises} userStats={userStats} />
                     </div>
                 ) : (
                     <ProfileSettings

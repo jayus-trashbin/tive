@@ -40,10 +40,10 @@ const SetRow: React.FC<Props> = ({
 
     const getTypeStyle = (type?: SetType) => {
         switch (type) {
-            case 'warmup': return "text-brand-warning border-brand-warning/30 bg-brand-warning/10";
-            case 'failure': return "text-brand-danger border-brand-danger/30 bg-brand-danger/10";
-            case 'drop': return "text-purple-400 border-purple-400/30 bg-purple-400/10";
-            default: return "text-zinc-400 border-zinc-700 bg-zinc-800/50";
+            case 'warmup': return "text-brand-warning bg-brand-warning/10";
+            case 'failure': return "text-brand-danger bg-brand-danger/10";
+            case 'drop':    return "text-brand-accent  bg-brand-accent/10";
+            default:        return "text-zinc-400 bg-zinc-800/50";
         }
     };
 
@@ -63,13 +63,13 @@ const SetRow: React.FC<Props> = ({
                 <div className="absolute inset-0 bg-red-900/20 rounded-2xl flex items-center justify-end px-4 gap-4 z-0">
                     <button 
                         onClick={() => onClone?.()} 
-                        className="w-10 h-10 bg-blue-500/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
+                        className="w-10 h-10 bg-brand-accent/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
                     >
                         <Copy size={18} />
                     </button>
                     <button 
                         onClick={() => onDelete()} 
-                        className="w-10 h-10 bg-red-500/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
+                        className="w-10 h-10 bg-brand-danger/80 rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg"
                     >
                         <Trash2 size={18} />
                     </button>
@@ -87,137 +87,104 @@ const SetRow: React.FC<Props> = ({
                         if (info.offset.x < -100) onDelete();
                     }}
                     className={cn(
-                        "relative z-10 grid gap-1.5 items-center p-1.5 rounded-2xl border transition-colors duration-200 will-change-transform",
-                        "grid-cols-[36px_1fr_1fr_44px_50px]",
+                        "relative z-10 grid gap-2 items-center px-3 py-2 transition-colors duration-200 will-change-transform rounded-xl",
+                        "grid-cols-[36px_1fr_48px_48px_32px_44px]",
                         isCompleted
-                            ? "bg-zinc-950 border-brand-success/30"
-                            : "bg-zinc-900 border-white/5"
+                            ? "bg-zinc-950 border border-brand-success/30"
+                            : "bg-zinc-900" // Solid background to hide swipe actions underneath
                     )}
                 >
                     {/* 1. Set Type Indicator */}
-                    <button
-                        onClick={handleTypeToggle}
-                        className={cn(
-                            "h-full min-h-[44px] flex items-center justify-center rounded-xl text-xs font-bold border",
-                            getTypeStyle(set.type)
-                        )}
+                    <div className="flex justify-center items-center h-full min-h-[44px]">
+                        <button
+                            onClick={handleTypeToggle}
+                            className={cn(
+                                "h-8 w-8 mx-auto flex items-center justify-center rounded-md text-xs font-bold transition-colors active:scale-95",
+                                getTypeStyle(set.type)
+                            )}
+                        >
+                            {getTypeLabel(set.type)}
+                        </button>
+                    </div>
+
+                    {/* 2. Previous Performance */}
+                    <div 
+                        className="text-[11px] text-zinc-500 font-medium truncate cursor-pointer hover:text-zinc-300 transition-colors pl-1 select-none flex items-center h-full min-h-[44px]"
+                        onClick={() => {
+                            if (previousSet) {
+                                onUpdate('weight', previousSet.weight);
+                                onUpdate('reps', previousSet.reps);
+                            }
+                        }}
                     >
-                        {getTypeLabel(set.type)}
-                    </button>
+                        {previousSet ? `${previousSet.weight}kg × ${previousSet.reps}` : '-'}
+                    </div>
 
-                    {/* 2. Weight Input Island */}
-                    <div className={cn(
-                        "relative h-full min-h-[48px] rounded-xl flex flex-col items-center justify-center px-1",
-                        isCompleted ? "opacity-80" : "bg-zinc-950 border border-zinc-800"
-                    )}>
-                        {/* Floating Label (Hidden on small screens) */}
-                        {!isCompleted && (
-                            <div className="absolute top-1 right-2 text-[7px] font-bold text-zinc-600 pointer-events-none uppercase">
-                                KG
-                            </div>
-                        )}
-
+                    {/* 3. Weight Input */}
+                    <div className="relative flex items-center justify-center h-full min-h-[44px]">
                         <input
                             id={getInputId('weight')}
                             type="number"
                             inputMode="decimal"
                             value={set.weight === 0 ? '' : set.weight}
-                            placeholder={previousSet ? String(previousSet.weight) : '-'}
+                            placeholder="-"
                             onChange={(e) => handleChange(e, 'weight')}
                             onFocus={(e) => e.target.select()}
                             className={cn(
-                                "w-full bg-transparent text-center text-lg font-bold focus:outline-none placeholder:text-zinc-800",
-                                isCompleted ? "text-brand-success" : "text-white",
-                                previousSet && !isCompleted ? "leading-none mt-2" : ""
+                                "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
+                                isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
                             )}
                         />
-                        {previousSet && !isCompleted && (
-                            <button
-                                onClick={() => {
-                                    const suggested = getSuggestedWeight(previousSet);
-                                    if (suggested) onUpdate('weight', suggested);
-                                }}
-                                className="text-[9px] text-zinc-500 font-medium mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
-                            >
-                                Suggest: {getSuggestedWeight(previousSet)}
-                            </button>
-                        )}
                     </div>
 
-                    {/* 3. Reps Input Island */}
-                    <div className={cn(
-                        "relative h-full min-h-[48px] rounded-xl flex flex-col items-center justify-center px-1",
-                        isCompleted ? "opacity-80" : "bg-zinc-950 border border-zinc-800"
-                    )}>
-                        {!isCompleted && (
-                            <div className="absolute top-1 right-2 text-[7px] font-bold text-zinc-600 pointer-events-none uppercase">
-                                Reps
-                            </div>
-                        )}
-
+                    {/* 4. Reps Input */}
+                    <div className="relative flex items-center justify-center h-full min-h-[44px]">
                         <input
                             id={getInputId('reps')}
                             type="number"
                             inputMode="numeric"
                             value={set.reps === 0 ? '' : set.reps}
-                            placeholder={previousSet ? String(previousSet.reps) : '-'}
+                            placeholder="-"
                             onChange={(e) => handleChange(e, 'reps')}
                             onFocus={(e) => e.target.select()}
                             className={cn(
-                                "w-full bg-transparent text-center text-lg font-bold focus:outline-none placeholder:text-zinc-800",
-                                isCompleted ? "text-brand-success" : "text-white",
-                                previousSet && !isCompleted ? "leading-none mt-2" : ""
+                                "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
+                                isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
                             )}
                         />
-                        {previousSet && !isCompleted && (
-                            <button
-                                onClick={() => {
-                                    if (previousSet.reps) onUpdate('reps', previousSet.reps);
-                                }}
-                                className="text-[9px] text-zinc-500 font-medium mt-0.5 truncate max-w-full px-1 hover:text-brand-primary active:scale-95 transition-all cursor-pointer"
-                            >
-                                Prev: {previousSet.reps}
-                            </button>
-                        )}
                     </div>
 
-                    {/* 4. RPE Pill + e1RM */}
-                    <div className="flex justify-center h-full">
+                    {/* 5. RPE Pill */}
+                    <div className="flex justify-center items-center h-full min-h-[44px]">
                         <button
                             onClick={() => setShowRpePicker(true)}
                             className={cn(
-                                "w-full h-full min-h-[44px] rounded-xl text-[10px] font-bold flex flex-col items-center justify-center border gap-0.5",
+                                "w-full h-9 rounded-lg text-[11px] font-bold flex items-center justify-center transition-colors active:scale-95 border",
                                 set.rpe >= 9
-                                    ? "border-brand-danger/30 text-brand-danger bg-brand-danger/5"
-                                    : "border-zinc-800 text-zinc-500 bg-zinc-900"
+                                    ? "text-red-400 bg-red-400/10 border-red-400/20"
+                                    : "text-zinc-300 hover:bg-zinc-700 hover:text-white bg-zinc-800 border-zinc-700/50"
                             )}
                         >
-                            <span>@{set.rpe}</span>
-                            {set.weight > 0 && set.reps > 0 && (
-                                <span className="text-[8px] opacity-70 leading-none" title="Estimated 1RM">
-                                    {Math.round(calculateHybrid1RM(set.weight, set.reps, set.rpe))}kg
-                                </span>
-                            )}
+                            {set.rpe > 0 ? set.rpe : '-'}
                         </button>
                     </div>
 
-                    {/* 5. Checkbox (Large Touch Target) */}
-                    <div className="flex justify-center h-full">
+                    {/* 6. Checkbox */}
+                    <div className="flex justify-center items-center h-full min-h-[44px]">
                         <button
                             onClick={(e) => { e.stopPropagation(); onComplete(); }}
                             aria-label={`Marcar set ${index + 1} completo — ${set.weight}kg × ${set.reps} reps`}
                             aria-pressed={isCompleted}
                             className={cn(
-                                "w-full h-full min-h-[44px] rounded-xl flex items-center justify-center active:scale-95 transition-transform",
+                                "w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-sm",
                                 isCompleted
                                     ? "bg-brand-success text-black"
-                                    : "bg-zinc-800 text-zinc-600"
+                                    : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700 hover:text-white"
                             )}
                         >
-                            <Check size={22} strokeWidth={isCompleted ? 4 : 3} />
+                            <Check size={18} strokeWidth={isCompleted ? 4 : 3} />
                         </button>
                     </div>
-
                 </motion.div>
             </div>
 

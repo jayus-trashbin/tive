@@ -1,4 +1,4 @@
-import { Session, WorkoutSet, MuscleGroup, Exercise } from '../types/domain';
+import { Session, MuscleGroup, Exercise } from '../types/domain';
 
 export interface TimeSeriesPoint {
     date: number;
@@ -310,6 +310,146 @@ export function getSessionMuscleIntensity(
     });
 
     return intensityMap;
+}
+
+/**
+ * Computes the average session duration in minutes across all completed sessions.
+ * Prefers session.endTime; falls back to the timestamp of the last completed set.
+ * Filters out suspiciously short (<2 min) or long (>4 h) values to avoid outliers.
+ */
+export function getAvgSessionDuration(sessions: Session[]): number | null {
+    const completed = sessions.filter(s => s.isCompleted && !s.deletedAt);
+    if (completed.length === 0) return null;
+
+    const durations = completed.map(s => {
+        if (s.endTime && s.endTime > s.date) return s.endTime - s.date;
+        const doneSets = s.sets.filter(st => st.isCompleted && st.timestamp > s.date);
+        if (doneSets.length === 0) return 0;
+        return Math.max(...doneSets.map(st => st.timestamp)) - s.date;
+    }).filter(d => d >= 2 * 60_000 && d <= 4 * 60 * 60_000);
+
+    if (durations.length === 0) return null;
+    return Math.round(durations.reduce((a, b) => a + b, 0) / durations.length / 60_000);
+}
+
+/**
+ * Returns the average RPE per session for a given exercise (oldest-first).
+ * Only includes sessions where RPE was actually recorded (rpe > 0).
+ */
+export function getRPEProgression(
+    sessions: Session[],
+    exerciseId: string
+): TimeSeriesPoint[] {
+    const result: TimeSeriesPoint[] = [];
+
+    const sorted = [...sessions]
+        .filter(s => !s.deletedAt && s.isCompleted)
+        .sort((a, b) => a.date - b.date);
+
+    sorted.forEach(session => {
+        const sets = session.sets.filter(s => s.exerciseId === exerciseId && s.rpe > 0);
+        if (sets.length === 0) return;
+        const avgRPE = sets.reduce((acc, s) => acc + s.rpe, 0) / sets.length;
+        result.push({
+            date: session.date,
+            value: Math.round(avgRPE * 10) / 10,
+            label: new Date(session.date).toLocaleDateString()
+        });
+    });
+
+    return result;
+}
+
+/**
+ * Replays session history oldest-first to produce a per-muscle fatigue score
+ * for each of the last `days` days.
+ *
+ * Uses the same half-life decay formula as fatigueModel.ts so values are
+ * consistent with the live readiness widget.
+ */
+export interface MuscleFatigueSnapshot {
+    date: number; // midnight timestamp
+    /** 0–100 readiness score (100 = fully fresh) */
+    scores: Partial<Record<MuscleGroup, number>>;
+}
+
+export function getMuscleFatigueTimeline(
+    sessions: Session[],
+    exercises: Exercise[],
+    days: number = 14
+): MuscleFatigueSnapshot[] {
+    const HALF_LIVES: Partial<Record<MuscleGroup, number>> = {
+        'upper legs': 24, back: 22, chest: 18, shoulders: 16,
+        'lower legs': 12, arms: 12, core: 10, cardio: 8,
+    };
+    const MAX_CAPACITY: Partial<Record<MuscleGroup, number>> = {
+        chest: 4000, back: 5000, 'upper legs': 7000, 'lower legs': 3000,
+        shoulders: 2500, arms: 2000, core: 1500, cardio: 1200,
+    };
+    const trackedMuscles: MuscleGroup[] = ['chest', 'back', 'upper legs', 'lower legs', 'shoulders', 'arms'];
+    const exerciseMap = new Map(exercises.map(e => [e.id, e]));
+
+    // fatigue state in raw load units, keyed by muscle
+    const fatigue: Partial<Record<MuscleGroup, number>> = {};
+    trackedMuscles.forEach(m => { fatigue[m] = 0; });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startMs = today.getTime() - (days - 1) * 86_400_000;
+
+    const sorted = [...sessions]
+        .filter(s => s.isCompleted && !s.deletedAt)
+        .sort((a, b) => a.date - b.date);
+
+    // Snapshot per day: simulate fatigue accumulation
+    const snapshots: MuscleFatigueSnapshot[] = [];
+    let lastProcessedTs = sorted.length > 0 ? sorted[0].date : startMs;
+
+    const applyDecay = (from: number, to: number) => {
+        const hoursPassed = (to - from) / 3_600_000;
+        trackedMuscles.forEach(m => {
+            const halfLife = HALF_LIVES[m] ?? 18;
+            fatigue[m] = (fatigue[m] ?? 0) * Math.pow(0.5, hoursPassed / halfLife);
+        });
+    };
+
+    // Walk through sessions and accumulate fatigue
+    let sessionIdx = 0;
+    for (let d = 0; d < days; d++) {
+        const dayStart = startMs + d * 86_400_000;
+        const dayEnd = dayStart + 86_400_000;
+
+        // Apply sessions that fall in this day
+        while (sessionIdx < sorted.length && sorted[sessionIdx].date < dayEnd) {
+            const session = sorted[sessionIdx];
+            if (session.date >= dayStart) {
+                applyDecay(lastProcessedTs, session.date);
+                lastProcessedTs = session.date;
+                session.sets.filter(s => s.isCompleted).forEach(set => {
+                    const ex = exerciseMap.get(set.exerciseId);
+                    if (!ex) return;
+                    const load = set.weight * set.reps;
+                    fatigue[ex.targetMuscle] = (fatigue[ex.targetMuscle] ?? 0) + load;
+                });
+            }
+            sessionIdx++;
+        }
+
+        // Decay to end of day for snapshot
+        applyDecay(lastProcessedTs, dayEnd);
+        lastProcessedTs = dayEnd;
+
+        // Compute readiness scores (0-100)
+        const scores: Partial<Record<MuscleGroup, number>> = {};
+        trackedMuscles.forEach(m => {
+            const cap = MAX_CAPACITY[m] ?? 3000;
+            scores[m] = Math.round(Math.max(0, Math.min(1, 1 - (fatigue[m] ?? 0) / cap)) * 100);
+        });
+
+        if (dayStart >= startMs) snapshots.push({ date: dayStart, scores });
+    }
+
+    return snapshots;
 }
 
 // --- E-03. Weekly Muscle Volume with Delta ---

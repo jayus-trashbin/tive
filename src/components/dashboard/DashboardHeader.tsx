@@ -27,7 +27,9 @@ export const DashboardHeader: React.FC = () => {
             <button
                 onClick={() => setProfileOpen(true)}
                 className="group relative shrink-0"
+                aria-label="View Profile and Settings"
             >
+
                 <div className="w-12 h-12 bg-zinc-800 flex items-center justify-center rounded-full transition-transform active:scale-95 group-hover:bg-zinc-700">
                     <span className="font-bold text-sm text-zinc-300 uppercase">
                         {userStats.name ? userStats.name.substring(0, 2) : 'AT'}

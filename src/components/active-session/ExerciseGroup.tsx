@@ -140,28 +140,21 @@ const ExerciseGroup: React.FC<Props> = ({
                             </div>
                         </div>
 
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onReplaceRequest?.(); }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 bg-white/5 transition-all hover:bg-brand-primary hover:text-white"
-                                title="Replace Exercise"
-                            >
-                                <RefreshCw size={14} />
-                            </button>
+                        <div className="flex gap-1 items-center">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); setIsNotesOpen(!isNotesOpen); }}
                                 className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-                                    isNotesOpen || currentNote ? "bg-brand-primary text-white" : "bg-white/5 text-zinc-600 hover:bg-white/10"
+                                    "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
+                                    isNotesOpen || currentNote ? "text-brand-primary" : "text-zinc-500 hover:text-white"
                                 )}
                             >
-                                <MessageSquare size={14} />
+                                <MessageSquare size={16} />
                             </button>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 bg-white/5 transition-all hover:bg-brand-primary hover:text-white"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:text-white transition-all shrink-0"
                             >
-                                <Info size={16} />
+                                <Info size={18} />
                             </button>
                         </div>
                     </div>
@@ -186,13 +179,14 @@ const ExerciseGroup: React.FC<Props> = ({
                         </div>
                     )}
 
-                    {/* Column Headers (Hidden on Mobile for cleaner look? No, keep subtle) */}
-                    <div className="grid grid-cols-[40px_1fr_1fr_50px_60px] gap-3 px-2 pb-2">
-                        <div className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-wider">Set</div>
-                        <div className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-wider">Load</div>
-                        <div className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-wider">Reps</div>
-                        <div className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-wider">RPE</div>
-                        <div className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-wider">Log</div>
+                    {/* Column Headers */}
+                    <div className="grid grid-cols-[36px_1fr_48px_48px_32px_44px] gap-2 px-3 pb-2 items-center">
+                        <div className="text-[10px] font-bold text-zinc-500 text-center uppercase tracking-wider">Set</div>
+                        <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">Previous</div>
+                        <div className="text-[10px] font-bold text-zinc-500 text-center uppercase tracking-wider">KG</div>
+                        <div className="text-[10px] font-bold text-zinc-500 text-center uppercase tracking-wider">Reps</div>
+                        <div className="text-[10px] font-bold text-zinc-500 text-center uppercase tracking-wider">RPE</div>
+                        <div className="text-[10px] font-bold text-zinc-500 text-center uppercase tracking-wider">✓</div>
                     </div>
 
                     {/* Sets List */}

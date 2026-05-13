@@ -69,7 +69,7 @@ class ErrorBoundary extends React.Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-zinc-950 p-6 text-center z-[9999] relative">
+        <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-zinc-950 p-6 text-center z-debug relative">
           <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
             <AlertTriangle size={40} className="text-red-500" />
           </div>
