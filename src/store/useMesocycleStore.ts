@@ -23,6 +23,7 @@ export interface MesocyclePlan {
   startDate: number;
   focus: MesocycleFocus;
   weeks: MesocycleWeek[];
+  completedAt?: number; // timestamp when the block was archived
 }
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -50,6 +51,8 @@ interface MesocycleStore {
 
   assignRoutine: (planId: string, weekNumber: number, dayIndex: number, routineId: string | null) => void;
   toggleDeload: (planId: string, weekNumber: number) => void;
+  /** Mark a plan as completed and remove it from the active list; keeps it in plans for history. */
+  completePlan: (id: string) => void;
 }
 
 export const useMesocycleStore = create<MesocycleStore>()(
@@ -131,6 +134,20 @@ export const useMesocycleStore = create<MesocycleStore>()(
             ? plans.find(p => p.id === planId) ?? state.activePlan
             : state.activePlan;
           return { plans, activePlan };
+        });
+      },
+
+      completePlan: (id) => {
+        set(state => {
+          const plans = state.plans.map(p =>
+            p.id === id ? { ...p, completedAt: Date.now() } : p
+          );
+          // If it was the active plan, promote the next unfinished one
+          const nextActive =
+            state.activePlan?.id === id
+              ? (plans.find(p => !p.completedAt) ?? null)
+              : state.activePlan;
+          return { plans, activePlan: nextActive };
         });
       },
     }),

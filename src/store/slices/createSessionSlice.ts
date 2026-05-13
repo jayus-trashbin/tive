@@ -40,7 +40,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
         try {
             const { routines, history } = get();
 
-            let sessionName = `Workout #${history.length + 1}`;
+            let sessionName = `Workout #${history.filter(s => !s.deletedAt).length + 1}`;
             let plannedExerciseIds: string[] = [];
             let initialSets: WorkoutSet[] = [];
             let routineSnapshot: RoutineBlock[] = [];

@@ -19,11 +19,16 @@ export { MAX_MUSCLE_CAPACITY, MUSCLE_RECOVERY_PROFILE, calculateMuscleReadiness 
 export const calculateHybrid1RM = (weight: number, reps: number, rpe: number = 10): number => {
   if (weight <= 0 || reps <= 0) return 0;
 
+  // Guard: clamp rpe to valid physiological range
+  const clampedRpe = Math.min(10, Math.max(1, rpe));
+
   // 1. Normalize "Reps to Failure" (Effective Reps)
   // RPE 10 = 0 RIR (Reps In Reserve)
   // RPE 8 = 2 RIR
-  const rir = Math.max(0, 10 - rpe);
-  const effectiveReps = reps + rir;
+  const rir = Math.max(0, 10 - clampedRpe);
+
+  // Guard: clamp effectiveReps to [1, 36] — Brzycki denominator (37 - 37) = 0 would be Infinity
+  const effectiveReps = Math.min(36, Math.max(1, reps + rir));
 
   let oneRM = 0;
 

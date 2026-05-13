@@ -31,6 +31,29 @@ describe('formulas', () => {
             expect(calculateHybrid1RM(0, 5)).toBe(0);
             expect(calculateHybrid1RM(100, 0)).toBe(0);
         });
+
+        it('never returns Infinity or NaN — reps=30, rpe=3 (effectiveReps would reach Brzycki zero denominator)', () => {
+            const result = calculateHybrid1RM(100, 30, 3);
+            expect(isFinite(result)).toBe(true);
+            expect(isNaN(result)).toBe(false);
+            expect(result).toBeGreaterThan(0);
+        });
+
+        it('clamps effectiveReps: reps=37, rpe=10 never produces Infinity', () => {
+            const result = calculateHybrid1RM(100, 37, 10);
+            expect(isFinite(result)).toBe(true);
+            expect(result).toBeGreaterThan(0);
+        });
+
+        it('clamps out-of-range rpe values gracefully', () => {
+            const rpe0 = calculateHybrid1RM(100, 5, 0);
+            const rpe1 = calculateHybrid1RM(100, 5, 1);
+            expect(rpe0).toBe(rpe1);
+
+            const rpe15 = calculateHybrid1RM(100, 5, 15);
+            const rpe10 = calculateHybrid1RM(100, 5, 10);
+            expect(rpe15).toBe(rpe10);
+        });
     });
 
     describe('calculateMuscleReadiness', () => {
