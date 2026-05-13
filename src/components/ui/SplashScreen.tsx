@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
  */
 export const SplashScreen: React.FC = () => {
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-modal bg-black flex flex-col items-center justify-center overflow-hidden">
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
         <motion.div

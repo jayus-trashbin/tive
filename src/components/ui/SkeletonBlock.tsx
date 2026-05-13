@@ -6,7 +6,7 @@ interface Props {
 }
 
 const SkeletonBlock: React.FC<Props> = ({ className }) => (
-    <div className={cn('bg-zinc-800 animate-pulse rounded-sm', className)} />
+    <div className={cn('bg-zinc-900 animate-pulse rounded', className)} />
 );
 
 export default SkeletonBlock;

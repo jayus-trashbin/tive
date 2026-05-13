@@ -95,7 +95,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             // Full overlay — clicking backdrop closes
-            className="fixed inset-0 z-[90] bg-black/75 backdrop-blur-sm flex flex-col"
+            className="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex flex-col"
             onClick={onClose}
         >
             {/* ── DESKTOP: centered card (md+) ────────────────────────────────── */}
