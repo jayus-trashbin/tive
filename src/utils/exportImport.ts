@@ -124,18 +124,233 @@ export function parseBackupJSON(jsonString: string): ImportResult {
     }
 }
 
-/**
- * Placeholder for Hevy CSV Import
- */
-export function parseHevyCSV(csvString: string): ImportResult {
-    // TODO: Phase 3.4 - Map Hevy headers (Date, Workout Name, Exercise Name, Set Order, Weight, Reps)
-    return { sessions: [], exercises: [], error: 'Importação do Hevy ainda em desenvolvimento.' };
+// ──────────────────────────────────────────────────────────────
+// Shared CSV helpers
+// ──────────────────────────────────────────────────────────────
+
+function parseCSVLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+            else inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    result.push(current.trim());
+    return result;
 }
 
-/**
- * Placeholder for Strong CSV Import
- */
+function slugifyExercise(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+function guessTargetMuscle(name: string): import('../types/domain').MuscleGroup {
+    const n = name.toLowerCase();
+    if (/chest|bench|fly|pec/.test(n)) return 'chest';
+    if (/back|row|pull|lat|deadlift|rdl/.test(n)) return 'back';
+    if (/squat|leg|quad|hamstring|glute|lunge/.test(n)) return 'upper legs';
+    if (/calf|calves/.test(n)) return 'lower legs';
+    if (/shoulder|delt|press.*over|ohp/.test(n)) return 'shoulders';
+    if (/curl|tricep|bicep|arm/.test(n)) return 'arms';
+    if (/crunch|plank|ab|core/.test(n)) return 'core';
+    return 'back'; // safe default for compound movements
+}
+
+// ──────────────────────────────────────────────────────────────
+// Hevy CSV Import
+// Hevy export headers (v2+):
+//   Date, Workout Name, Exercise Name, Set Order, Weight (kg), Reps, RPE, Notes
+// ──────────────────────────────────────────────────────────────
+
+export function parseHevyCSV(csvString: string): ImportResult {
+    try {
+        const lines = csvString.trim().split('\n');
+        if (lines.length < 2) return { sessions: [], exercises: [], error: 'CSV vazio ou sem dados.' };
+
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+        const col = (name: string) => headers.indexOf(name);
+        const dateCol   = col('date');
+        const nameCol   = col('workoutname');
+        const exCol     = col('exercisename');
+        const weightCol = headers.findIndex(h => h.startsWith('weight'));
+        const repsCol   = col('reps');
+        const rpeCol    = col('rpe');
+
+        if (dateCol === -1 || exCol === -1 || repsCol === -1) {
+            return { sessions: [], exercises: [], error: 'Formato Hevy não reconhecido. Verifique o arquivo exportado.' };
+        }
+
+        const exerciseMap = new Map<string, Exercise>();
+        const sessionMap = new Map<string, Session>();
+
+        for (let i = 1; i < lines.length; i++) {
+            const row = parseCSVLine(lines[i]);
+            if (row.length < 4) continue;
+
+            const rawDate  = row[dateCol]?.trim() ?? '';
+            const wName    = row[nameCol]?.trim() || 'Hevy Import';
+            const exName   = row[exCol]?.trim() || 'Unknown';
+            const weightRaw = weightCol >= 0 ? parseFloat(row[weightCol] ?? '0') || 0 : 0;
+            const reps     = parseInt(row[repsCol] ?? '0') || 0;
+            const rpe      = rpeCol >= 0 ? parseFloat(row[rpeCol] ?? '0') || 0 : 0;
+
+            // Normalise date
+            const dateMs = new Date(rawDate).getTime();
+            if (isNaN(dateMs)) continue;
+            const dayKey = new Date(dateMs).toISOString().split('T')[0];
+            const sessionKey = `${dayKey}_${wName}`;
+
+            // Upsert exercise
+            const exId = slugifyExercise(exName);
+            if (!exerciseMap.has(exId)) {
+                exerciseMap.set(exId, {
+                    id: exId,
+                    name: exName,
+                    targetMuscle: guessTargetMuscle(exName),
+                    gifUrl: '',
+                    fatigueFactor: 1,
+                    isUnilateral: false,
+                });
+            }
+
+            // Upsert session
+            if (!sessionMap.has(sessionKey)) {
+                sessionMap.set(sessionKey, {
+                    id: crypto.randomUUID(),
+                    date: dateMs,
+                    name: wName,
+                    sets: [],
+                    isCompleted: true,
+                    volumeLoad: 0,
+                });
+            }
+            const session = sessionMap.get(sessionKey)!;
+            const e1RM = reps > 0 && weightRaw > 0 ? Math.round(weightRaw * (1 + reps / 30)) : 0;
+            session.sets.push({
+                id: crypto.randomUUID(),
+                exerciseId: exId,
+                weight: weightRaw,
+                reps,
+                rpe,
+                timestamp: dateMs,
+                estimated1RM: e1RM,
+                isCompleted: true,
+            });
+            session.volumeLoad += weightRaw * reps;
+        }
+
+        if (sessionMap.size === 0) {
+            return { sessions: [], exercises: [], error: 'Nenhuma sessão encontrada no CSV do Hevy.' };
+        }
+
+        return {
+            sessions: Array.from(sessionMap.values()),
+            exercises: Array.from(exerciseMap.values()),
+        };
+    } catch (e) {
+        return { sessions: [], exercises: [], error: 'Erro ao processar CSV do Hevy.' };
+    }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Strong CSV Import
+// Strong export headers:
+//   Date, Workout Name, Duration, Exercise Name, Set Order, Weight, Reps, Distance, Seconds, Notes, Workout Notes, RPE
+// ──────────────────────────────────────────────────────────────
+
 export function parseStrongCSV(csvString: string): ImportResult {
-    // TODO: Phase 3.4 - Map Strong headers (Date, Workout Name, Exercise Name, Set Order, Weight, Reps)
-    return { sessions: [], exercises: [], error: 'Importação do Strong ainda em desenvolvimento.' };
+    try {
+        const lines = csvString.trim().split('\n');
+        if (lines.length < 2) return { sessions: [], exercises: [], error: 'CSV vazio ou sem dados.' };
+
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+        const col = (name: string) => headers.indexOf(name);
+        const dateCol   = col('date');
+        const nameCol   = col('workoutname');
+        const exCol     = col('exercisename');
+        const weightCol = col('weight');
+        const repsCol   = col('reps');
+        const rpeCol    = col('rpe');
+
+        if (dateCol === -1 || exCol === -1 || repsCol === -1) {
+            return { sessions: [], exercises: [], error: 'Formato Strong não reconhecido. Verifique o arquivo exportado.' };
+        }
+
+        const exerciseMap = new Map<string, Exercise>();
+        const sessionMap = new Map<string, Session>();
+
+        for (let i = 1; i < lines.length; i++) {
+            const row = parseCSVLine(lines[i]);
+            if (row.length < 4) continue;
+
+            const rawDate   = row[dateCol]?.trim() ?? '';
+            const wName     = row[nameCol]?.trim() || 'Strong Import';
+            const exName    = row[exCol]?.trim() || 'Unknown';
+            const weightRaw = weightCol >= 0 ? parseFloat(row[weightCol] ?? '0') || 0 : 0;
+            const reps      = parseInt(row[repsCol] ?? '0') || 0;
+            const rpe       = rpeCol >= 0 ? parseFloat(row[rpeCol] ?? '0') || 0 : 0;
+
+            const dateMs = new Date(rawDate).getTime();
+            if (isNaN(dateMs)) continue;
+            const dayKey = new Date(dateMs).toISOString().split('T')[0];
+            const sessionKey = `${dayKey}_${wName}`;
+
+            const exId = slugifyExercise(exName);
+            if (!exerciseMap.has(exId)) {
+                exerciseMap.set(exId, {
+                    id: exId,
+                    name: exName,
+                    targetMuscle: guessTargetMuscle(exName),
+                    gifUrl: '',
+                    fatigueFactor: 1,
+                    isUnilateral: false,
+                });
+            }
+
+            if (!sessionMap.has(sessionKey)) {
+                sessionMap.set(sessionKey, {
+                    id: crypto.randomUUID(),
+                    date: dateMs,
+                    name: wName,
+                    sets: [],
+                    isCompleted: true,
+                    volumeLoad: 0,
+                });
+            }
+            const session = sessionMap.get(sessionKey)!;
+            const e1RM = reps > 0 && weightRaw > 0 ? Math.round(weightRaw * (1 + reps / 30)) : 0;
+            session.sets.push({
+                id: crypto.randomUUID(),
+                exerciseId: exId,
+                weight: weightRaw,
+                reps,
+                rpe,
+                timestamp: dateMs,
+                estimated1RM: e1RM,
+                isCompleted: true,
+            });
+            session.volumeLoad += weightRaw * reps;
+        }
+
+        if (sessionMap.size === 0) {
+            return { sessions: [], exercises: [], error: 'Nenhuma sessão encontrada no CSV do Strong.' };
+        }
+
+        return {
+            sessions: Array.from(sessionMap.values()),
+            exercises: Array.from(exerciseMap.values()),
+        };
+    } catch (e) {
+        return { sessions: [], exercises: [], error: 'Erro ao processar CSV do Strong.' };
+    }
 }

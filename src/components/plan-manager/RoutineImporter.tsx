@@ -4,6 +4,8 @@ import { X, FileJson, BookTemplate, History, Upload, Check, AlertTriangle } from
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { Routine } from '../../types/domain';
 import { cn } from '../../lib/utils';
+import { Button, IconButton } from '../ui';
+
 
 interface RoutineImporterProps {
     isOpen: boolean;
@@ -11,7 +13,8 @@ interface RoutineImporterProps {
     onImported?: (routine: Routine) => void;
 }
 
-type ImportTab = 'json' | 'templates' | 'history';
+type ImportTab = 'external' | 'templates' | 'history';
+
 
 // Built-in routine templates (exerciseIds only — blocks can be configured later in editor)
 const TEMPLATES: { name: string; category: string; exerciseIds: string[]; exerciseCount: number }[] = [
@@ -78,27 +81,61 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
     const tabs: { id: ImportTab; label: string; icon: React.ReactNode }[] = [
         { id: 'templates', label: 'Templates', icon: <BookTemplate size={14} /> },
         { id: 'history', label: 'From History', icon: <History size={14} /> },
-        { id: 'json', label: 'Import', icon: <FileJson size={14} /> },
+        { id: 'external', label: 'External', icon: <FileJson size={14} /> },
     ];
 
-    const handleJsonImport = () => {
+
+    const handleExternalImport = () => {
+        const input = jsonInput.trim();
+        if (!input) return;
+
         try {
-            const parsed = JSON.parse(jsonInput);
-            let routineName = parsed.name || parsed.title || 'Imported Routine';
+            let routineName = 'Imported Routine';
             let exerciseIds: string[] = [];
 
-            // Support various JSON formats
-            if (parsed.exerciseIds) {
-                exerciseIds = parsed.exerciseIds;
-            } else if (parsed.exercises) {
-                exerciseIds = parsed.exercises.map((e: { id?: string; exerciseId?: string }) => e.id || e.exerciseId || '');
-            } else if (Array.isArray(parsed)) {
-                exerciseIds = parsed.map((e: { id?: string; exerciseId?: string }) => e.id || e.exerciseId || '');
-                routineName = 'Imported Routine';
+            // 1. Try JSON Parser
+            if (input.startsWith('{') || input.startsWith('[')) {
+                const parsed = JSON.parse(input);
+                routineName = parsed.name || parsed.title || 'Imported Routine';
+                
+                if (parsed.exerciseIds) {
+                    exerciseIds = parsed.exerciseIds;
+                } else if (parsed.exercises) {
+                    exerciseIds = parsed.exercises.map((e: any) => e.id || e.exerciseId || e.name || '');
+                } else if (Array.isArray(parsed)) {
+                    exerciseIds = parsed.map((e: any) => e.id || e.exerciseId || e.name || '');
+                }
+            } 
+            // 2. Try CSV Parser (Hevy/Strong)
+            else if (input.toLowerCase().includes('date') && (input.toLowerCase().includes('workout') || input.toLowerCase().includes('exercise'))) {
+                // Hevy/Strong detection
+                const lines = input.split('\n');
+                const headers = lines[0].toLowerCase();
+                const isHevy = headers.includes('workout name') && headers.includes('exercise name');
+                const isStrong = headers.includes('workout name') && headers.includes('duration');
+
+                if (isHevy || isStrong) {
+                    // Extract unique exercises from the last workout mentioned in the CSV
+                    // We'll take the first workout block we find
+                    const rows = lines.slice(1).map(l => l.split(','));
+                    const workoutName = rows[0]?.[1]?.replace(/"/g, '') || 'Imported ' + (isHevy ? 'Hevy' : 'Strong');
+                    
+                    const exCol = isHevy ? 2 : 3; // Exercise Name column index
+                    const seen = new Set<string>();
+                    
+                    // Simple slugify for matching fallback exercises if possible
+                    rows.forEach(r => {
+                        const name = r[exCol]?.replace(/"/g, '').trim();
+                        if (name && name !== 'Exercise Name') seen.add(name);
+                    });
+
+                    exerciseIds = Array.from(seen);
+                    routineName = workoutName;
+                }
             }
 
             if (exerciseIds.length === 0) {
-                setJsonError('No exercises found in the JSON. Expected "exerciseIds" or "exercises" array.');
+                setJsonError('No exercises found. Ensure format is JSON or a valid Hevy/Strong CSV export.');
                 return;
             }
 
@@ -115,10 +152,11 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                 setImportSuccess(false);
                 onClose();
             }, 1500);
-        } catch {
-            setJsonError('Invalid JSON format. Please check your input.');
+        } catch (e) {
+            setJsonError('Parse error. Check your input format.');
         }
     };
+
 
     const handleTemplateImport = (template: typeof TEMPLATES[number]) => {
         const newRoutine: Routine = {
@@ -179,12 +217,14 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                         <h2 className="font-heading font-bold text-white text-lg uppercase tracking-tight">
                             Add Routine
                         </h2>
-                        <button
+                        <IconButton
+                            icon={X}
                             onClick={onClose}
-                            className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-                        >
-                            <X size={18} />
-                        </button>
+                            variant="ghost"
+                            size="md"
+                            aria-label="Close"
+                        />
+
                     </div>
 
                     {/* Tab Bar */}
@@ -193,6 +233,8 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
+                                role="tab"
+                                aria-selected={activeTab === tab.id}
                                 className={cn(
                                     'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-[10px] font-bold uppercase tracking-widest transition-all',
                                     activeTab === tab.id
@@ -203,6 +245,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                 {tab.icon}
                                 {tab.label}
                             </button>
+
                         ))}
                     </div>
 
@@ -294,17 +337,17 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                             </div>
                         )}
 
-                        {/* JSON Import Tab */}
-                        {activeTab === 'json' && (
+                        {/* External Import Tab */}
+                        {activeTab === 'external' && (
                             <div className="space-y-4">
                                 <p className="font-medium text-[10px] text-zinc-400 leading-relaxed">
-                                    Paste a JSON export from Hevy, Strong, or any app with exercise data.
-                                    We'll detect the format automatically.
+                                    Paste a JSON routine or a **Hevy/Strong CSV** export.
+                                    We'll extract the exercises to create a new routine.
                                 </p>
                                 <textarea
                                     value={jsonInput}
                                     onChange={(e) => { setJsonInput(e.target.value); setJsonError(null); }}
-                                    placeholder='{"name": "My Routine", "exerciseIds": ["0025", "0027"]}'
+                                    placeholder='Paste JSON or CSV content here...'
                                     className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-medium text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
                                 />
                                 {jsonError && (
@@ -313,20 +356,18 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                         {jsonError}
                                     </div>
                                 )}
-                                <button
-                                    onClick={handleJsonImport}
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    fullWidth
+                                    onClick={handleExternalImport}
                                     disabled={!jsonInput.trim()}
-                                    className={cn(
-                                        'w-full py-3 font-medium text-xs font-bold uppercase tracking-widest transition-all',
-                                        jsonInput.trim()
-                                            ? 'btn-tech text-zinc-950'
-                                            : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                                    )}
                                 >
-                                    Import Routine
-                                </button>
+                                    Parse & Create Routine
+                                </Button>
                             </div>
                         )}
+
                     </div>
                 </motion.div>
             </motion.div>
