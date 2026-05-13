@@ -124,8 +124,8 @@ export const generateLocalInsights = (history: Session[], exercises: Exercise[])
         if (acwr && acwr.ratio > 1.3) {
             insights.push({
                 type: 'warning',
-                title: 'Alerta de Carga (ACWR)',
-                description: `Sua carga aguda está ${Math.round((acwr.ratio - 1) * 100)}% acima da crônica. Considere um deload leve para evitar lesões.`
+                title: 'Fatigue Alert (ACWR)',
+                description: `Your acute load is ${Math.round((acwr.ratio - 1) * 100)}% above your chronic baseline. Consider a deload to prevent injury.`
             });
         }
         
@@ -136,22 +136,22 @@ export const generateLocalInsights = (history: Session[], exercises: Exercise[])
         if (topGrowth && topGrowth.deltaPct! > 20) {
             insights.push({
                 type: 'success',
-                title: 'Sobrecarga Progressiva',
-                description: `Seu volume de ${topGrowth.muscle} aumentou ${Math.round(topGrowth.deltaPct!)}% esta semana. Excelente trabalho!`
+                title: 'Progressive Overload',
+                description: `Your ${topGrowth.muscle} volume increased by ${Math.round(topGrowth.deltaPct!)}% this week. Strong progress.`
             });
         } else if (topDrop && topDrop.deltaPct! < -30) {
             insights.push({
                 type: 'info',
-                title: 'Atenção ao Volume',
-                description: `Seu volume de ${topDrop.muscle} caiu ${Math.round(Math.abs(topDrop.deltaPct!))}% esta semana. Tente dar mais foco no próximo treino.`
+                title: 'Volume Variance',
+                description: `Your ${topDrop.muscle} volume dropped by ${Math.round(Math.abs(topDrop.deltaPct!))}% this week. Focus on consistency in your next session.`
             });
         }
         
         if (insights.length === 0) {
             insights.push({
                 type: 'info',
-                title: 'Consistência é a Chave',
-                description: 'Continue registrando seus treinos para gerar insights mais profundos sobre sua recuperação e progresso.'
+                title: 'Consistency is Key',
+                description: 'Keep logging your workouts to unlock deeper insights into your physiological progress and recovery.'
             });
         }
     } catch(e) {
@@ -193,21 +193,23 @@ export const generateInsights = async (): Promise<InsightsResponse> => {
         });
         
         const prompt = `
-        You are an expert strength and conditioning AI coach.
-        Analyze this user's training data from the past 2 weeks and provide 3 short, actionable insights in JSON format.
+        You are an expert strength and conditioning AI coach for Tive Strength OS.
+        Analyze this athlete's training data from the past 2 weeks and provide exactly 3 short, high-value actionable insights in JSON format.
         
-        DATA:
+        ATHLETE DATA:
         ${context}
         
-        OUTPUT FORMAT:
-        Return ONLY valid JSON with this structure:
+        OUTPUT FORMAT (JSON ONLY):
         {
             "insights": [
-                { "type": "success"|"warning"|"info", "title": "Short Title", "description": "1-2 sentences max." }
+                { "type": "success"|"warning"|"info", "title": "Professional Title", "description": "1 short, scientific and motivating sentence." }
             ]
         }
         
-        Focus on progressive overload, fatigue management (ACWR > 1.3 is warning), and muscle volume imbalances.
+        RULES:
+        1. Language: ALWAYS use English.
+        2. Tone: Professional, data-driven, and minimalist. No emojis.
+        3. Priority: Fatigue management (ACWR > 1.3), Significant volume drops, and Progressive overload achievements.
         `;
         
         const result = await model.generateContent(prompt);
