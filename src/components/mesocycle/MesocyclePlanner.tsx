@@ -14,13 +14,15 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Plus, X, ChevronLeft, Calendar, Zap, BarChart2, Trash2, RotateCcw
+    Plus, X, ChevronLeft, Calendar, Zap, BarChart2, Trash2, RotateCcw, CheckCircle2, Archive
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useMesocycleStore, MesocycleFocus, MesocyclePlan } from '../../store/useMesocycleStore';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { VOLUME_LANDMARKS, getVolumeZone, getVolumeZoneColor, getVolumeZoneLabel } from '../../engine/volumeLandmarks';
 import { MuscleGroup } from '../../types/domain';
+import { Button, IconButton, EmptyState } from '../ui';
+
 
 // ─── Draggable Routine Chip ─────────────────────────────────────────────────
 
@@ -104,10 +106,12 @@ const DroppableDay: React.FC<DroppableDayProps> = ({
                     </span>
                     <button
                         onPointerDown={e => { e.stopPropagation(); onClear(); }}
-                        className="absolute top-0.5 right-0.5 text-zinc-600 hover:text-red-400 transition-colors"
+                        className="absolute top-0.5 right-0.5 text-zinc-600 hover:text-red-400 transition-colors p-1"
+                        aria-label="Clear routine from day"
                     >
-                        <X size={8} />
+                        <X size={10} />
                     </button>
+
                 </>
             ) : (
                 <span className="text-[8px] text-zinc-700 font-medium mt-2">+</span>
@@ -295,21 +299,26 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onCreate, onCancel }) =
                 </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
-                <button
+            <div className="flex gap-3 pt-2">
+                <Button
+                    variant="secondary"
+                    size="md"
+                    fullWidth
                     onClick={onCancel}
-                    className="flex-1 py-3 border border-zinc-800 text-zinc-500 text-xs font-bold uppercase rounded-lg hover:border-zinc-600 transition-all"
                 >
                     Cancel
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
                     onClick={handleSubmit}
                     disabled={!name.trim()}
-                    className="flex-1 py-3 bg-brand-primary text-black text-xs font-bold uppercase rounded-lg disabled:opacity-40 transition-all"
                 >
                     Create Plan
-                </button>
+                </Button>
             </div>
+
         </motion.div>
     );
 };
@@ -327,12 +336,19 @@ const FOCUS_COLOR: Record<MesocycleFocus, string> = {
 };
 
 const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
-    const { activePlan, plans, createPlan, assignRoutine, toggleDeload, deletePlan, setActivePlan } =
+    const { activePlan, plans, createPlan, assignRoutine, toggleDeload, deletePlan, setActivePlan, completePlan } =
         useMesocycleStore();
     const { routines, exercises } = useWorkoutStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [activeRoutineId, setActiveRoutineId] = useState<string | null>(null);
+    const [showArchive, setShowArchive] = useState(false);
+
+    const activePlans = useMemo(() => plans.filter(p => !p.completedAt), [plans]);
+    const archivedPlans = useMemo(
+        () => [...plans.filter(p => p.completedAt)].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0)),
+        [plans]
+    );
 
     // Sensors: require 8px movement before drag starts (prevents accidental drags on mobile)
     const sensors = useSensors(
@@ -393,34 +409,41 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
     };
 
     // Empty state: no plans
-    if (plans.length === 0 && !showCreate) {
+    if (activePlans.length === 0 && !showCreate) {
         return (
             <div className="flex flex-col h-full bg-black">
                 <header
                     className="shrink-0 px-5 pb-4 border-b border-zinc-900 bg-zinc-950/80 flex items-center gap-3"
                     style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
                 >
-                    <button onClick={onBack} className="p-2 -ml-2 text-zinc-500 hover:text-white">
-                        <ChevronLeft size={20} />
-                    </button>
+                    <IconButton
+                        icon={ChevronLeft}
+                        onClick={onBack}
+                        variant="ghost"
+                        size="md"
+                        aria-label="Back"
+                        className="-ml-2"
+                    />
+
                     <div>
                         <div className="section-title">Training Block</div>
                         <h1 className="page-title">Mesocycle<span className="text-brand-primary">_</span>Planner</h1>
                     </div>
                 </header>
-                <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4">
-                    <Calendar size={48} className="text-zinc-700" />
-                    <div className="text-center">
-                        <p className="text-white font-bold">No Training Blocks Yet</p>
-                        <p className="text-zinc-500 text-sm mt-1">Plan your 4-6 week mesocycle</p>
-                    </div>
-                    <button
-                        onClick={() => setShowCreate(true)}
-                        className="mt-4 flex items-center gap-2 px-6 py-3 bg-brand-primary text-black font-bold text-sm uppercase rounded-lg"
-                    >
-                        <Plus size={16} /> Create Block
-                    </button>
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
+                    <EmptyState
+                        icon={Calendar}
+                        title="No Training Blocks Yet"
+                        description="Plan your 4-6 week mesocycle to optimize your volume and recovery."
+                        action={{
+                            label: "Create Block",
+                            onClick: () => setShowCreate(true),
+                            variant: "primary",
+                            iconLeft: Plus
+                        }}
+                    />
                 </div>
+
             </div>
         );
     }
@@ -432,9 +455,15 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                     className="shrink-0 px-5 py-4 border-b border-zinc-900 flex items-center gap-3"
                     style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
                 >
-                    <button onClick={() => setShowCreate(false)} className="p-2 -ml-2 text-zinc-500 hover:text-white">
-                        <ChevronLeft size={20} />
-                    </button>
+                    <IconButton
+                        icon={ChevronLeft}
+                        onClick={() => setShowCreate(false)}
+                        variant="ghost"
+                        size="md"
+                        aria-label="Back"
+                        className="-ml-2"
+                    />
+
                     <h2 className="text-sm font-bold text-white uppercase tracking-wider font-medium">New Training Block</h2>
                 </header>
                 <CreatePlanForm
@@ -448,7 +477,7 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
         );
     }
 
-    const currentPlan = activePlan ?? plans[0];
+    const currentPlan = activePlan ?? activePlans[0];
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -459,28 +488,47 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                     style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
                 >
                     <div className="flex items-center gap-3 mb-3">
-                        <button onClick={onBack} className="p-2 -ml-2 text-zinc-500 hover:text-white">
-                            <ChevronLeft size={20} />
-                        </button>
+                        <IconButton
+                            icon={ChevronLeft}
+                            onClick={onBack}
+                            variant="ghost"
+                            size="md"
+                            aria-label="Back"
+                            className="-ml-2"
+                        />
+
                         <div className="flex-1 min-w-0">
                             <div className="section-title">Training Block</div>
                             <h1 className="page-title truncate">
                                 {currentPlan.name}<span className="text-brand-primary">_</span>
                             </h1>
                         </div>
-                        <button
+                        <IconButton
+                            icon={Plus}
                             onClick={() => setShowCreate(true)}
-                            className="p-2 text-zinc-500 hover:text-white"
-                            title="New Plan"
-                        >
-                            <Plus size={18} />
-                        </button>
-                        <button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="New Plan"
+                        />
+                        <IconButton
+                            icon={CheckCircle2}
+                            onClick={() => {
+                                if (confirm('Mark this block as completed and archive it?')) {
+                                    completePlan(currentPlan.id);
+                                }
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Complete Block"
+                        />
+                        <IconButton
+                            icon={Trash2}
                             onClick={() => { if (confirm('Delete this plan?')) deletePlan(currentPlan.id); }}
-                            className="p-2 text-zinc-600 hover:text-red-400"
-                        >
-                            <Trash2 size={16} />
-                        </button>
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Delete Plan"
+                        />
+
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -495,10 +543,10 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                         </span>
                     </div>
 
-                    {/* Plan selector (if multiple plans) */}
-                    {plans.length > 1 && (
+                    {/* Plan selector (active plans only) */}
+                    {activePlans.length > 1 && (
                         <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
-                            {plans.map(p => (
+                            {activePlans.map(p => (
                                 <button
                                     key={p.id}
                                     onClick={() => setActivePlan(p.id)}
@@ -542,12 +590,26 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                     </div>
 
                     {/* Week Grid */}
-                    <div className="px-5 space-y-3 mt-2">
+                    <motion.div 
+                        initial="hidden"
+                        animate="visible"
+                        variants={{
+                            visible: { transition: { staggerChildren: 0.05 } }
+                        }}
+                        className="px-5 space-y-3 mt-2"
+                    >
                         {currentPlan.weeks.map(week => (
-                            <div key={week.weekNumber} className={cn(
-                                'border rounded-lg overflow-hidden',
-                                week.isDeload ? 'border-zinc-800/50' : 'border-zinc-800'
-                            )}>
+                            <motion.div 
+                                key={week.weekNumber}
+                                variants={{
+                                    hidden: { opacity: 0, y: 10 },
+                                    visible: { opacity: 1, y: 0 }
+                                }}
+                                className={cn(
+                                    'border rounded-lg overflow-hidden',
+                                    week.isDeload ? 'border-zinc-800/50' : 'border-zinc-800'
+                                )}
+                            >
                                 {/* Week Header */}
                                 <div className={cn(
                                     'flex items-center justify-between px-3 py-2',
@@ -563,13 +625,15 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                                             </span>
                                         )}
                                     </div>
-                                    <button
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        iconLeft={RotateCcw}
                                         onClick={() => toggleDeload(currentPlan.id, week.weekNumber)}
-                                        className="text-[8px] font-medium text-zinc-600 hover:text-zinc-400 flex items-center gap-1 transition-colors"
+                                        className="h-7 px-2 text-[8px] text-zinc-500"
                                     >
-                                        <RotateCcw size={8} />
                                         {week.isDeload ? 'Unmark' : 'Deload'}
-                                    </button>
+                                    </Button>
                                 </div>
 
                                 {/* Day Grid */}
@@ -590,14 +654,67 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                                         />
                                     ))}
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
+
 
                     {/* Volume Projection */}
                     <div className="px-5 mt-5">
                         <VolumeProjection plan={currentPlan} routinesById={routinesById} />
                     </div>
+
+                    {/* Past Cycles Archive */}
+                    {archivedPlans.length > 0 && (
+                        <div className="px-5 mt-6">
+                            <button
+                                onClick={() => setShowArchive(v => !v)}
+                                className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
+                            >
+                                <Archive size={11} />
+                                Past Cycles ({archivedPlans.length})
+                                <span className="ml-1">{showArchive ? '▲' : '▼'}</span>
+                            </button>
+
+                            <AnimatePresence>
+                                {showArchive && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden space-y-2"
+                                    >
+                                        {archivedPlans.map(plan => (
+                                            <div
+                                                key={plan.id}
+                                                className="flex items-center justify-between px-4 py-3 bg-zinc-900/40 border border-zinc-800/50 rounded-lg"
+                                            >
+                                                <div>
+                                                    <p className="text-xs font-bold text-zinc-300">{plan.name}</p>
+                                                    <p className="text-[9px] text-zinc-600 mt-0.5">
+                                                        <span className={cn('capitalize', FOCUS_COLOR[plan.focus].split(' ')[0])}>
+                                                            {plan.focus}
+                                                        </span>
+                                                        {' · '}{plan.totalWeeks}W
+                                                        {' · completed '}
+                                                        {plan.completedAt
+                                                            ? new Date(plan.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                                                            : '—'}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => { if (confirm('Delete this archived cycle?')) deletePlan(plan.id); }}
+                                                    className="text-zinc-700 hover:text-red-400 transition-colors p-1"
+                                                >
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
                 </div>
 
                 {/* Drag Overlay */}
