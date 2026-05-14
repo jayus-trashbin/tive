@@ -71,6 +71,13 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
     return items;
   }, [routine, exercises]);
 
+  const totalSets = useMemo(() => {
+    if (routine.blocks) {
+      return routine.blocks.reduce((acc, b) => acc + b.sets.length, 0);
+    }
+    return routine.exerciseIds.length * 3;
+  }, [routine]);
+
   const estTime = estimateRoutineDuration(routine);
 
   // R-04: Muscle distribution
@@ -202,13 +209,24 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
             </div>
 
             {/* Sticky Footer */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-12 px-4 pb-safe z-50">
-                <button 
-                    onClick={onBegin}
-                    className="w-full mb-6 py-4 bg-white text-black font-bold text-lg rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform"
-                >
-                    <Play size={20} fill="currentColor" /> BEGIN WORKOUT
-                </button>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent pt-24 px-4 pb-safe z-50 pointer-events-none">
+                <div className="pointer-events-auto">
+                    <div className="text-center mb-3">
+                        <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                            <span>{displayItems.length} Exercises</span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                            <span>{totalSets} Sets</span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                            <span>~{estTime} Min</span>
+                        </p>
+                    </div>
+                    <button 
+                        onClick={onBegin}
+                        className="w-full mb-6 py-4 bg-white text-black font-bold text-lg rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.2)] active:scale-[0.98] transition-all"
+                    >
+                        <Play size={20} fill="currentColor" /> BEGIN WORKOUT
+                    </button>
+                </div>
             </div>
 
             <AnimatePresence>

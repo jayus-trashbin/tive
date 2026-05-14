@@ -7,7 +7,7 @@ import { audio } from '../../utils/audio';
 import { cn } from '../../lib/utils';
 
 export const RestTimerOverlay = () => {
-    const { restTimer, skipRest, addRestTime, userStats } = useWorkoutStore();
+    const { restTimer, skipRest, addRestTime, userStats, activeSession, exercises } = useWorkoutStore();
     const { trigger: haptic } = useHaptic();
     const [timeLeft, setTimeLeft] = useState(0);
 
@@ -42,6 +42,11 @@ export const RestTimerOverlay = () => {
 
     const progress = Math.min(100, (timeLeft / restTimer.originalDuration) * 100);
     const isCritical = timeLeft <= 10;
+
+    // "Next Up" Logic
+    const nextSet = activeSession?.sets.find(s => !s.isCompleted);
+    const nextExercise = nextSet ? exercises.find(e => e.id === nextSet.exerciseId) : null;
+    const remainingSets = nextExercise ? activeSession?.sets.filter(s => s.exerciseId === nextExercise.id && !s.isCompleted).length : 0;
 
     // Helper for quick adjust buttons
     const AdjustButton = ({ seconds, label }: { seconds: number, label: string }) => (
@@ -98,6 +103,29 @@ export const RestTimerOverlay = () => {
 
                 {/* Controls Container */}
                 <div className="w-full max-w-sm space-y-6">
+
+                    {/* Next Up Card */}
+                    <AnimatePresence>
+                        {nextExercise && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center gap-3 p-3 bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-white/5 mb-2"
+                            >
+                                <div className="w-10 h-10 rounded-xl bg-black overflow-hidden shrink-0 border border-white/10">
+                                    <img src={nextExercise.staticImageUrl || (nextExercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(nextExercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" loading="lazy" alt="" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">Next Up</p>
+                                    <p className="text-sm font-bold text-white truncate">{nextExercise.name}</p>
+                                </div>
+                                <div className="text-right shrink-0 pr-2">
+                                    <p className="text-xs font-bold text-zinc-400">{remainingSets} sets</p>
+                                    <p className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider">Left</p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Time Adjustment Grid */}
                     <div className="flex justify-between items-center px-4 gap-4">

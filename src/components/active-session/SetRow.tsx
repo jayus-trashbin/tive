@@ -31,6 +31,20 @@ const SetRow: React.FC<Props> = ({
         onUpdate(field, num);
     };
 
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>, field: 'weight' | 'reps') => {
+        e.target.select();
+        // Auto-fill from previous set if currently empty (0)
+        if (set[field] === 0 && previousSet && previousSet[field] > 0) {
+            // Magic: if both are 0, auto-fill both at once for maximum frictionless UX
+            if (set.weight === 0 && set.reps === 0) {
+                onUpdate('weight', previousSet.weight);
+                onUpdate('reps', previousSet.reps);
+            } else {
+                onUpdate(field, previousSet[field]);
+            }
+        }
+    };
+
     const handleTypeToggle = () => {
         const types: SetType[] = ['working', 'warmup', 'failure', 'drop'];
         const currentIndex = types.indexOf(set.type || 'working');
@@ -86,12 +100,14 @@ const SetRow: React.FC<Props> = ({
                         // Keep open or trigger action based on distance
                         if (info.offset.x < -100) onDelete();
                     }}
+                    animate={isCompleted ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.3 }}
                     className={cn(
-                        "relative z-10 grid gap-2 items-center px-3 py-2 transition-colors duration-200 will-change-transform rounded-xl",
+                        "relative z-10 grid gap-2 items-center px-3 py-2 transition-colors duration-200 will-change-transform rounded-xl border",
                         "grid-cols-[36px_1fr_48px_48px_32px_44px]",
                         isCompleted
-                            ? "bg-zinc-950 border border-brand-success/30"
-                            : "bg-zinc-900" // Solid background to hide swipe actions underneath
+                            ? "bg-zinc-950 border-brand-success/30"
+                            : "bg-zinc-900 border-transparent" // Solid background to hide swipe actions underneath
                     )}
                 >
                     {/* 1. Set Type Indicator */}
@@ -129,7 +145,7 @@ const SetRow: React.FC<Props> = ({
                             value={set.weight === 0 ? '' : set.weight}
                             placeholder="-"
                             onChange={(e) => handleChange(e, 'weight')}
-                            onFocus={(e) => e.target.select()}
+                            onFocus={(e) => handleFocus(e, 'weight')}
                             className={cn(
                                 "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
                                 isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
@@ -146,7 +162,7 @@ const SetRow: React.FC<Props> = ({
                             value={set.reps === 0 ? '' : set.reps}
                             placeholder="-"
                             onChange={(e) => handleChange(e, 'reps')}
-                            onFocus={(e) => e.target.select()}
+                            onFocus={(e) => handleFocus(e, 'reps')}
                             className={cn(
                                 "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
                                 isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
@@ -171,19 +187,22 @@ const SetRow: React.FC<Props> = ({
 
                     {/* 6. Checkbox */}
                     <div className="flex justify-center items-center h-full min-h-[44px]">
-                        <button
+                        <motion.button
                             onClick={(e) => { e.stopPropagation(); onComplete(); }}
                             aria-label={`Marcar set ${index + 1} completo — ${set.weight}kg × ${set.reps} reps`}
                             aria-pressed={isCompleted}
+                            whileTap={{ scale: 0.9 }}
+                            animate={isCompleted ? { scale: [1, 1.2, 1], backgroundColor: ["#10b981", "#10b981"] } : {}}
+                            transition={{ duration: 0.4, ease: "backOut" }}
                             className={cn(
-                                "w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-sm",
+                                "w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-sm",
                                 isCompleted
                                     ? "bg-brand-success text-black"
                                     : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700 hover:text-white"
                             )}
                         >
                             <Check size={18} strokeWidth={isCompleted ? 4 : 3} />
-                        </button>
+                        </motion.button>
                     </div>
                 </motion.div>
             </div>
