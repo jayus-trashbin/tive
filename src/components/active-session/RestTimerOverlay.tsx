@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, SkipForward, Minus, ChevronsRight, RotateCcw } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { useHaptic } from '../../hooks/useHaptic';

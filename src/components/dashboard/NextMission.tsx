@@ -67,7 +67,7 @@ const EmptyMission: React.FC = () => (
         action={{
             label: "New Routine",
             onClick: () => { /* Handle new routine */ },
-            icon: Plus
+            iconLeft: Plus
         }}
     />
 );

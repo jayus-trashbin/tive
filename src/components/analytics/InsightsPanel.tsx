@@ -4,7 +4,7 @@ import { Sparkles, BrainCircuit, AlertTriangle, TrendingUp, Info, ChevronRight }
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
-import { SkeletonBlock } from '../ui/SkeletonBlock';
+import SkeletonBlock from '../ui/SkeletonBlock';
 
 export const InsightsPanel: React.FC = () => {
     const [insightsData, setInsightsData] = useState<InsightsResponse | null>(null);
@@ -33,9 +33,9 @@ export const InsightsPanel: React.FC = () => {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Analysing Patterns...</span>
                 </div>
                 <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-5 space-y-3">
-                    <SkeletonBlock height="24px" width="40%" />
-                    <SkeletonBlock height="60px" />
-                    <SkeletonBlock height="60px" />
+                    <SkeletonBlock className="h-6 w-[40%]" />
+                    <SkeletonBlock className="h-[60px]" />
+                    <SkeletonBlock className="h-[60px]" />
                 </div>
             </div>
         );

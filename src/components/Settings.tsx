@@ -26,6 +26,11 @@ import { cn } from '../lib/utils';
 import { Button, IconButton } from './ui';
 
 
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+};
+
 /**
  * Settings Page
  * Premium configuration with grouped lists and sleek micro-interactions
