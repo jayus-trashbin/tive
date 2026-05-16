@@ -10,7 +10,7 @@ interface Props {
 export const CoachCard: React.FC<Props> = ({ onStartRoutine }) => {
   const advisor = useNextWorkoutAdvisor();
 
-  if (!advisor) return <div className="card mb-6 p-4 text-brand-primary">Advisor returned null! routines length check failed.</div>;
+  if (!advisor) return null;
 
   return (
     <motion.div 
