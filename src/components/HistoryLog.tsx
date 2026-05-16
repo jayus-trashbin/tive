@@ -1,20 +1,25 @@
-import React, { useMemo, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { useActiveSessions } from '../store/selectors';
 import { startOfDay, endOfDay } from '../utils/date';
-import { Calendar, Search, TrendingUp, LayoutGrid, Dumbbell, BarChart3, Filter } from 'lucide-react';
-import { Button, EmptyState } from './ui';
-import { cn } from '../lib/utils';
+import { Dumbbell, Filter } from 'lucide-react';
+import { EmptyState } from './ui';
+import { AnimatePresence } from 'framer-motion';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     HistoryHeader,
     SessionCard,
     SessionDetailsModal,
     CalendarModal
 } from './history';
-import VolumeChart from './analytics/VolumeChart';
-import MuscleRadar from './analytics/MuscleRadar';
+
+const AnalyticsDashboard = lazy(() => import('./analytics/AnalyticsDashboard'));
+
+const AnalyticsFallback = () => (
+    <div className="flex items-center justify-center h-32">
+        <div className="w-5 h-5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+);
 
 /**
  * History Log — Training Journal & Analytics
@@ -32,7 +37,6 @@ const HistoryLog: React.FC = () => {
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [performanceRange, setPerformanceRange] = useState<'7D' | '30D' | '90D'>('30D');
 
     // Filter sessions
     const filteredSessions = useMemo(() => {
@@ -88,6 +92,7 @@ const HistoryLog: React.FC = () => {
                                             session={session} 
                                             onClick={() => setSelectedSessionId(session.id)}
                                             style={style}
+                                            isLatest={index === 0}
                                         />
                                     );
                                 }}
@@ -95,51 +100,9 @@ const HistoryLog: React.FC = () => {
                         </div>
                     )
                 ) : (
-                    <div className="space-y-6 mt-6">
-                        {history.length > 0 ? (
-                            <>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center px-1">
-                                        <div className="section-title flex items-center gap-2">
-                                            <TrendingUp size={12} className="text-brand-primary" /> Volume Progression
-                                        </div>
-                                        <div className="flex bg-zinc-900 border border-zinc-800 p-0.5 rounded-xl">
-                                            {(['7D', '30D', '90D'] as const).map((r) => (
-                                                <Button
-                                                    key={r}
-                                                    variant={performanceRange === r ? 'primary' : 'ghost'}
-                                                    size="sm"
-                                                    onClick={() => setPerformanceRange(r)}
-                                                    className="px-3 py-1 text-caption-xs font-bold"
-                                                >
-                                                    {r}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="card-elevated p-3 overflow-hidden">
-                                        <VolumeChart days={performanceRange === '7D' ? 7 : performanceRange === '30D' ? 30 : 90} />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="section-title px-1 flex items-center gap-2">
-                                        <LayoutGrid size={12} className="text-brand-primary" /> Muscle Balance
-                                    </div>
-                                    <div className="card-elevated p-4 h-[280px]">
-                                        <MuscleRadar />
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                             <EmptyState
-                                 icon={BarChart3}
-                                 title="No Data Yet"
-                                 description="Complete workouts to unlock analytics"
-                                 subtitle="Analytics"
-                             />
-                        )}
-                    </div>
+                    <Suspense fallback={<AnalyticsFallback />}>
+                        <AnalyticsDashboard />
+                    </Suspense>
                 )}
             </div>
 

@@ -1,14 +1,22 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, ClipboardList, History, Image } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { useUIStore } from "../store/useUIStore";
+import type { TabId } from '../types';
+import { useTranslation } from '../i18n';
 
 interface LayoutProps {
     children: React.ReactNode;
-    activeTab: 'dashboard' | 'workout' | 'exercises' | 'plans' | 'history' | 'analytics' | 'photos' | 'settings';
-    onTabChange: (tab: 'dashboard' | 'workout' | 'exercises' | 'plans' | 'history' | 'analytics' | 'photos' | 'settings') => void;
+    activeTab: TabId;
+    onTabChange: (tab: TabId) => void;
+}
+
+interface TabConfig {
+    id: TabId;
+    icon: typeof Home;
+    label: string;
 }
 
 /**
@@ -20,18 +28,19 @@ interface LayoutProps {
  */
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => {
     const { activeSession } = useWorkoutStore();
-    const { isMinimized, isRoutineEditorOpen, isRoutinePreviewOpen, isProfileOpen } = useUIStore();;
-    const tabs = [
-        { id: 'dashboard', icon: Home, label: 'Home' },
-        { id: 'plans', icon: ClipboardList, label: 'Routines' },
-        { id: 'photos', icon: Image, label: 'Photos' },
-        { id: 'history', icon: History, label: 'History' },
+    const { isMinimized, isRoutineEditorOpen, isRoutinePreviewOpen, isSettingsOpen } = useUIStore();
+    const { t } = useTranslation();
+    const tabs: TabConfig[] = [
+        { id: 'dashboard', icon: Home, label: t('tabs.home') },
+        { id: 'plans', icon: ClipboardList, label: t('tabs.routines') },
+        { id: 'photos', icon: Image, label: t('tabs.photos') },
+        { id: 'history', icon: History, label: t('tabs.history') },
     ];
 
     const isVisible = (!activeSession || (activeSession && isMinimized)) &&
         !isRoutineEditorOpen &&
         !isRoutinePreviewOpen &&
-        !isProfileOpen;
+        !isSettingsOpen;
 
     return (
         <div className="flex justify-center h-[100dvh] w-full overflow-hidden bg-black">
@@ -85,7 +94,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                                     key={tab.id}
                                     onClick={() => {
                                         if (navigator.vibrate) navigator.vibrate(5);
-                                        onTabChange(tab.id as any);
+                                        onTabChange(tab.id);
                                     }}
                                     aria-label={tab.label}
                                     aria-current={isActive ? 'page' : undefined}
@@ -95,8 +104,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                                         size={22}
                                         strokeWidth={isActive ? 2.5 : 2}
                                         className={cn(
-                                            "transition-colors duration-200",
-                                            isActive ? "text-brand-primary" : "text-zinc-500"
+                                            "transition-all duration-200",
+                                            isActive ? "text-brand-primary drop-shadow-[0_0_6px_currentColor]" : "text-zinc-500"
                                         )}
                                     />
                                     <span className={cn(

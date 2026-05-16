@@ -9,10 +9,10 @@ const defaultState = {
     isMinimized: false,
     _hasHydrated: true,
     userStats: { isOnboarded: true, name: 'Test User', theme: 'dark' },
-    isProfileOpen: false,
+    isSettingsOpen: false,
     startSession: vi.fn(),
     setHasHydrated: vi.fn(),
-    setProfileOpen: vi.fn(),
+    setSettingsOpen: vi.fn(),
 };
 
 let mockState = { ...defaultState };
@@ -60,9 +60,6 @@ vi.mock('../components/ui/SplashScreen', () => ({
 vi.mock('../components/WelcomeModal', () => ({
     default: ({ onComplete }: { onComplete: () => void }) =>
         <div data-testid="welcome-modal" onClick={onComplete} />,
-}));
-vi.mock('../components/ProfileModal', () => ({
-    default: () => <div data-testid="profile-modal" />,
 }));
 vi.mock('../components/active-session/MiniPlayer', () => ({
     MiniPlayer: () => <div data-testid="mini-player" />,

@@ -294,8 +294,8 @@ export const getPreviousSetPerformance = (
   return null;
 };
 
-export const getSuggestedWeight = (previousSet: WorkoutSet | null, history: Session[] = [], exerciseId: string = '', setIndex: number = 0): number | null => {
-  return getSmartWeightSuggestion({ previousSet, recentHistory: history, exerciseId, setIndex });
+export const getSuggestedWeight = (previousSet: WorkoutSet | null, history: Session[] = [], exerciseId: string = '', setIndex: number = 0, exercise?: any): number | null => {
+  return getSmartWeightSuggestion({ previousSet, recentHistory: history, exerciseId, setIndex, exercise });
 };
 
 // --- E-01. Exercise Progression Status Engine ---

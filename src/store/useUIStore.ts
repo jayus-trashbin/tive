@@ -4,10 +4,12 @@ export interface UIState {
   isMinimized: boolean;
   isRoutineEditorOpen: boolean;
   isRoutinePreviewOpen: boolean;
-  isProfileOpen: boolean;
+  isSettingsOpen: boolean;
   _hasHydrated: boolean;
   isSyncing: boolean;
   lastSyncError: string | null;
+  /** Weight (kg) the user is currently editing/focused. PlateCalculator reads this. */
+  plateTargetWeight: number;
 
   notifications: { id: string, message: string, type: 'info' | 'success' | 'error' }[];
 
@@ -17,20 +19,22 @@ export interface UIState {
   removeNotification: (id: string) => void;
 
   toggleMinimize: (minimized?: boolean) => void;
-  setProfileOpen: (isOpen: boolean) => void;
+  setSettingsOpen: (isOpen: boolean) => void;
   setRoutineEditorOpen: (isOpen: boolean) => void;
   setRoutinePreviewOpen: (isOpen: boolean) => void;
   setHasHydrated: (state: boolean) => void;
+  setPlateTargetWeight: (kg: number) => void;
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
   isMinimized: false,
   isRoutineEditorOpen: false,
   isRoutinePreviewOpen: false,
-  isProfileOpen: false,
+  isSettingsOpen: false,
   _hasHydrated: false,
   isSyncing: false,
   lastSyncError: null,
+  plateTargetWeight: 0,
 
   notifications: [],
 
@@ -57,8 +61,9 @@ export const useUIStore = create<UIState>((set, get) => ({
     isMinimized: minimized !== undefined ? minimized : !state.isMinimized
   })),
 
-  setProfileOpen: (isOpen) => set({ isProfileOpen: isOpen }),
+  setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
   setRoutineEditorOpen: (isOpen) => set({ isRoutineEditorOpen: isOpen }),
   setRoutinePreviewOpen: (isOpen) => set({ isRoutinePreviewOpen: isOpen }),
-  setHasHydrated: (state) => set({ _hasHydrated: state })
+  setHasHydrated: (state) => set({ _hasHydrated: state }),
+  setPlateTargetWeight: (kg) => set({ plateTargetWeight: kg }),
 }));

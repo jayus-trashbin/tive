@@ -79,6 +79,16 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 /* Safe Area Utilities */
 .pb-safe {
   padding-bottom: calc(1.5rem + var(--sab));

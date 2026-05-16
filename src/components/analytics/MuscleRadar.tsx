@@ -32,7 +32,7 @@ const MuscleRadar: React.FC = () => {
     );
 
     return (
-        <div className="h-full w-full">
+        <div className="h-full w-full overflow-hidden">
 
             {/* Radar Chart */}
             {hasData ? (
@@ -75,16 +75,13 @@ const MuscleRadar: React.FC = () => {
                 </div>
             )}
 
-            {/* Legend */}
             {hasData && (
-                <div className="flex flex-wrap gap-2 justify-center mt-2">
+                <div className="grid grid-cols-2 gap-1.5 mt-3 px-2">
                     {data.map(d => (
-                        <div
-                            key={d.muscle}
-                            className="text-[9px] font-medium text-zinc-500"
-                        >
-                            <span className="text-white">{d.muscle}</span>
-                            <span className="ml-1 text-brand-primary">{d.value}%</span>
+                        <div key={d.muscle} className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-brand-primary" />
+                            <span className="text-[11px] text-zinc-400 truncate">{d.muscle}</span>
+                            <span className="text-[11px] font-bold text-white ml-auto">{d.value}%</span>
                         </div>
                     ))}
                 </div>

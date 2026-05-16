@@ -1,5 +1,6 @@
 
 import { MuscleGroup } from '../types';
+import { logger } from './logger';
 
 export interface PlateInventory {
   [weight: number]: number; // weight -> count
@@ -109,7 +110,7 @@ export const solvePlateLoading = (
 
       safetyCounter++;
       if (safetyCounter > MAX_ITERATIONS) {
-        console.warn("[PlateCalc] Infinite loop detected, aborting calc.");
+        logger.warn('PlateCalc', 'Infinite loop detected, aborting calc');
         break;
       }
 

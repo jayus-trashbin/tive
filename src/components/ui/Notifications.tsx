@@ -3,6 +3,7 @@ import { useUIStore } from '../../store/useUIStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Info, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useTranslation } from '../../i18n';
 
 type NotificationType = 'info' | 'success' | 'error';
 
@@ -10,25 +11,21 @@ const TOAST_CONFIG: Record<NotificationType, {
   icon: typeof Info;
   iconClass: string;
   borderClass: string;
-  label: string;
 }> = {
   info: {
     icon: Info,
     iconClass: 'text-brand-primary',
     borderClass: 'border-brand-primary/30',
-    label: 'Info',
   },
   success: {
     icon: CheckCircle2,
     iconClass: 'text-brand-success',
     borderClass: 'border-brand-success/30',
-    label: 'Concluído',
   },
   error: {
     icon: AlertCircle,
     iconClass: 'text-brand-danger',
     borderClass: 'border-brand-danger/40',
-    label: 'Erro',
   },
 };
 
@@ -42,12 +39,18 @@ const TOAST_CONFIG: Record<NotificationType, {
 export const Notifications: React.FC = () => {
   const notifications = useUIStore(s => s.notifications);
   const removeNotification = useUIStore(s => s.removeNotification);
+  const { t } = useTranslation();
+
+  const labelFor = (type: NotificationType) =>
+    type === 'success' ? t('notifications.success')
+      : type === 'error' ? t('notifications.error')
+      : t('notifications.info');
 
   return (
     <div
       role="region"
       aria-live="polite"
-      aria-label="Notificações"
+      aria-label={t('notifications.region')}
       className="fixed bottom-24 right-4 z-toast flex flex-col gap-2 w-72 sm:w-80 pointer-events-none"
     >
       <AnimatePresence mode="popLayout">
@@ -75,7 +78,7 @@ export const Notifications: React.FC = () => {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <p className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-0.5">
-                  {config.label}
+                  {labelFor(n.type)}
                 </p>
                 <p className="text-body text-zinc-100 leading-snug">
                   {n.message}
@@ -85,7 +88,7 @@ export const Notifications: React.FC = () => {
               {/* Dismiss */}
               <button
                 onClick={() => removeNotification(n.id)}
-                aria-label="Fechar notificação"
+                aria-label={t('notifications.dismiss')}
                 className="text-zinc-600 hover:text-zinc-300 transition-colors shrink-0 mt-0.5 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary"
               >
                 <X className="w-4 h-4" />

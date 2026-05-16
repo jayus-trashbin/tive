@@ -142,9 +142,11 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                     <div className="space-y-6">
                         {/* Name Input */}
                         <div className="relative group">
-                            <input 
+                            <label htmlFor="welcome-name" className="sr-only">Your Name</label>
+                            <input
+                                id="welcome-name"
                                 autoFocus
-                                type="text" 
+                                type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Your Name"
@@ -177,8 +179,9 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                 <span className="text-sm font-bold text-zinc-400 flex items-center gap-2"><Scale size={16}/> Bodyweight</span>
                                 <span className="text-2xl font-bold">{weight} <span className="text-sm text-zinc-500">KG</span></span>
                             </div>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
+                                aria-label="Bodyweight in kilograms"
                                 min="40" max="150" step="0.5"
                                 value={weight}
                                 onChange={(e) => setWeight(Number(e.target.value))}

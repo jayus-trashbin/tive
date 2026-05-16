@@ -1,6 +1,7 @@
 
 import { get, set, del } from 'idb-keyval';
 import { StateStorage } from 'zustand/middleware';
+import { logger } from './logger';
 
 // Custom Storage Adapter for Zustand Persist Middleware
 export const idbStorage: StateStorage = {
@@ -9,7 +10,7 @@ export const idbStorage: StateStorage = {
       const value = await get(name);
       return value || null;
     } catch (e) {
-      console.warn('IDB Get Error', e);
+      logger.warn('IDB', 'Get error', e);
       return null;
     }
   },
@@ -17,14 +18,14 @@ export const idbStorage: StateStorage = {
     try {
       await set(name, value);
     } catch (e) {
-      console.warn('IDB Set Error', e);
+      logger.warn('IDB', 'Set error', e);
     }
   },
   removeItem: async (name: string): Promise<void> => {
     try {
       await del(name);
     } catch (e) {
-      console.warn('IDB Delete Error', e);
+      logger.warn('IDB', 'Delete error', e);
     }
   },
 };

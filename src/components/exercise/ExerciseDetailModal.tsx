@@ -10,6 +10,7 @@ import { ExerciseTabs } from '../exercise-detail/ExerciseTabs';
 import { ExerciseGuide } from '../exercise-detail/ExerciseGuide';
 import { ExerciseHistory } from '../exercise-detail/ExerciseHistory';
 import { ExerciseAnatomy } from '../exercise-detail/ExerciseAnatomy';
+import { logger } from '../../utils/logger';
 
 interface Props {
     exercise: Exercise | null;
@@ -48,7 +49,7 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
                             addExercise(enriched); // Persist to store so next time it's instant
                         }
                     } catch (e) {
-                        console.warn("Failed to enrich exercise details");
+                        logger.warn('ExerciseDetail', 'Failed to enrich exercise details', e);
                     } finally {
                         setIsFetchingDetails(false);
                     }

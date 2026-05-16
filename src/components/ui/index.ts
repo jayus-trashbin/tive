@@ -5,6 +5,7 @@
  *   import { Button, EmptyState, IconButton } from '../ui';
  */
 export { default as Button } from './Button';
+export { default as ConfirmModal } from './ConfirmModal';
 export { default as EmptyState } from './EmptyState';
 export { default as IconButton } from './IconButton';
 export { Notifications } from './Notifications';

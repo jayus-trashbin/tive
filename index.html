@@ -37,15 +37,7 @@
 
 <body>
   <div id="root"></div>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(() => console.log('SW registered'))
-          .catch(err => console.log('SW registration failed', err));
-      });
-    }
-  </script>
+  <!-- Service worker registration moved to src/main.tsx (production-only). -->
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

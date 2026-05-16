@@ -40,7 +40,8 @@ export const useWorkoutLogic = () => {
             // Try to find historical data using the engine
             const lastPerf = getPreviousSetPerformance(history, currentSession.routineId, exerciseId, 0);
             if (lastPerf) {
-                defaultWeight = getSuggestedWeight(lastPerf, history, exerciseId, 0) || lastPerf.weight;
+                const exercise = useWorkoutStore.getState().exercises.find(e => e.id === exerciseId);
+                defaultWeight = getSuggestedWeight(lastPerf, history, exerciseId, 0, exercise) || lastPerf.weight;
                 defaultReps = lastPerf.reps;
             }
         }

@@ -30,7 +30,8 @@ export interface UserStats {
   geminiApiKey?: string; // AI
   lastSyncTime?: number;
   unitSystem: 'metric' | 'imperial';
-  theme: 'dark' | 'light' | 'oled';
+  theme: 'dark' | 'oled';
+  language?: 'en' | 'pt-BR';
   isAudioEnabled?: boolean;
   isVibrationEnabled?: boolean;
   smartAudio?: boolean; // Detect music playing
@@ -44,7 +45,7 @@ export interface ProfileFormData {
   supabaseUrl: string;
   supabaseKey: string;
   unitSystem: 'metric' | 'imperial';
-  theme: 'dark' | 'light' | 'oled';
+  theme: 'dark' | 'oled';
   geminiApiKey: string;
   isAudioEnabled: boolean;
   isVibrationEnabled: boolean;

@@ -20,7 +20,7 @@ interface Props {
     onAutoScrollRequest?: (nextExerciseId: string) => void;
     onReplaceRequest?: (exerciseId: string) => void;
     /** Optional props forwarded to each ExerciseGroup for drag-and-drop */
-    dragHandleProps?: any;
+    dragHandleProps?: React.HTMLAttributes<HTMLElement>;
     /** Round index label (e.g. "A", "B", "C") — shown on each card */
     supersetLabel?: string;
 }

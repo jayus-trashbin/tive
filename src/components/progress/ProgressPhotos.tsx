@@ -6,6 +6,7 @@ import PhotoCanvas from './PhotoCanvas';
 import PhotoGallery from './PhotoGallery';
 import { MuscleGroup } from '../../types/domain';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
+import { logger } from '../../utils/logger';
 
 type ViewState = 'gallery' | 'camera' | 'processing';
 
@@ -75,7 +76,7 @@ const ProgressPhotos: React.FC = () => {
             if (pendingMuscleGroups.length > 0) dismissPostWorkoutPrompt();
             setView('gallery');
         } catch (err) {
-            console.error('[ProgressPhotos] Failed to save photo:', err);
+            logger.error('ProgressPhotos', 'Failed to save photo', err);
             setSaveError('Failed to save photo. Please try again.');
         }
     }, [addPhoto, captureData, userStats.bodyweight, dismissPostWorkoutPrompt, pendingMuscleGroups]);

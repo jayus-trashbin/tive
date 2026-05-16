@@ -107,18 +107,26 @@ export function parseBackupJSON(jsonString: string): ImportResult {
             return { sessions: [], exercises: [], error: 'Nenhum dado encontrado no arquivo.' };
         }
 
-        // Schema validation
-        const isValidSession = (s: any) => typeof s === 'object' && s !== null && typeof s.id === 'string' && typeof s.date === 'number' && Array.isArray(s.sets);
-        const isValidExercise = (e: any) => typeof e === 'object' && e !== null && typeof e.id === 'string' && typeof e.name === 'string';
+        // Schema validation (typed guards)
+        const isValidSession = (s: unknown): s is Session => {
+            if (typeof s !== 'object' || s === null) return false;
+            const o = s as Record<string, unknown>;
+            return typeof o.id === 'string' && typeof o.date === 'number' && Array.isArray(o.sets);
+        };
+        const isValidExercise = (e: unknown): e is Exercise => {
+            if (typeof e !== 'object' || e === null) return false;
+            const o = e as Record<string, unknown>;
+            return typeof o.id === 'string' && typeof o.name === 'string';
+        };
 
-        const invalidSessions = rawSessions.filter((s: any) => !isValidSession(s));
-        const invalidExercises = rawExercises.filter((e: any) => !isValidExercise(e));
+        const validSessions = (rawSessions as unknown[]).filter(isValidSession);
+        const validExercises = (rawExercises as unknown[]).filter(isValidExercise);
 
-        if (invalidSessions.length > 0 || invalidExercises.length > 0) {
+        if (validSessions.length !== rawSessions.length || validExercises.length !== rawExercises.length) {
             return { sessions: [], exercises: [], error: 'Arquivo JSON corrompido ou formato inválido.' };
         }
 
-        return { sessions: rawSessions as Session[], exercises: rawExercises as Exercise[] };
+        return { sessions: validSessions, exercises: validExercises };
     } catch (e) {
         return { sessions: [], exercises: [], error: 'Arquivo JSON inválido. Verifique se o arquivo não está corrompido.' };
     }

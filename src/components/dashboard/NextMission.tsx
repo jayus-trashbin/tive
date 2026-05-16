@@ -22,14 +22,14 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
             <motion.div
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onStart(nextRoutine.id)}
-                className="card relative overflow-hidden cursor-pointer group"
+                className="card relative overflow-hidden cursor-pointer group border border-zinc-800 shadow-[0_4px_32px_-8px] shadow-brand-primary/10"
             >
                 {/* Subtle Ambient Glow */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 blur-3xl pointer-events-none transition-opacity group-hover:opacity-100 opacity-50" />
 
                 <div className="p-5 flex justify-between items-center relative z-10">
                     <div className="space-y-3">
-                        <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-medium">
+                        <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-primary/15 border border-brand-primary/30 text-brand-primary text-xs font-medium">
                             Ready to Train
                         </div>
                         
@@ -50,7 +50,7 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
                         </div>
                     </div>
 
-                    <div className="w-12 h-12 bg-brand-primary text-black flex items-center justify-center rounded-full shadow-lg group-hover:scale-105 transition-transform duration-200 shrink-0">
+                    <div className="w-12 h-12 bg-brand-primary text-black flex items-center justify-center rounded-full shadow-[0_0_20px_-4px] shadow-brand-primary/40 group-hover:scale-105 transition-transform duration-200 shrink-0">
                         <Play size={20} fill="black" className="ml-1" />
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
-import { useActiveSessions } from '../store/selectors';
+import { useActiveSessions, useHistorySummary, useRoutines } from '../store/selectors';
 import { logger } from '../utils/logger';
 import { calculateCurrentStreak, getWeeklyStats, calculateACWR } from '../utils/engine';
 import { usePhysiology } from '../hooks/usePhysiology';
@@ -13,6 +13,7 @@ import {
     MuscleReadiness
 } from './dashboard/index';
 import { getAvgSessionDuration } from '../utils/analytics';
+import CoachCard from './dashboard/CoachCard';
 import ACWRCard from './analytics/ACWRCard';
 import { InsightsPanel } from './analytics/InsightsPanel';
 import { StrengthStandards } from './analytics/StrengthStandards';
@@ -20,17 +21,11 @@ import SocialHub from './social/SocialHub';
 
 /**
  * Dashboard — Premium Home Screen
- * 
- * Visual hierarchy (Modularized):
- *   1. DashboardHeader (Greeting + Profile)
- *   2. MetricStrip (Streak + Volume + Sessions)
- *   3. NextMission (Hero Action Card)
- *   4. MuscleReadiness (Fatigue / Recovery)
  */
 const Dashboard: React.FC = () => {
-    const history = useActiveSessions();
-    const userStats = useWorkoutStore(s => s.userStats);
-    const routines = useWorkoutStore(s => s.routines);
+    const history = useActiveSessions(); // Used for detailed calculations (streak, etc.)
+    const summary = useHistorySummary(); // Triggers re-renders only on session completion
+    const routines = useRoutines();
     const startSession = useWorkoutStore(s => s.startSession);
     const { calculateReadiness } = usePhysiology();
 
@@ -107,6 +102,7 @@ const Dashboard: React.FC = () => {
                 streakCard={<StreakCard streak={streak} history={history} />}
             />
 
+            <CoachCard onStartRoutine={startSession} />
             <NextMission nextRoutine={nextRoutine} onStart={startSession} />
 
             <MuscleReadiness readiness={readinessData} />

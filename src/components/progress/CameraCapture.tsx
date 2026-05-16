@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, RotateCcw, Check, AlertCircle, SwitchCamera, Upload, Image as ImageIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { logger } from '../../utils/logger';
 
 export type PhotoSource = 'front' | 'back' | 'upload';
 
@@ -93,7 +94,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                 return;
             }
 
-            console.error('[CameraCapture] Error:', error);
+            logger.error('CameraCapture', 'Error', error);
 
             if (error instanceof DOMException) {
                 if (error.name === 'NotAllowedError') {

@@ -1,4 +1,5 @@
 import { Session, MuscleGroup, Exercise } from '../types/domain';
+import { CacheManager } from './CacheManager';
 
 export interface TimeSeriesPoint {
     date: number;
@@ -26,6 +27,14 @@ export interface PREvent {
     estimated1RM: number;
 }
 
+/** Helper to generate safe cache key based on history state */
+const generateHistoryHash = (sessions: Session[]): string => {
+    const valid = sessions.filter(s => s.isCompleted && !s.deletedAt);
+    if (valid.length === 0) return 'empty';
+    const lastSession = valid.reduce((latest, s) => s.date > latest.date ? s : latest, valid[0]);
+    return `${valid.length}_${lastSession.date}`;
+};
+
 /**
  * Get total training volume by day for the last N days
  */
@@ -33,6 +42,10 @@ export function getVolumeTimeSeries(
     sessions: Session[],
     days: number = 30
 ): TimeSeriesPoint[] {
+    const cacheKey = `getVolumeTimeSeries_${days}_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<TimeSeriesPoint[]>(cacheKey);
+    if (cached) return cached;
+
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const validSessions = sessions.filter(s => s.date >= cutoff && !s.deletedAt && s.isCompleted);
 
@@ -60,6 +73,7 @@ export function getVolumeTimeSeries(
         });
     }
 
+    CacheManager.setMemory(cacheKey, result);
     return result;
 }
 
@@ -70,6 +84,10 @@ export function get1RMProgression(
     sessions: Session[],
     exerciseId: string
 ): TimeSeriesPoint[] {
+    const cacheKey = `get1RMProgression_${exerciseId}_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<TimeSeriesPoint[]>(cacheKey);
+    if (cached) return cached;
+
     const result: TimeSeriesPoint[] = [];
 
     // Sort sessions by date (oldest first)
@@ -94,6 +112,7 @@ export function get1RMProgression(
         }
     });
 
+    CacheManager.setMemory(cacheKey, result);
     return result;
 }
 
@@ -101,6 +120,10 @@ export function get1RMProgression(
  * Get training frequency heatmap for the last 90 days
  */
 export function getFrequencyHeatmap(sessions: Session[]): HeatmapPoint[] {
+    const cacheKey = `getFrequencyHeatmap_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<HeatmapPoint[]>(cacheKey);
+    if (cached) return cached;
+
     const days = 90;
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const validSessions = sessions.filter(s => s.date >= cutoff && !s.deletedAt && s.isCompleted);
@@ -128,6 +151,7 @@ export function getFrequencyHeatmap(sessions: Session[]): HeatmapPoint[] {
         });
     }
 
+    CacheManager.setMemory(cacheKey, result);
     return result;
 }
 
@@ -139,6 +163,10 @@ export function getMuscleVolumeDistribution(
     exercises: Exercise[],
     days: number = 30
 ): MuscleVolumePoint[] {
+    const cacheKey = `getMuscleVolumeDistribution_${days}_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<MuscleVolumePoint[]>(cacheKey);
+    if (cached) return cached;
+
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const validSessions = sessions.filter(s => s.date >= cutoff && !s.deletedAt && s.isCompleted);
 
@@ -160,13 +188,16 @@ export function getMuscleVolumeDistribution(
 
     const muscles: MuscleGroup[] = ['chest', 'back', 'upper legs', 'lower legs', 'shoulders', 'arms'];
 
-    return muscles.map(muscle => ({
+    const result = muscles.map(muscle => ({
         muscle,
         volume: muscleVolume.get(muscle) || 0,
         percentage: totalVolume > 0
             ? Math.round((muscleVolume.get(muscle) || 0) / totalVolume * 100)
             : 0
     }));
+
+    CacheManager.setMemory(cacheKey, result);
+    return result;
 }
 
 /**
@@ -214,6 +245,10 @@ export function getWeeklySummary(sessions: Session[], weeks: number = 4): {
     sessions: number;
     avgPerSession: number;
 }[] {
+    const cacheKey = `getWeeklySummary_${weeks}_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<any[]>(cacheKey);
+    if (cached) return cached;
+
     const result = [];
     const now = Date.now();
     const weekMs = 7 * 24 * 60 * 60 * 1000;
@@ -239,7 +274,9 @@ export function getWeeklySummary(sessions: Session[], weeks: number = 4): {
         });
     }
 
-    return result.reverse(); // Oldest first
+    const finalResult = result.reverse(); // Oldest first
+    CacheManager.setMemory(cacheKey, finalResult);
+    return finalResult;
 }
 
 /**
@@ -378,6 +415,10 @@ export function getMuscleFatigueTimeline(
     exercises: Exercise[],
     days: number = 14
 ): MuscleFatigueSnapshot[] {
+    const cacheKey = `getMuscleFatigueTimeline_${days}_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<MuscleFatigueSnapshot[]>(cacheKey);
+    if (cached) return cached;
+
     const HALF_LIVES: Partial<Record<MuscleGroup, number>> = {
         'upper legs': 24, back: 22, chest: 18, shoulders: 16,
         'lower legs': 12, arms: 12, core: 10, cardio: 8,
@@ -449,6 +490,7 @@ export function getMuscleFatigueTimeline(
         if (dayStart >= startMs) snapshots.push({ date: dayStart, scores });
     }
 
+    CacheManager.setMemory(cacheKey, snapshots);
     return snapshots;
 }
 
@@ -476,6 +518,10 @@ export function getWeeklyMuscleVolume(
     sessions: Session[],
     exercises: Exercise[]
 ): WeeklyMuscleVolumePoint[] {
+    const cacheKey = `getWeeklyMuscleVolume_${generateHistoryHash(sessions)}`;
+    const cached = CacheManager.getMemory<WeeklyMuscleVolumePoint[]>(cacheKey);
+    if (cached) return cached;
+
     const weekMs = 7 * 24 * 60 * 60 * 1000;
     const now = Date.now();
     const thisWeekStart = now - weekMs;
@@ -504,13 +550,16 @@ export function getWeeklyMuscleVolume(
         return { vol, setCount };
     };
 
-    return muscles.map(muscle => {
+    const result = muscles.map(muscle => {
         const { vol: thisWeek, setCount: sets } = calcVolume(thisWeekSessions, muscle);
         const { vol: lastWeek } = calcVolume(lastWeekSessions, muscle);
         const delta = thisWeek - lastWeek;
         const deltaPct = lastWeek > 0 ? (delta / lastWeek) * 100 : null;
         return { muscle, thisWeek, lastWeek, delta, deltaPct, sets };
     });
+
+    CacheManager.setMemory(cacheKey, result);
+    return result;
 }
 
 // ------------------------------------------------------

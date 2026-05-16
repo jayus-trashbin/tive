@@ -6,8 +6,8 @@ import {
     PHOTO_DB_NAME,
     PHOTO_STORE_NAME
 } from '../../types/photo';
-import { MuscleGroup } from '../../types/domain';
 import { photoSyncService } from '../../services/PhotoSyncService';
+import { logger } from '../../utils/logger';
 
 // ============================================
 // IndexedDB Helpers
@@ -118,7 +118,7 @@ export const createPhotoSlice: StateCreator<PhotoSlice> = (set, get) => ({
 
             return id;
         } catch (error) {
-            console.error('[PhotoSlice] Failed to save photo:', error);
+            logger.error('PhotoSlice', 'Failed to save photo', error);
             throw error;
         }
     },
@@ -136,7 +136,7 @@ export const createPhotoSlice: StateCreator<PhotoSlice> = (set, get) => ({
             }));
 
         } catch (error) {
-            console.error('[PhotoSlice] Failed to delete photo:', error);
+            logger.error('PhotoSlice', 'Failed to delete photo', error);
             throw error;
         }
     },
@@ -148,7 +148,7 @@ export const createPhotoSlice: StateCreator<PhotoSlice> = (set, get) => ({
             set({ photos, isLoading: false });
 
         } catch (error) {
-            console.error('[PhotoSlice] Failed to load photos:', error);
+            logger.error('PhotoSlice', 'Failed to load photos', error);
             set({ isLoading: false });
         }
     },

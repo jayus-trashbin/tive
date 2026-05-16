@@ -9,6 +9,7 @@ import { createExerciseSlice } from './slices/createExerciseSlice';
 import { createRoutineSlice } from './slices/createRoutineSlice';
 import { createPhotoSlice } from './slices/createPhotoSlice';
 import { useUIStore } from './useUIStore';
+import { logger } from '../utils/logger';
 
 export const useWorkoutStore = create<WorkoutState>()(
   persist(
@@ -85,8 +86,8 @@ export const useWorkoutStore = create<WorkoutState>()(
       }),
 
       onRehydrateStorage: () => (state) => {
-        return (rehydratedState: any, error: any) => {
-          if (error) console.error("Hydration Failed", error);
+        return (_rehydratedState: unknown, error: unknown) => {
+          if (error) logger.error('Store', 'Hydration failed', error);
           // Restore credentials from separate store after hydration
           const supabaseUrl = credentialsStore.getSupabaseUrl();
           const supabaseKey = credentialsStore.getSupabaseKey();
@@ -95,15 +96,15 @@ export const useWorkoutStore = create<WorkoutState>()(
             state?.updateUserStats({ supabaseUrl, supabaseKey, geminiApiKey });
           }
           useUIStore.getState().setHasHydrated(true);
-          useUIStore.getState().setProfileOpen(false);
+          useUIStore.getState().setSettingsOpen(false);
           useUIStore.getState().setRoutineEditorOpen(false);
           useUIStore.getState().setRoutinePreviewOpen(false);
 
           if (typeof window !== 'undefined') {
             if ('requestIdleCallback' in window) {
-              window.requestIdleCallback(() => syncService.sync(), { timeout: 2000 });
+              window.requestIdleCallback(() => syncService.sync({ silent: true }), { timeout: 2000 });
             } else {
-              setTimeout(() => syncService.sync(), 500);
+              setTimeout(() => syncService.sync({ silent: true }), 500);
             }
           }
         }

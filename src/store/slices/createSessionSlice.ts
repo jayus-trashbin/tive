@@ -4,6 +4,7 @@ import { Session, WorkoutSet, PhysiologyState, MuscleGroup, RoutineBlock, Routin
 import { syncService } from '../../services/SyncService';
 import { processSessionCompletion, getPreviousSetPerformance, getSuggestedWeight } from '../../utils/engine';
 import { useUIStore } from '../useUIStore';
+import { logger } from '../../utils/logger';
 
 // Initial state helpers
 const initialPhysiology: PhysiologyState = {
@@ -60,7 +61,8 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                         if (w === 0 || r === 0) {
                             const lastPerf = getPreviousSetPerformance(get().history, routineId, exerciseId, setIndex);
                             if (lastPerf) {
-                                if (w === 0) w = getSuggestedWeight(lastPerf) || lastPerf.weight;
+                                const exercise = get().exercises.find(e => e.id === exerciseId);
+                                if (w === 0) w = getSuggestedWeight(lastPerf, get().history, exerciseId, setIndex, exercise) || lastPerf.weight;
                                 if (r === 0) r = lastPerf.reps;
                             }
                         }
@@ -130,7 +132,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
             useUIStore.getState().toggleMinimize(false);
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
         } catch (error) {
-            console.error("[Store] startSession failed:", error);
+            logger.error('SessionSlice', 'startSession failed', error);
             useUIStore.getState().addNotification("Failed to start session. Please try again.", "error");
         }
     },
@@ -158,13 +160,13 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
             // Trigger sync in background
             if (typeof window !== 'undefined') {
                 if ('requestIdleCallback' in window) {
-                    window.requestIdleCallback(() => syncService.sync());
+                    window.requestIdleCallback(() => syncService.sync({ silent: true }));
                 } else {
-                    setTimeout(() => syncService.sync(), 0);
+                    setTimeout(() => syncService.sync({ silent: true }), 0);
                 }
             }
         } catch (error) {
-            console.error("[Store] finishSession CRITICAL FAILURE:", error);
+            logger.error('SessionSlice', 'finishSession critical failure', error);
             useUIStore.getState().addNotification("Error saving workout. Your data is still safe in the active session.", "error");
         }
     },
@@ -298,7 +300,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 // Trigger Timer
                 get().startRest(restDuration);
             } catch (err) {
-                console.warn("[Store] Auto-rest logic failed, ignoring.", err);
+                logger.warn('SessionSlice', 'Auto-rest logic failed, ignoring', err);
             }
         }
     },
@@ -394,7 +396,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                     : s
             )
         }));
-        syncService.sync();
+        syncService.sync({ silent: true });
     },
 
     resetStorage: () => set({
@@ -468,7 +470,7 @@ export const createSessionSlice: StateCreator<WorkoutState, [], [], SessionSlice
                 exercises: mergedExercises
             };
         } catch (e) {
-            console.error("[Store] mergeRemoteData failed:", e);
+            logger.error('SessionSlice', 'mergeRemoteData failed', e);
             return {};
         }
     })

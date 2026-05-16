@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useUIStore } from "../store/useUIStore";
 import { Exercise, WorkoutSet, MuscleGroup, Session } from '../types';
 import { ChevronDown, Calculator, CheckCircle2, Plus, Dumbbell, AlertTriangle, TrendingDown } from 'lucide-react';
@@ -18,6 +19,8 @@ import { cn } from '../lib/utils';
 import LiveMuscleHeatmap from './active-session/LiveMuscleHeatmap';
 import PRCelebration from './active-session/PRCelebration';
 import { Button, EmptyState } from './ui';
+import { useTranslation } from '../i18n';
+import AutoRegulationBanner from './active-session/AutoRegulationBanner';
 
 import {
     DndContext,
@@ -78,8 +81,20 @@ const SortableExerciseGroup = (props: React.ComponentProps<typeof ExerciseGroup>
 };
 
 const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
-    const { activeSession, finishSession, exercises, history, logSet, addExercise, replaceExercise, reorderExercises, triggerPostWorkoutPrompt } = useWorkoutStore();
-    const { toggleMinimize } = useUIStore();;
+    const { activeSession, finishSession, exercises, history, logSet, addExercise, replaceExercise, reorderExercises, triggerPostWorkoutPrompt } = useWorkoutStore(useShallow(state => ({
+        activeSession: state.activeSession,
+        finishSession: state.finishSession,
+        exercises: state.exercises,
+        history: state.history,
+        logSet: state.logSet,
+        addExercise: state.addExercise,
+        replaceExercise: state.replaceExercise,
+        reorderExercises: state.reorderExercises,
+        triggerPostWorkoutPrompt: state.triggerPostWorkoutPrompt
+    })));
+    const { toggleMinimize } = useUIStore();
+    const plateTargetWeight = useUIStore(s => s.plateTargetWeight);
+    const { t } = useTranslation();
     const { calculate1RM } = usePhysiology();
 
     const [showPlateCalc, setShowPlateCalc] = useState(false);
@@ -281,10 +296,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
             finishSession();
             useUIStore.getState().addNotification('Workout completed! Stay strong. 🔥', 'success');
 
-            // Trigger photo prompt
-            if (muscleGroups.length > 0) {
-                triggerPostWorkoutPrompt(sessionSnapshot.id, muscleGroups);
-            }
+            // Note: PostWorkoutPrompt is redundant since WorkoutSummary handles photos
 
             // Pass data up for summary screen
             if (onFinishWithData) {
@@ -351,79 +363,61 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         </h1>
                     </div>
 
-                    {/* Right: timer + finish */}
-                    <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-sm font-medium text-zinc-300 tabular-nums">
+                    {/* Right: Plates + timer + finish */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        <button
+                            onClick={() => setShowPlateCalc(!showPlateCalc)}
+                            className={cn(
+                                "flex items-center justify-center w-8 h-8 rounded-full transition-colors active:scale-95",
+                                showPlateCalc ? "bg-brand-primary text-black" : "text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800"
+                            )}
+                            title={t('workoutPlayer.plateCalculator')}
+                        >
+                            <Calculator size={14} />
+                        </button>
+                        <span className="font-mono text-white tabular-nums font-bold text-base">
                             {duration}
                         </span>
-                        <Button
-                            variant="primary"
-                            size="sm"
+                        <button
                             onClick={() => setShowFinishModal(true)}
+                            className="rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-primary border border-brand-primary/30 hover:bg-brand-primary/10 transition-colors"
                         >
                             Finish
-                        </Button>
+                        </button>
                     </div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="h-1.5 w-full bg-zinc-900 overflow-hidden flex">
-                    <motion.div
-                        className="h-full bg-brand-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progressPercent}%` }}
-                        transition={{ duration: 0.5 }}
-                    />
+                {/* Progress Bar & Stats */}
+                <div className="mt-1">
+                    <div className="h-0.5 w-full bg-zinc-900 overflow-hidden flex rounded-full">
+                        <motion.div
+                            className="h-full bg-brand-primary"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPercent}%` }}
+                            transition={{ duration: 0.5 }}
+                        />
+                    </div>
+                    <div className="flex justify-between items-center mt-1.5 px-1">
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                            {completedSets}/{estimatedTotal} Sets
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-bold tracking-wider">
+                            {Math.round(progressPercent)}%
+                        </span>
+                    </div>
                 </div>
 
-                {/* Auto-Regulation Banner */}
-                <AnimatePresence>
-                    {autoRegMessage && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden mt-2"
-                        >
-                            <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] font-bold text-amber-400">
-                                {autoRegMessage.includes('High') ? (
-                                    <TrendingDown size={12} className="shrink-0" />
-                                ) : (
-                                    <AlertTriangle size={12} className="shrink-0" />
-                                )}
-                                <span className="flex-1">{autoRegMessage}</span>
-                                <button
-                                    onClick={clearAutoReg}
-                                    className="text-amber-600 hover:text-amber-400 transition-colors ml-1"
-                                    aria-label="Dismiss"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                <AutoRegulationBanner />
             </header>
 
             {/* ──── EXERCISE LIST ──── */}
             <div className="flex-1 overflow-y-auto no-scrollbar pb-40">
                 <div className="px-5 py-4 space-y-5">
 
-                    {/* Quick Tools */}
-                    <div className="flex justify-between items-center">
-                        <div className="section-title">Running Order</div>
-                        <button
-                            onClick={() => setShowPlateCalc(!showPlateCalc)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-xs font-medium text-zinc-400 border border-zinc-800 hover:text-white transition-colors active:scale-95 rounded-full"
-                        >
-                            <Calculator size={14} /> Plates
-                        </button>
-                    </div>
-
                     <AnimatePresence>
                         {showPlateCalc && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                <PlateCalculator targetWeight={100} />
+                                <PlateCalculator targetWeight={plateTargetWeight || 100} />
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -433,8 +427,8 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         {sessionExercises.length === 0 ? (
                             <EmptyState
                                 icon={Dumbbell}
-                                title="Session Empty"
-                                description="Add an exercise to get started"
+                                title={t('workoutPlayer.sessionEmpty')}
+                                description={t('workoutPlayer.sessionEmptyDesc')}
                                 compact
                             />
                         ) : (
@@ -537,14 +531,20 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                            className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 w-full max-w-sm text-center shadow-card"
+                            className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 w-full max-w-sm text-center shadow-[0_0_60px_-12px] shadow-brand-primary/20"
                         >
-                            <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-2xl">
-                                <CheckCircle2 size={32} />
+                            <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-2xl animate-pulse shadow-[0_0_20px_-4px] shadow-brand-primary/20">
+                                <motion.div animate={{ scale: [0, 1.3, 1] }} transition={{ type: 'spring', delay: 0.1 }}>
+                                    <CheckCircle2 size={32} />
+                                </motion.div>
                             </div>
-                            <h2 className="page-title text-2xl mb-2">All Done?</h2>
+                            <h2 className="page-title text-2xl mb-2">{t('workoutPlayer.finishTitle')}</h2>
                             <p className="text-zinc-500 mb-8 text-sm">
-                                You've completed <span className="text-white font-bold">{completedSets} sets</span> today.
+                                {t('workoutPlayer.finishStatsPrefix')}{' '}
+                                <span className="text-white font-bold">
+                                    {completedSets} {completedSets === 1 ? 'série' : 'séries'}
+                                </span>{' '}
+                                {t('workoutPlayer.finishStatsSuffix')}
                             </p>
 
                             <div className="flex flex-col gap-3">
@@ -554,7 +554,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                                     fullWidth
                                     onClick={handleFinish}
                                 >
-                                    Finish Workout
+                                    {t('workoutPlayer.finishWorkout')}
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -562,7 +562,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                                     fullWidth
                                     onClick={() => setShowFinishModal(false)}
                                 >
-                                    Keep Going
+                                    {t('workoutPlayer.keepGoing')}
                                 </Button>
                             </div>
                         </motion.div>

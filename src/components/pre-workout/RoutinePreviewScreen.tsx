@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ExerciseDetailModal from '../exercise/ExerciseDetailModal';
 import { estimateRoutineDuration } from '../../utils/engine';
 import { calculateACWR } from '../../utils/engine';
+import { cn } from '../../lib/utils';
 
 interface Props {
   routineId: string;
@@ -24,6 +25,14 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
   const routine = useMemo(() => 
     routines.find(r => r.id === routineId), 
   [routines, routineId]);
+
+  const getMuscleGradient = (muscle: string) => {
+      const lower = muscle.toLowerCase();
+      if (lower.includes('chest') || lower.includes('push')) return 'bg-gradient-to-br from-red-900/40 to-zinc-800';
+      if (lower.includes('back') || lower.includes('pull')) return 'bg-gradient-to-br from-blue-900/40 to-zinc-800';
+      if (lower.includes('leg')) return 'bg-gradient-to-br from-green-900/40 to-zinc-800';
+      return 'bg-gradient-to-br from-brand-primary/20 to-zinc-800';
+  };
 
   // --- SELF HEALING ---
   useEffect(() => {
@@ -100,6 +109,10 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
     return calculateACWR(history);
   }, [history]);
 
+  const coverExerciseId = routine?.blocks?.[0]?.exerciseId || routine?.exerciseIds?.[0];
+  const coverExercise = exercises.find(e => e.id === coverExerciseId);
+  const coverImage = coverExercise?.staticImageUrl || (coverExercise?.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(coverExercise.gifUrl)}&n=1&output=png` : null);
+
   const riskLabel = acwr
     ? acwr.risk === 'optimal' ? { text: 'Ready', color: 'text-brand-primary border-brand-primary/30 bg-brand-primary/10' }
     : acwr.risk === 'high'    ? { text: 'High Load', color: 'text-red-400 border-red-500/30 bg-red-500/10' }
@@ -111,8 +124,9 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
         <div className="w-full max-w-lg md:max-w-2xl h-full bg-zinc-950 flex flex-col animate-in slide-in-from-bottom-10 shadow-2xl overflow-hidden relative">
       
             {/* Header Image/Gradient */}
-            <div className="relative h-64 shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 to-zinc-950 z-0" />
+            <div className="relative h-64 shrink-0 overflow-hidden">
+                {coverImage && <img src={coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="Cover" loading="lazy" />}
+                <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/10 via-zinc-950/80 to-zinc-950 z-0" />
                 
                 {/* Header Controls */}
                 <div className="absolute top-0 left-0 right-0 p-4 pt-safe flex items-center justify-between z-10">
@@ -187,11 +201,14 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                         className={`flex items-center gap-4 p-3 bg-zinc-900 border border-white/5 rounded-2xl transition-all ${item.exercise ? 'cursor-pointer hover:bg-zinc-800 active:scale-[0.98]' : ''}`}
                     >
                         <div className="w-14 h-14 rounded-xl bg-zinc-800 overflow-hidden shrink-0 border border-white/5 relative">
-                            {item.exercise ? (
-                                <img src={item.exercise.staticImageUrl || (item.exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(item.exercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" loading="lazy" />
+                            {item.exercise && (item.exercise.staticImageUrl || item.exercise.gifUrl) ? (
+                                <img src={item.exercise.staticImageUrl || `https://wsrv.nl/?url=${encodeURIComponent(item.exercise.gifUrl!)}&n=1&output=png`} className="w-full h-full object-cover opacity-80" loading="lazy" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-zinc-800">
-                                    <Dumbbell size={20} className="text-zinc-600" />
+                                <div className={cn(
+                                    "w-full h-full flex items-center justify-center",
+                                    item.exercise ? getMuscleGradient(item.exercise.targetMuscle) : "bg-zinc-800"
+                                )}>
+                                    <Dumbbell size={20} className="text-white/20" />
                                 </div>
                             )}
                         </div>
@@ -208,8 +225,11 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                 ))}
             </div>
 
+            {/* Fade-out gradient indicando scroll */}
+            <div className="absolute bottom-[110px] left-0 right-0 h-16 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none z-20" />
+
             {/* Sticky Footer */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent pt-24 px-4 pb-safe z-50 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 bg-zinc-950 px-4 pb-safe z-50 pt-2">
                 <div className="pointer-events-auto">
                     <div className="text-center mb-3">
                         <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2">
@@ -222,7 +242,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                     </div>
                     <button 
                         onClick={onBegin}
-                        className="w-full mb-6 py-4 bg-white text-black font-bold text-lg rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.2)] active:scale-[0.98] transition-all"
+                        className="w-full mb-6 py-4 bg-brand-primary text-black font-black text-lg tracking-widest rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_24px_-4px] shadow-brand-primary/40 active:scale-[0.98] hover:brightness-110 transition-all"
                     >
                         <Play size={20} fill="currentColor" /> BEGIN WORKOUT
                     </button>

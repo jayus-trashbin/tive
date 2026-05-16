@@ -29,13 +29,16 @@ export const StreakCard: React.FC<StreakCardProps> = ({ streak, history }) => {
     }, [history]);
 
     return (
-        <div className="card flex flex-col justify-between p-4 min-w-[160px] relative overflow-hidden group">
+        <div className="bg-zinc-900 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden group">
             <div className="flex justify-between items-start z-10">
                 <div>
-                    <div className="text-3xl font-bold text-white leading-none tracking-tight flex items-center gap-2">
-                        {streak} <Flame size={20} className={streak > 0 ? "text-orange-500 fill-orange-500" : "text-zinc-700"} />
+                    <div className="flex items-center gap-2 mb-1">
+                        <Flame size={14} className={streak > 0 ? "text-orange-500" : "text-zinc-500"} />
+                        <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">Day Streak</span>
                     </div>
-                    <div className="text-xs font-medium text-zinc-400 uppercase tracking-wider mt-1">Day Streak</div>
+                    <div className="text-2xl font-black text-white leading-none tracking-tight flex items-center gap-2">
+                        {streak}
+                    </div>
                 </div>
             </div>
 

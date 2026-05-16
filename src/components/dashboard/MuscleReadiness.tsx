@@ -48,7 +48,7 @@ export const MuscleReadiness: React.FC<MuscleReadinessProps> = ({ readiness }) =
                             </div>
                             <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                                 <div
-                                    className={cn("h-full transition-all duration-700 ease-out", getReadinessColor(item.score))}
+                                    className={cn("h-full rounded-full transition-all duration-700 ease-out", getReadinessColor(item.score))}
                                     style={{ width: `${item.score * 100}%` }}
                                 />
                             </div>

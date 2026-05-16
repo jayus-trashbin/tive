@@ -61,8 +61,16 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         }
     };
 
+    const getMuscleGradient = (muscle: string) => {
+        const lower = muscle.toLowerCase();
+        if (lower.includes('chest') || lower.includes('push')) return 'bg-gradient-to-br from-red-900/40 to-zinc-950';
+        if (lower.includes('back') || lower.includes('pull')) return 'bg-gradient-to-br from-blue-900/40 to-zinc-950';
+        if (lower.includes('leg')) return 'bg-gradient-to-br from-green-900/40 to-zinc-950';
+        return 'bg-gradient-to-br from-brand-primary/20 to-zinc-950';
+    };
+
     return (
-        <div className="card relative w-full aspect-[2/1] group p-0 overflow-hidden cursor-pointer">
+        <div className="card relative w-full aspect-[2/1] group p-0 overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-150 hover:border-zinc-700">
 
             {/* SWIPE ACTION BACKGROUND (Left/Start) */}
             <div className="absolute inset-y-0 left-0 w-full bg-brand-primary flex items-center pl-6">
@@ -105,7 +113,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                                     thumbnails.length === 2 && "col-span-1 first:col-span-2",
                                     thumbnails.length === 3 && "col-span-1"
                                 )}>
-                                    <img src={url as string} loading="lazy" className="w-full h-full object-cover" />
+                                    <img src={url as string} loading="lazy" className="w-full h-full object-cover opacity-60" />
                                 </div>
                             ))}
                             {thumbnails.length < 3 && Array.from({ length: 3 - thumbnails.length }).map((_, i) => (
@@ -113,8 +121,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                             ))}
                         </>
                     ) : (
-                        <div className="col-span-3 bg-zinc-950 flex items-center justify-center border border-zinc-900">
-                            <Dumbbell className="text-zinc-800" size={60} strokeWidth={1} />
+                        <div className={cn(
+                            "col-span-3 flex items-center justify-center border border-zinc-900",
+                            topMuscles.length > 0 ? getMuscleGradient(topMuscles[0]) : "bg-zinc-950"
+                        )}>
+                            <Dumbbell className="text-white/10" size={60} strokeWidth={1} />
                         </div>
                     )}
                 </div>

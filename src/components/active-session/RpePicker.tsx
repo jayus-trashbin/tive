@@ -78,8 +78,10 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
                                     isSelected 
                                         ? "bg-brand-primary border-brand-primary text-white shadow-glow transform scale-105" 
                                         : isHigh 
-                                            ? "bg-red-500/5 border-red-500/20 text-red-500"
-                                            : "bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                                            ? "bg-red-400/10 border-red-400/20 text-red-400"
+                                            : val >= 7 
+                                                ? "bg-amber-300/10 border-amber-300/20 text-amber-300 hover:bg-amber-300/20"
+                                                : "bg-emerald-400/10 border-emerald-400/20 text-emerald-400 hover:bg-emerald-400/20"
                                 )}
                             >
                                 <span className="text-lg font-bold tracking-tighter">{val}</span>

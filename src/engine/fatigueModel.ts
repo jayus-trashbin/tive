@@ -18,10 +18,11 @@ export const MAX_MUSCLE_CAPACITY: Record<MuscleGroup, number> = {
 };
 
 export const MUSCLE_CONTRIBUTIONS: Record<string, Partial<Record<MuscleGroup, number>>> = {
-    'chest': { 'shoulders': 0.25, 'arms': 0.15 }, 
-    'back': { 'arms': 0.20 }, 
-    'upper legs': { 'core': 0.10, 'lower legs': 0.05 },
-    'shoulders': { 'arms': 0.15 } 
+  'chest':      { shoulders: 0.25, arms: 0.15 },
+  'back':       { arms: 0.20, shoulders: 0.10 }, // rear delt
+  'upper legs': { core: 0.15, 'lower legs': 0.10, back: 0.10 }, // leg drive on squat
+  'shoulders':  { arms: 0.15, chest: 0.05 },     // pressing overlap
+  'arms':       { shoulders: 0.05 },              // bicep curls load supinator
 };
 
 export const calculateMuscleReadiness = (

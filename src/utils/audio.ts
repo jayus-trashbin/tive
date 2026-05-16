@@ -1,4 +1,5 @@
 import { useWorkoutStore } from '../store/useWorkoutStore';
+import { logger } from './logger';
 
 // A simple browser-native synthesizer for workout timers
 // No external assets required.
@@ -54,7 +55,7 @@ class AudioEngine {
       osc.start();
       osc.stop(ctx.currentTime + duration);
     } catch (e) {
-      console.error("Audio playback failed", e);
+      logger.error('Audio', 'Playback failed', e);
     }
   }
 

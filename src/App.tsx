@@ -5,7 +5,6 @@ import { useUIStore } from "./store/useUIStore";
 import Dashboard from './components/Dashboard';
 import Layout from './components/Layout';
 import WelcomeModal from './components/WelcomeModal';
-import ProfileModal from './components/ProfileModal';
 import { MiniPlayer } from './components/active-session/MiniPlayer';
 import { SplashScreen } from './components/ui/SplashScreen';
 import PostWorkoutPrompt from './components/progress/PostWorkoutPrompt';
@@ -14,6 +13,7 @@ import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { FinishData } from './components/WorkoutPlayer';
 import WorkoutSummary from './components/post-workout/WorkoutSummary';
 import GlobalSearch from './components/ui/GlobalSearch';
+import { X } from 'lucide-react';
 
 // Lazy load heavy components for better initial load performance
 const WorkoutPlayer = lazy(() => import('./components/WorkoutPlayer'));
@@ -25,7 +25,8 @@ const Settings = lazy(() => import('./components/Settings'));
 
 import HistorySkeleton from './components/ui/skeletons/HistorySkeleton';
 import PlanSkeleton from './components/ui/skeletons/PlanSkeleton';
-import { AnalyticsBoundary, HistoryBoundary, WorkoutPlayerBoundary } from './components/ui/SectionBoundaries';
+import { HistoryBoundary, WorkoutPlayerBoundary } from './components/ui/SectionBoundaries';
+import type { TabId } from './types';
 
 // Fallback for components with no dedicated skeleton (e.g. WorkoutPlayer)
 const LazyFallback = () => (
@@ -34,10 +35,10 @@ const LazyFallback = () => (
   </div>
 );
 
-type View = 'dashboard' | 'workout' | 'exercises' | 'plans' | 'history' | 'photos';
+type View = TabId;
 
 // Map views to indices for directional logic
-const TAB_ORDER: Record<string, number> = {
+const TAB_ORDER: Record<TabId, number> = {
   'dashboard': 0,
   'plans': 1,
   'photos': 2,
@@ -49,7 +50,7 @@ const App: React.FC = () => {
   const [[view, direction], setViewTuple] = useState<[View, number]>(['dashboard', 0]);
 
   const { activeSession, startSession, userStats } = useWorkoutStore();
-    const { _hasHydrated, isMinimized, setHasHydrated, isProfileOpen, setProfileOpen } = useUIStore();;
+    const { _hasHydrated, isMinimized, setHasHydrated, isSettingsOpen, setSettingsOpen } = useUIStore();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [finishData, setFinishData] = useState<FinishData | null>(null);
@@ -112,6 +113,33 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  // PWA manifest shortcuts: /?action=start-workout, /?view=history|plans|photos
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    const requestedView = params.get('view');
+    let handled = false;
+
+    if (action === 'start-workout' && !activeSession) {
+      startSession();
+      handled = true;
+    }
+
+    if (requestedView && ['dashboard', 'plans', 'photos', 'history'].includes(requestedView)) {
+      setView(requestedView as View);
+      handled = true;
+    }
+
+    if (handled) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('action');
+      url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated]);
 
   const handleStartRoutine = (routineId: string) => {
     startSession(routineId);
@@ -189,10 +217,33 @@ const App: React.FC = () => {
 
       <Notifications />
 
-      {/* 3. Global Modals (Profile) */}
+      {/* 3. Global Modals (Settings overlay) */}
       <AnimatePresence>
-        {isProfileOpen && (
-          <ProfileModal isOpen={isProfileOpen} onClose={() => setProfileOpen(false)} />
+        {isSettingsOpen && (
+          <motion.div
+            key="settings-overlay"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300, bounce: 0 }}
+            className="fixed inset-0 z-modal flex justify-center pointer-events-none"
+          >
+            <div className="w-full max-w-lg md:max-w-2xl h-full bg-zinc-950 pointer-events-auto shadow-2xl relative overflow-hidden flex flex-col">
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(false)}
+                  aria-label="Close Settings"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-95 transition-all backdrop-blur-sm border border-zinc-800/50"
+                >
+                  <X size={18} strokeWidth={2.5} />
+                </button>
+              </div>
+              <Suspense fallback={<LazyFallback />}>
+                <Settings />
+              </Suspense>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -204,7 +255,7 @@ const App: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <Layout activeTab={view as any} onTabChange={setView as any}>
+          <Layout activeTab={view} onTabChange={setView}>
 
             {/* 
                    mode="popLayout" allows the exiting component to pop out of the flow,

@@ -8,6 +8,7 @@ import { Exercise } from '../../types';
 import { cn } from '../../lib/utils';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import CreateExerciseModal from './CreateExerciseModal';
+import { logger } from '../../utils/logger';
 
 interface Props {
   isOpen: boolean;
@@ -86,7 +87,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
       setResults(response.data);
       setNextCursor(response.nextCursor);
     } catch (e) {
-      console.error("Failed to load exercises", e);
+      logger.error('ExercisePicker', 'Failed to load exercises', e);
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
         setNextCursor(null);
       }
     } catch (e) {
-      console.error("Load more failed", e);
+      logger.error('ExercisePicker', 'Load more failed', e);
     } finally {
       setLoadingMore(false);
     }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import type { TooltipProps } from 'recharts';
 import { TrendingUp, Dumbbell, ChevronDown } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { get1RMProgression, getRPEProgression, getMostUsedExercises } from '../../utils/analytics';
@@ -57,10 +58,10 @@ const OneRMProgress: React.FC = () => {
 
     const current1RM = oneRMData.length > 0 ? oneRMData[oneRMData.length - 1].value : 0;
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
-            const rm = payload.find((p: any) => p.dataKey === 'value');
-            const rpe = payload.find((p: any) => p.dataKey === 'rpe');
+            const rm = payload.find(p => p.dataKey === 'value');
+            const rpe = payload.find(p => p.dataKey === 'rpe');
             return (
                 <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-xl">
                     <p className="text-[10px] text-zinc-500 font-medium mb-1 uppercase">

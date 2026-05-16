@@ -2,15 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Trophy, Clock, Dumbbell, Flame, TrendingUp, TrendingDown,
-    ChevronRight, Camera, X, Zap, Target
+    ChevronRight, Camera, X, Zap, Target, AlertTriangle, Info
 } from 'lucide-react';
 import { Session, MuscleGroup, Exercise } from '../../types';
+import { useCoachInsight } from '../../hooks/useCoachInsight';
 import MuscleOverlay from '../progress/MuscleOverlay';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
 import { calculateACWR } from '../../utils/engine';
 import { calculateHybrid1RM } from '../../utils/formulas';
 import ACWRCard from '../analytics/ACWRCard';
 import { cn } from '../../lib/utils';
+import { useTranslation } from '../../i18n';
 
 interface WorkoutSummaryProps {
     session: Session;
@@ -52,6 +54,7 @@ const AnimatedNumber: React.FC<{ value: number; duration?: number; suffix?: stri
 // Format duration from ms to "1h 23m" or "45m"
 const formatDuration = (ms: number): string => {
     const totalMinutes = Math.floor(ms / 60000);
+    if (totalMinutes === 0) return "< 1m";
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     if (hours > 0) return `${hours}h ${minutes}m`;
@@ -61,7 +64,9 @@ const formatDuration = (ms: number): string => {
 const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
     session, muscleGroups, exercises, previousSession, history = [], onContinue, onDismiss
 }) => {
+    const { t } = useTranslation();
     const [showConfetti, setShowConfetti] = useState(false);
+    const insights = useCoachInsight(session);
 
     // Compute stats
     const stats = useMemo(() => {
@@ -192,7 +197,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[95] bg-black/95 backdrop-blur-xl flex items-end sm:items-center justify-center sm:p-4 overflow-y-auto"
+            className="fixed inset-0 z-[95] bg-zinc-950 flex flex-col justify-between overflow-y-auto sm:p-4"
         >
             {/* Confetti particles for PR */}
             <AnimatePresence>
@@ -232,32 +237,35 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                 initial={{ y: 40, opacity: 0, scale: 0.95 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
-                className="w-full max-w-md bg-zinc-950 border border-zinc-800 overflow-hidden relative overflow-y-auto max-h-[90dvh] rounded-t-2xl sm:rounded-none"
+                className="w-full max-w-md mx-auto bg-zinc-950 sm:border sm:border-zinc-800 overflow-hidden relative min-h-screen sm:min-h-[90dvh] sm:rounded-2xl flex flex-col pointer-events-auto"
             >
-                {/* Close button â€” 44px touch target */}
+                {/* Close button — High priority z-index and visibility */}
                 <button
                     onClick={onDismiss}
-                    className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full text-zinc-600 hover:text-white hover:bg-zinc-800 active:bg-zinc-700 transition-colors"
-                    aria-label="Close"
+                    className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-zinc-900/50 text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-90 transition-all backdrop-blur-sm border border-zinc-800/50"
+                    aria-label={t('common.close')}
                 >
-                    <X size={18} />
+                    <X size={20} strokeWidth={2.5} />
                 </button>
 
+                {/* Hero Gradient Background */}
+                <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-brand-primary/10 via-brand-primary/5 to-transparent pointer-events-none" />
+
                 {/* Header */}
-                <div className="px-6 pt-6 pb-4 border-b border-zinc-800/50">
+                <div className="px-6 pt-12 pb-6 relative z-10">
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', delay: 0.3 }}
-                        className="w-12 h-12 bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-3 rounded-2xl"
+                        className="w-14 h-14 bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center mb-4 rounded-2xl shadow-[0_0_24px_-4px] shadow-brand-primary/20"
                     >
-                        <Trophy size={24} className="text-brand-primary" />
+                        <Trophy size={28} className="text-brand-primary" />
                     </motion.div>
-                    <h2 className="text-3xl font-bold text-white tracking-tight mb-1">
-                        Workout Complete
+                    <h2 className="text-4xl font-black text-white tracking-tight mb-2">
+                        {t('workoutSummary.title')}
                     </h2>
-                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
-                        {session.name || 'Free Session'} • {new Date(session.date).toLocaleDateString()}
+                    <p className="text-[13px] font-medium text-zinc-400">
+                        {session.name || t('workoutSummary.freeSession')} • {new Date(session.date).toLocaleDateString()}
                     </p>
 
                     {/* Badges Row */}
@@ -270,11 +278,11 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.5 + i * 0.1, type: "spring", stiffness: 400 }}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider",
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider",
                                         b.bg, b.border, b.color
                                     )}
                                 >
-                                    <b.icon size={12} />
+                                    <b.icon size={14} />
                                     {b.label}
                                 </motion.div>
                             ))}
@@ -282,20 +290,20 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     )}
                 </div>
 
-                {/* Main Stats Grid */}
-                <div className="grid grid-cols-2 gap-px bg-zinc-800/30 border-b border-zinc-800/50">
+                {/* Main Stats Grid - Bento Style */}
+                <div className="grid grid-cols-2 gap-3 px-6 pb-6 relative z-10">
                     {/* Duration */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-zinc-950 p-4"
+                        className="bg-zinc-900/50 backdrop-blur-md border border-zinc-900 p-4 rounded-2xl flex flex-col justify-between"
                     >
-                        <div className="flex items-center gap-1.5 mb-1">
-                            <Clock size={14} className="text-zinc-500" />
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Duration</span>
+                        <div className="flex items-center gap-1.5 mb-3 opacity-70">
+                            <Clock size={16} className="text-brand-primary" />
+                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Duration</span>
                         </div>
-                        <div className="text-3xl font-bold text-white">
+                        <div className="text-3xl font-black text-white">
                             {formatDuration(stats.duration)}
                         </div>
                     </motion.div>
@@ -305,40 +313,42 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-zinc-950 p-4"
+                        className="bg-zinc-900/50 backdrop-blur-md border border-zinc-900 p-4 rounded-2xl flex flex-col justify-between"
                     >
-                        <div className="flex items-center gap-1.5 mb-1">
-                            <Dumbbell size={14} className="text-zinc-500" />
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Volume</span>
+                        <div className="flex items-center gap-1.5 mb-3 opacity-70">
+                            <Dumbbell size={16} className="text-brand-primary" />
+                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Volume</span>
                         </div>
-                        <div className="text-3xl font-bold text-white">
-                            <AnimatedNumber
-                                value={stats.totalVolume}
-                                suffix={stats.totalVolume >= 1000 ? '' : 'kg'}
-                                prefix=""
-                            />
-                            {stats.totalVolume >= 1000 && (
-                                <span className="text-sm text-zinc-400">kg</span>
+                        <div>
+                            <div className="text-3xl font-black text-white flex items-baseline">
+                                <AnimatedNumber
+                                    value={stats.totalVolume}
+                                    suffix={stats.totalVolume >= 1000 ? '' : 'kg'}
+                                    prefix=""
+                                />
+                                {stats.totalVolume >= 1000 && (
+                                    <span className="text-base text-zinc-400 font-bold ml-1">kg</span>
+                                )}
+                            </div>
+                            {/* Comparison badge */}
+                            {comparison && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -5 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 1.5 }}
+                                    className={cn(
+                                        "flex items-center gap-1 mt-1 font-bold text-xs",
+                                        comparison.volumePercent >= 0 ? "text-brand-primary" : "text-red-400"
+                                    )}
+                                >
+                                    {comparison.volumePercent >= 0
+                                        ? <TrendingUp size={12} strokeWidth={3} />
+                                        : <TrendingDown size={12} strokeWidth={3} />
+                                    }
+                                    {comparison.volumePercent >= 0 ? '+' : ''}{comparison.volumePercent}% vs last
+                                </motion.div>
                             )}
                         </div>
-                        {/* Comparison badge */}
-                        {comparison && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -5 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1.5 }}
-                                className={cn(
-                                    "flex items-center gap-0.5 mt-1 font-medium text-[10px] font-bold",
-                                    comparison.volumePercent >= 0 ? "text-brand-primary" : "text-red-400"
-                                )}
-                            >
-                                {comparison.volumePercent >= 0
-                                    ? <TrendingUp size={10} />
-                                    : <TrendingDown size={10} />
-                                }
-                                {comparison.volumePercent >= 0 ? '+' : ''}{comparison.volumePercent}% vs last
-                            </motion.div>
-                        )}
                     </motion.div>
 
                     {/* Sets */}
@@ -346,28 +356,30 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="bg-zinc-950 p-4"
+                        className="bg-zinc-900/50 backdrop-blur-md border border-zinc-900 p-4 rounded-2xl flex flex-col justify-between"
                     >
-                        <div className="flex items-center gap-1.5 mb-1">
-                            <Target size={14} className="text-zinc-500" />
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Sets</span>
+                        <div className="flex items-center gap-1.5 mb-3 opacity-70">
+                            <Target size={16} className="text-brand-primary" />
+                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Sets</span>
                         </div>
-                        <div className="text-3xl font-bold text-white">
-                            <AnimatedNumber value={stats.totalSets} />
+                        <div>
+                            <div className="text-3xl font-black text-white">
+                                <AnimatedNumber value={stats.totalSets} />
+                            </div>
+                            {comparison && comparison.setDiff !== 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 1.6 }}
+                                    className={cn(
+                                        "font-bold text-xs mt-1 flex items-center gap-1",
+                                        comparison.setDiff > 0 ? "text-brand-primary" : "text-red-400"
+                                    )}
+                                >
+                                    {comparison.setDiff > 0 ? '+' : ''}{comparison.setDiff} sets
+                                </motion.div>
+                            )}
                         </div>
-                        {comparison && comparison.setDiff !== 0 && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1.6 }}
-                                className={cn(
-                                    "font-medium text-[10px] font-bold mt-1",
-                                    comparison.setDiff > 0 ? "text-brand-primary" : "text-red-400"
-                                )}
-                            >
-                                {comparison.setDiff > 0 ? '+' : ''}{comparison.setDiff} sets
-                            </motion.div>
-                        )}
                     </motion.div>
 
                     {/* Exercises */}
@@ -375,13 +387,13 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="bg-zinc-950 p-4"
+                        className="bg-zinc-900/50 backdrop-blur-md border border-zinc-900 p-4 rounded-2xl flex flex-col justify-between"
                     >
-                        <div className="flex items-center gap-1.5 mb-1">
-                            <Zap size={14} className="text-zinc-500" />
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Exercises</span>
+                        <div className="flex items-center gap-1.5 mb-3 opacity-70">
+                            <Zap size={16} className="text-brand-primary" />
+                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Exercises</span>
                         </div>
-                        <div className="text-3xl font-bold text-white">
+                        <div className="text-3xl font-black text-white">
                             <AnimatedNumber value={stats.uniqueExercises} />
                         </div>
                     </motion.div>
@@ -450,34 +462,34 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                         animate={{ x: 0, opacity: 1 }}
                                         transition={{ delay: 1.1 + i * 0.08 }}
                                     >
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="flex-1 font-medium text-[11px] text-zinc-300 truncate">{ex?.name ?? d.id}</span>
-                                            <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-3 mb-2 bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800/30">
+                                            <span className="flex-1 font-bold text-xs text-white truncate">{ex?.name ?? d.id}</span>
+                                            <div className="flex items-center gap-3">
                                                 {/* Volume Delta */}
-                                                <div className="flex items-center gap-1">
-                                                    <span className="font-medium text-[9px] text-zinc-600">VOL:</span>
+                                                <div className="flex flex-col items-end justify-center">
+                                                    <span className="font-bold text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Volume</span>
                                                     {d.prev.vol === 0 ? (
-                                                        <span className="font-medium text-[9px] text-zinc-600">New</span>
+                                                        <span className="font-bold text-xs text-zinc-400">New</span>
                                                     ) : (
-                                                        <>
-                                                            <span className={cn(
-                                                                "font-medium text-[10px] font-bold",
-                                                                isUp ? "text-brand-primary" : "text-red-400"
-                                                            )}>
-                                                                {isUp ? '+' : ''}{d.pct}%
-                                                            </span>
-                                                        </>
+                                                        <span className={cn(
+                                                            "font-bold text-xs flex items-center gap-0.5",
+                                                            isUp ? "text-brand-primary" : "text-red-400"
+                                                        )}>
+                                                            {isUp ? <TrendingUp size={10} strokeWidth={3} /> : <TrendingDown size={10} strokeWidth={3} />}
+                                                            {isUp ? '+' : ''}{d.pct}%
+                                                        </span>
                                                     )}
                                                 </div>
                                                 
                                                 {/* e1RM Delta */}
                                                 {(d.prev.maxE1RM > 0 && d.e1rmDiff !== 0) && (
-                                                    <div className="flex items-center gap-1 border-l border-zinc-800 pl-2">
-                                                        <span className="font-medium text-[9px] text-zinc-600">e1RM:</span>
+                                                    <div className="flex flex-col items-end justify-center border-l border-zinc-800/80 pl-3">
+                                                        <span className="font-bold text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">e1RM</span>
                                                         <span className={cn(
-                                                            "font-medium text-[10px] font-bold",
+                                                            "font-bold text-xs flex items-center gap-0.5",
                                                             isE1RMUp ? "text-brand-primary" : "text-red-400"
                                                         )}>
+                                                            {isE1RMUp ? <TrendingUp size={10} strokeWidth={3} /> : <TrendingDown size={10} strokeWidth={3} />}
                                                             {isE1RMUp ? '+' : ''}{d.e1rmDiff.toFixed(1)}kg
                                                         </span>
                                                     </div>
@@ -502,7 +514,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         <MuscleOverlay
                             muscleGroups={muscleGroups}
                             volumes={useMemo(() => getSessionMuscleIntensity(session, Array.from(exercises.values())), [session, exercises])}
-                            size={64}
+                            size={80}
                         />
                         <div className="flex-1">
                             <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-2">
@@ -540,22 +552,60 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     </motion.div>
                 )}
 
+                {/* Coach Insights */}
+                {insights.length > 0 && (
+                    <div className="px-6 py-4 border-b border-zinc-800/50 space-y-3">
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-2">
+                            Coach Insights
+                        </span>
+                        {insights.map((insight, idx) => {
+                            const Icon = insight.icon === 'AlertTriangle' ? AlertTriangle :
+                                         insight.icon === 'Trophy' ? Trophy :
+                                         insight.icon === 'TrendingUp' ? TrendingUp : Info;
+                            return (
+                                <motion.div
+                                    key={insight.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.8 + idx * 0.1 }}
+                                    className={cn(
+                                        "p-3 rounded-xl border flex items-start gap-3",
+                                        insight.type === 'warning' ? "bg-red-500/10 border-red-500/20" :
+                                        insight.type === 'achievement' ? "bg-brand-primary/10 border-brand-primary/20" :
+                                        "bg-zinc-800/30 border-zinc-700/50"
+                                    )}
+                                >
+                                    <Icon size={18} className={cn(
+                                        "shrink-0 mt-0.5",
+                                        insight.type === 'warning' ? "text-red-400" :
+                                        insight.type === 'achievement' ? "text-brand-primary" :
+                                        "text-zinc-400"
+                                    )} />
+                                    <div>
+                                        <h4 className="text-xs font-bold text-white mb-0.5">{insight.title}</h4>
+                                        <p className="text-[11px] text-zinc-400 leading-relaxed">{insight.body}</p>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                )}
+
                 {/* Actions */}
-                <div className="flex">
-                    <button
-                        onClick={onDismiss}
-                        className="flex-1 px-4 py-4 font-medium text-sm text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors text-center"
-                    >
-                        Done
-                    </button>
-                    <div className="w-px bg-zinc-800" />
+                <div className="mt-auto px-6 pt-4 pb-8 flex flex-col gap-3 relative z-10 bg-zinc-950">
                     <button
                         onClick={onContinue}
-                        className="flex-1 px-4 py-4 bg-brand-primary font-bold text-sm text-black flex items-center justify-center gap-2 hover:brightness-110 transition-all uppercase tracking-wider"
+                        className="w-full h-14 bg-brand-primary text-black font-black text-sm uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_24px_-4px] shadow-brand-primary/40 active:scale-[0.98] transition-all hover:brightness-110"
                     >
-                        <Camera size={16} />
-                        <span>Take Photo</span>
-                        <ChevronRight size={16} />
+                        <Camera size={18} strokeWidth={2.5} />
+                        <span>{t('workoutSummary.takePhoto')}</span>
+                    </button>
+
+                    <button
+                        onClick={onDismiss}
+                        className="w-full h-12 text-zinc-400 font-bold text-sm hover:text-white transition-colors flex items-center justify-center"
+                    >
+                        {t('workoutSummary.doneClose')}
                     </button>
                 </div>
             </motion.div>

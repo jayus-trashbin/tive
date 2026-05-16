@@ -4,9 +4,9 @@ import { WorkoutSet, SetType } from '../../types';
 import { Check, Trash2, Copy } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion, PanInfo } from 'framer-motion';
-import { getSuggestedWeight } from '../../utils/engine';
 import { calculateHybrid1RM } from '../../utils/formulas';
 import RpePicker from './RpePicker';
+import { useUIStore } from '../../store/useUIStore';
 
 interface Props {
     index: number;
@@ -29,6 +29,9 @@ const SetRow: React.FC<Props> = ({
         const val = e.target.value;
         const num = val === '' ? 0 : parseFloat(val);
         onUpdate(field, num);
+        if (field === 'weight' && num > 0) {
+            useUIStore.getState().setPlateTargetWeight(num);
+        }
     };
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>, field: 'weight' | 'reps') => {
@@ -42,6 +45,11 @@ const SetRow: React.FC<Props> = ({
             } else {
                 onUpdate(field, previousSet[field]);
             }
+        }
+        // Publish current weight so PlateCalculator can react
+        if (field === 'weight') {
+            const target = set.weight || previousSet?.weight || 0;
+            if (target > 0) useUIStore.getState().setPlateTargetWeight(target);
         }
     };
 
@@ -96,96 +104,102 @@ const SetRow: React.FC<Props> = ({
                     dragElastic={0.05}
                     dragMomentum={false}
                     dragDirectionLock={true}
+                    dragSnapToOrigin={true}
                     onDragEnd={(e, info: PanInfo) => {
-                        // Keep open or trigger action based on distance
                         if (info.offset.x < -100) onDelete();
                     }}
-                    animate={isCompleted ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+                    animate={isCompleted ? { scale: [1, 1.02, 1] } : { scale: 1, x: 0 }}
                     transition={{ duration: 0.3 }}
                     className={cn(
-                        "relative z-10 grid gap-2 items-center px-3 py-2 transition-colors duration-200 will-change-transform rounded-xl border",
-                        "grid-cols-[36px_1fr_48px_48px_32px_44px]",
+                        "relative z-10 flex flex-col px-3 py-2 transition-colors duration-200 will-change-transform rounded-xl border",
                         isCompleted
-                            ? "bg-zinc-950 border-brand-success/30"
-                            : "bg-zinc-900 border-transparent" // Solid background to hide swipe actions underneath
+                            ? "bg-zinc-950 border-brand-success/30 shadow-[0_0_15px_-3px_rgba(16,185,129,0.1)]"
+                            : "bg-zinc-900 border-transparent"
                     )}
                 >
-                    {/* 1. Set Type Indicator */}
-                    <div className="flex justify-center items-center h-full min-h-[44px]">
-                        <button
-                            onClick={handleTypeToggle}
-                            className={cn(
-                                "h-8 w-8 mx-auto flex items-center justify-center rounded-md text-xs font-bold transition-colors active:scale-95",
-                                getTypeStyle(set.type)
-                            )}
-                        >
-                            {getTypeLabel(set.type)}
-                        </button>
-                    </div>
-
-                    {/* 2. Previous Performance */}
-                    <div 
-                        className="text-[11px] text-zinc-500 font-medium truncate cursor-pointer hover:text-zinc-300 transition-colors pl-1 select-none flex items-center h-full min-h-[44px]"
-                        onClick={() => {
-                            if (previousSet) {
+                    {/* Previous Set Floating Row */}
+                    {!isCompleted && previousSet && (previousSet.weight > 0 || previousSet.reps > 0) && (
+                        <div 
+                            onClick={() => {
                                 onUpdate('weight', previousSet.weight);
                                 onUpdate('reps', previousSet.reps);
-                            }
-                        }}
-                    >
-                        {previousSet ? `${previousSet.weight}kg × ${previousSet.reps}` : '-'}
-                    </div>
-
-                    {/* 3. Weight Input */}
-                    <div className="relative flex items-center justify-center h-full min-h-[44px]">
-                        <input
-                            id={getInputId('weight')}
-                            type="number"
-                            inputMode="decimal"
-                            value={set.weight === 0 ? '' : set.weight}
-                            placeholder="-"
-                            onChange={(e) => handleChange(e, 'weight')}
-                            onFocus={(e) => handleFocus(e, 'weight')}
-                            className={cn(
-                                "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
-                                isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
-                            )}
-                        />
-                    </div>
-
-                    {/* 4. Reps Input */}
-                    <div className="relative flex items-center justify-center h-full min-h-[44px]">
-                        <input
-                            id={getInputId('reps')}
-                            type="number"
-                            inputMode="numeric"
-                            value={set.reps === 0 ? '' : set.reps}
-                            placeholder="-"
-                            onChange={(e) => handleChange(e, 'reps')}
-                            onFocus={(e) => handleFocus(e, 'reps')}
-                            className={cn(
-                                "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-500 transition-all appearance-none",
-                                isCompleted ? "text-brand-success bg-transparent border-transparent" : "text-white"
-                            )}
-                        />
-                    </div>
-
-                    {/* 5. RPE Pill */}
-                    <div className="flex justify-center items-center h-full min-h-[44px]">
-                        <button
-                            onClick={() => setShowRpePicker(true)}
-                            className={cn(
-                                "w-full h-9 rounded-lg text-[11px] font-bold flex items-center justify-center transition-colors active:scale-95 border",
-                                set.rpe >= 9
-                                    ? "text-red-400 bg-red-400/10 border-red-400/20"
-                                    : "text-zinc-300 hover:bg-zinc-700 hover:text-white bg-zinc-800 border-zinc-700/50"
-                            )}
+                            }}
+                            className="flex items-center gap-1 pl-[44px] mb-1 cursor-pointer group w-fit"
+                            title="Tap to auto-fill"
                         >
-                            {set.rpe > 0 ? set.rpe : '-'}
-                        </button>
-                    </div>
+                            <span className="text-[10px] font-mono text-zinc-400 group-hover:text-brand-primary transition-colors flex items-center gap-1">
+                                ↑ {previousSet.weight}kg × {previousSet.reps}
+                            </span>
+                        </div>
+                    )}
+                    
+                    <div className="grid grid-cols-[36px_1fr_1fr_40px_44px] gap-2 items-center">
+                        {/* 1. Set Type Indicator */}
+                        <div className="flex justify-center items-center h-full min-h-[44px]">
+                            <button
+                                onClick={handleTypeToggle}
+                                className={cn(
+                                    "h-8 w-8 mx-auto flex items-center justify-center rounded-md text-xs font-bold transition-colors active:scale-95",
+                                    getTypeStyle(set.type)
+                                )}
+                            >
+                                {getTypeLabel(set.type)}
+                            </button>
+                        </div>
 
-                    {/* 6. Checkbox */}
+                        {/* 2. Weight Input */}
+                        <div className="relative flex items-center justify-center h-full min-h-[44px]">
+                            <input
+                                id={getInputId('weight')}
+                                type="number"
+                                inputMode="decimal"
+                                aria-label={`Weight for set ${index + 1}`}
+                                value={set.weight === 0 ? '' : set.weight}
+                                placeholder="—"
+                                onChange={(e) => handleChange(e, 'weight')}
+                                onFocus={(e) => handleFocus(e, 'weight')}
+                                className={cn(
+                                    "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
+                                    isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
+                                )}
+                            />
+                        </div>
+
+                        {/* 3. Reps Input */}
+                        <div className="relative flex items-center justify-center h-full min-h-[44px]">
+                            <input
+                                id={getInputId('reps')}
+                                type="number"
+                                inputMode="numeric"
+                                aria-label={`Reps for set ${index + 1}`}
+                                value={set.reps === 0 ? '' : set.reps}
+                                placeholder="—"
+                                onChange={(e) => handleChange(e, 'reps')}
+                                onFocus={(e) => handleFocus(e, 'reps')}
+                                className={cn(
+                                    "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
+                                    isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
+                                )}
+                            />
+                        </div>
+
+                        {/* 4. RPE Pill */}
+                        <div className="flex justify-center items-center h-full min-h-[44px]">
+                            <button
+                                onClick={() => setShowRpePicker(true)}
+                                className={cn(
+                                    "w-full h-9 rounded-lg text-[11px] font-bold flex items-center justify-center transition-colors active:scale-95 border",
+                                    set.rpe === 0 ? "text-zinc-300 hover:bg-zinc-700 hover:text-white bg-zinc-800 border-zinc-700/50" :
+                                    set.rpe < 7 ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
+                                    set.rpe < 9 ? "text-amber-300 bg-amber-300/10 border-amber-300/20" :
+                                    "text-red-400 bg-red-400/10 border-red-400/20"
+                                )}
+                            >
+                                {set.rpe > 0 ? set.rpe : '-'}
+                            </button>
+                        </div>
+
+                        {/* 5. Checkbox */}
                     <div className="flex justify-center items-center h-full min-h-[44px]">
                         <motion.button
                             onClick={(e) => { e.stopPropagation(); onComplete(); }}
@@ -203,6 +217,7 @@ const SetRow: React.FC<Props> = ({
                         >
                             <Check size={18} strokeWidth={isCompleted ? 4 : 3} />
                         </motion.button>
+                    </div>
                     </div>
                 </motion.div>
             </div>

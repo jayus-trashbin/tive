@@ -203,6 +203,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
                 onChange={e => { setQuery(e.target.value); setSelectedIdx(() => 0); }}
                 onKeyDown={handleKey}
                 placeholder="Search exercises, sessions, routines..."
+                aria-label="Search exercises, sessions, routines"
                 inputMode="search"
                 autoComplete="off"
                 autoCorrect="off"

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectCurrentPhase, suggestWeeklyAdjustment } from '../periodization';
+import { detectCurrentPhase, getRecommendedWeeklyVolume } from '../periodization';
 import { Mesocycle } from '../../types';
 
 describe('periodization engine', () => {
@@ -48,22 +48,19 @@ describe('periodization engine', () => {
         });
     });
 
-    describe('suggestWeeklyAdjustment', () => {
-        it('suggests +1 set for accumulation', () => {
-            expect(suggestWeeklyAdjustment('accumulation', 10)).toBe(11);
+    describe('getRecommendedWeeklyVolume', () => {
+        it('suggests baseline volume for week 1', () => {
+            expect(getRecommendedWeeklyVolume('chest', 1, 4, 10)).toEqual({ sets: 10, intensity: 'moderate' });
         });
 
-        it('suggests keeping volume for intensification', () => {
-            expect(suggestWeeklyAdjustment('intensification', 12)).toBe(12);
+        it('adds volume progressively for subsequent weeks', () => {
+            expect(getRecommendedWeeklyVolume('chest', 2, 4, 10)).toEqual({ sets: 11, intensity: 'moderate' });
+            expect(getRecommendedWeeklyVolume('chest', 3, 4, 10)).toEqual({ sets: 12, intensity: 'heavy' });
         });
 
-        it('suggests cutting volume in half for deload', () => {
-            expect(suggestWeeklyAdjustment('deload', 10)).toBe(5);
-            expect(suggestWeeklyAdjustment('deload', 11)).toBe(5);
-        });
-
-        it('never drops volume below 1 set in deload', () => {
-            expect(suggestWeeklyAdjustment('deload', 1)).toBe(1);
+        it('cuts volume in half for deload', () => {
+            expect(getRecommendedWeeklyVolume('chest', 4, 4, 10)).toEqual({ sets: 5, intensity: 'light' });
+            expect(getRecommendedWeeklyVolume('chest', 5, 4, 10)).toEqual({ sets: 5, intensity: 'light' });
         });
     });
 });

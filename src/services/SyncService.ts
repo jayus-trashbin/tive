@@ -6,6 +6,24 @@ import { logger } from '../utils/logger';
 import { credentialsStore } from '../utils/credentialsStore';
 import { useUIStore } from '../store/useUIStore';
 
+interface SupabaseRow<T> {
+    json_data: T;
+    updated_at?: string;
+    deleted_at?: string | null;
+}
+
+interface PostgrestErrorShape {
+    code?: string;
+    message?: string;
+}
+
+function asErrorShape(err: unknown): PostgrestErrorShape {
+    if (typeof err === 'object' && err !== null) {
+        return err as PostgrestErrorShape;
+    }
+    return { message: String(err) };
+}
+
 class SyncService {
     private client: SupabaseClient | null = null;
     private isSyncing = false;
@@ -22,15 +40,16 @@ class SyncService {
     private async retryOperation<T>(operation: () => PromiseLike<T>, retries = 3, delay = 1000): Promise<T> {
         try {
             return await operation();
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const shape = asErrorShape(error);
             if (retries <= 0) throw error;
 
             // Don't retry auth errors or if table completely missing (though we want to error if missing now)
-            if (error?.code === 'PGRST204' || error?.message?.includes('does not exist')) {
+            if (shape.code === 'PGRST204' || shape.message?.includes('does not exist')) {
                 throw error;
             }
 
-            logger.info('SyncService', `Retry in ${delay}ms (${retries} left)`, error.message);
+            logger.info('SyncService', `Retry in ${delay}ms (${retries} left)`, shape.message);
             await new Promise(resolve => setTimeout(resolve, delay));
             return this.retryOperation(operation, retries - 1, delay * 2);
         }
@@ -61,7 +80,7 @@ class SyncService {
             const tempClient = createClient(url, key, { auth: { persistSession: false } });
             // Check connection by querying profiles or just a simple health check
             // We use 'profiles' as it should exist if schema is applied
-            const { error }: any = await tempClient.from('profiles').select('id').limit(1);
+            const { error } = await tempClient.from('profiles').select('id').limit(1);
 
             if (error) {
                 // If table doesn't exist, it's still a valid connection to Supabase, just missing schema
@@ -89,15 +108,17 @@ class SyncService {
             const userId = await this.getUserId(client);
             if (!userId) return; // Must be authenticated
 
+            type Fetched<T> = { data: SupabaseRow<T>[] | null };
+
             const [sessionData, routineData, exerciseData] = await Promise.all([
-                this.retryOperation(() => client.from('sessions').select('json_data').eq('user_id', userId) as unknown as Promise<any>),
-                this.retryOperation(() => client.from('routines').select('json_data').eq('user_id', userId) as unknown as Promise<any>),
-                this.retryOperation(() => client.from('exercises').select('json_data').eq('user_id', userId) as unknown as Promise<any>),
+                this.retryOperation(() => client.from('sessions').select('json_data').eq('user_id', userId) as unknown as Promise<Fetched<Session>>),
+                this.retryOperation(() => client.from('routines').select('json_data').eq('user_id', userId) as unknown as Promise<Fetched<Routine>>),
+                this.retryOperation(() => client.from('exercises').select('json_data').eq('user_id', userId) as unknown as Promise<Fetched<Exercise>>),
             ]);
 
-            const remoteSessions = (sessionData.data || []).map((row: any) => row.json_data);
-            const remoteRoutines = (routineData.data || []).map((row: any) => row.json_data);
-            const remoteExercises = (exerciseData.data || []).map((row: any) => row.json_data);
+            const remoteSessions = (sessionData.data ?? []).map(row => row.json_data);
+            const remoteRoutines = (routineData.data ?? []).map(row => row.json_data);
+            const remoteExercises = (exerciseData.data ?? []).map(row => row.json_data);
             // Need to handle folders merging in store, but currently store might not support it in mergeRemoteData?
             // createSessionSlice.ts showed mergeRemoteData taking 3 args.
             // We'll stick to 3 for now to match store signature.
@@ -183,7 +204,7 @@ class SyncService {
         }
     }
 
-    public async sync() {
+    public async sync(options?: { silent?: boolean }) {
         if (typeof navigator !== 'undefined' && !navigator.onLine) return;
         if (this.isSyncing) return;
 
@@ -194,16 +215,27 @@ class SyncService {
         useUIStore.getState().setSyncing(true);
         useUIStore.getState().setSyncError(null);
 
+        let failed = false;
         try {
             await this.pull(client);
             await this.push(client);
             useWorkoutStore.getState().updateUserStats({ lastSyncTime: Date.now() });
         } catch (err) {
+            failed = true;
             logger.warn('SyncService', 'Sync cycle incomplete', err);
-            useUIStore.getState().setSyncError(err instanceof Error ? err.message : String(err));
+            const msg = err instanceof Error ? err.message : String(err);
+            useUIStore.getState().setSyncError(msg);
+            if (!options?.silent) {
+                useUIStore.getState().addNotification('Sync failed: ' + msg, 'error');
+            }
         } finally {
             this.isSyncing = false;
             useUIStore.getState().setSyncing(false);
+        }
+
+        if (!failed && !options?.silent) {
+            // Only notify on user-initiated sync; background syncs stay quiet.
+            useUIStore.getState().addNotification('Synced', 'success');
         }
     }
 
