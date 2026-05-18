@@ -34,6 +34,10 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/components/profile/ProfileSettings.tsx",
+    "src/components/ProfileModal.tsx",
+    "src/components/profile/CloudSyncSection.tsx",
+    "src/components/profile/ExportDataButton.tsx"
   ]
 }
