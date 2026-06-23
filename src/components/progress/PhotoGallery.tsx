@@ -6,6 +6,7 @@ import { ProgressPhoto } from '../../types/photo';
 import { MuscleGroup } from '../../types/domain';
 import { cn } from '../../lib/utils';
 import EmptyState from '../ui/EmptyState';
+import { useTranslation } from '../../i18n';
 
 interface PhotoGalleryProps {
     onAddPhoto: () => void;
@@ -25,6 +26,7 @@ interface PhotoGroup {
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }) => {
     const { photos, deletePhoto, isLoading } = useWorkoutStore();
     const [selectedPhoto, setSelectedPhoto] = useState<ProgressPhoto | null>(null);
+    const { t } = useTranslation();
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'stack'>('stack');
 
@@ -212,13 +214,14 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                 ) : photos.length === 0 ? (
                     <EmptyState
                         icon={Camera}
-                        title="No Photos Yet"
-                        description="Track your physique progress securely. Photos are stored locally."
+                        title={t('photos.emptyTitle')}
+                        description={t('photos.emptyDesc')}
                         action={{
-                            label: "Take First Photo",
+                            label: t('photos.emptyAction'),
                             onClick: onAddPhoto
                         }}
                     />
+
                 ) : (
                     <div className="space-y-12 mt-6">
                         {groupedPhotos.map((group) => (

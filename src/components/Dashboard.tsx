@@ -18,6 +18,8 @@ import ACWRCard from './analytics/ACWRCard';
 import { InsightsPanel } from './analytics/InsightsPanel';
 import { StrengthStandards } from './analytics/StrengthStandards';
 import SocialHub from './social/SocialHub';
+import { WeeklyRecap } from './dashboard/WeeklyRecap';
+
 
 /**
  * Dashboard — Premium Home Screen
@@ -93,7 +95,9 @@ const Dashboard: React.FC = () => {
             className="flex flex-col h-full overflow-y-auto px-5 pb-32 space-y-8 no-scrollbar scroll-smooth"
             style={{ paddingTop: 'calc(var(--sat) + 1.5rem)' }}
         >
+            <WeeklyRecap />
             <DashboardHeader />
+
 
             <MetricStrip
                 sessionCount={weeklyStats.count}

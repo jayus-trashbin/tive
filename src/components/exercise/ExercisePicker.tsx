@@ -15,6 +15,7 @@ interface Props {
   onClose: () => void;
   onSelect: (exerciseIds: string[]) => void;
   multiSelect?: boolean;
+  existingExerciseIds?: string[];
 }
 
 // OSS ExerciseDB bodyParts (exact lowercase values from the API):
@@ -33,7 +34,14 @@ const MUSCLE_FILTERS: { label: string; value: string }[] = [
   { label: 'Neck',       value: 'neck' },
 ];
 
-const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelect = true }) => {
+/** Proxy external GIF URLs through wsrv.nl for reliable thumbnail loading */
+const getThumbUrl = (ex: Exercise): string => {
+  if (ex.staticImageUrl) return ex.staticImageUrl;
+  if (ex.gifUrl) return `https://wsrv.nl/?url=${encodeURIComponent(ex.gifUrl)}&n=1&output=webp&w=96&q=75`;
+  return '';
+};
+
+const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelect = true, existingExerciseIds = [] }) => {
   const { addExercise: cacheExercise } = useWorkoutStore();
 
   const [search, setSearch] = useState('');
@@ -42,6 +50,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
 
   const [results, setResults] = useState<Exercise[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -233,40 +242,89 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                     <>
                       {results.map(ex => {
                         const isSelected = selectedIds.includes(ex.id);
+                        const isExisting = existingExerciseIds.includes(ex.id);
+                        const isExpanded = expandedId === ex.id;
+                        
                         return (
-                          <div
-                            key={ex.id}
-                            onClick={() => handleToggle(ex)}
-                            className={cn(
-                              "flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer active:scale-[0.99]",
-                              isSelected
-                                ? "bg-brand-primary/10 border-brand-primary"
-                                : "bg-transparent border-transparent hover:bg-zinc-900"
-                            )}
-                          >
-                            <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden shrink-0 border border-white/5">
-                              <ImageWithFallback
-                                src={ex.staticImageUrl || ex.gifUrl}
-                                alt={ex.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-brand-primary" : "text-white")}>
-                                {ex.name}
-                              </h4>
-                              <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
-                                {ex.targetMuscle}
+                          <div key={ex.id} className="flex flex-col mb-1">
+                            <div
+                              onClick={() => setExpandedId(isExpanded ? null : ex.id)}
+                              className={cn(
+                                "flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer active:scale-[0.99]",
+                                isSelected
+                                  ? "bg-brand-primary/10 border-brand-primary"
+                                  : "bg-transparent border-transparent hover:bg-zinc-900",
+                                isExisting && !isSelected ? "opacity-60" : ""
+                              )}
+                            >
+                              <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden shrink-0 border border-white/5">
+                                <ImageWithFallback
+                                  src={getThumbUrl(ex)}
+                                  alt={ex.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-brand-primary" : "text-white")}>
+                                  {ex.name}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
+                                    {ex.targetMuscle}
+                                  </span>
+                                  {isExisting && (
+                                    <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                                      Added
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggle(ex);
+                                }}
+                                className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center border transition-all shrink-0",
+                                  isSelected
+                                    ? "bg-brand-primary border-brand-primary text-white"
+                                    : "border-zinc-700 text-transparent hover:border-zinc-500"
+                                )}>
+                                <Check size={16} strokeWidth={3} />
                               </div>
                             </div>
-                            <div className={cn(
-                              "w-6 h-6 rounded-full flex items-center justify-center border transition-all",
-                              isSelected
-                                ? "bg-brand-primary border-brand-primary text-white"
-                                : "border-zinc-700 text-transparent"
-                            )}>
-                              <Check size={14} strokeWidth={3} />
-                            </div>
+                            
+                            {/* Expanded Preview Inline */}
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="mx-2 mb-2 p-3 bg-zinc-900/50 rounded-lg border border-white/5 flex gap-3">
+                                    <div className="w-24 h-24 rounded bg-zinc-950 overflow-hidden shrink-0 border border-white/5">
+                                      <ImageWithFallback src={ex.gifUrl || getThumbUrl(ex)} alt={ex.name} className="w-full h-full object-cover mix-blend-screen" />
+                                    </div>
+                                    <div className="flex-1 flex flex-col justify-center gap-2">
+                                      {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
+                                        <div>
+                                          <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Secondary</span>
+                                          <p className="text-xs text-zinc-300 capitalize">{ex.secondaryMuscles.join(', ')}</p>
+                                        </div>
+                                      )}
+                                      {ex.equipment && (
+                                        <div>
+                                          <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Equipment</span>
+                                          <p className="text-xs text-zinc-300 capitalize">{ex.equipment}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}

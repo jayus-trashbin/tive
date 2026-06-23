@@ -7,13 +7,16 @@ import ExerciseDetailModal from './ExerciseDetailModal';
 import { Search, Loader2, Database, ChevronDown } from 'lucide-react';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { Exercise } from '../../types';
+import { useTranslation } from '../../i18n';
+import EmptyState from '../ui/EmptyState';
 
 interface Props {
-  onSelect: (exerciseId: string) => void;
+  onSelect?: (exerciseId: string) => void;
 }
 
 const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
   const { exercises: globalExercises, mergeExercises } = useWorkoutStore();
+  const { t } = useTranslation();
   
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -96,12 +99,12 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
     <>
       <div className="pb-24 space-y-6">
         <header className="sticky top-0 bg-zinc-950/80 backdrop-blur-md pt-4 pb-2 z-10">
-            <h1 className="page-title mb-4">Exercise Library</h1>
+            <h1 className="page-title mb-4">{t('exerciseLibrary.title')}</h1>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
               <input 
                   type="text" 
-                  placeholder="Search (e.g. Bench Press)..." 
+                  placeholder={t('exerciseLibrary.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-all shadow-lg"
@@ -149,7 +152,7 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
                                             className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
                                           >
                                               {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
-                                              {loadingMore ? 'Loading...' : 'Load More Exercises'}
+                                              {loadingMore ? t('exerciseLibrary.loading') : t('exerciseLibrary.loadMore')}
                                           </button>
                                       </div>
                                   );
@@ -160,7 +163,7 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
                                   <div style={style} className="p-2">
                                       <ExerciseCard 
                                           exercise={ex} 
-                                          onClick={() => onSelect(ex.id)}
+                                          onClick={() => onSelect ? onSelect(ex.id) : setDetailExercise(ex)}
                                           onInfoClick={() => setDetailExercise(ex)}
                                       />
                                   </div>
@@ -170,11 +173,19 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
                   </>
               ) : (
                   !loading && (
-                      <div className="text-center py-10 text-zinc-500">
-                          No exercises found. Try a different search term.
-                      </div>
+                      <EmptyState
+                          icon={Search}
+                          title={t('exerciseLibrary.noResults')}
+                          description={"Try searching for another exercise"}
+                          action={{
+                              label: "Clear Search",
+                              onClick: () => setSearch('')
+                          }}
+
+                      />
                   )
               )}
+
           </div>
         )}
       </div>

@@ -125,6 +125,14 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
                     <div className="text-lg font-bold text-white">{chronic.toFixed(0)}</div>
                 </div>
             </div>
+
+            {/* Action CTA for High Risk */}
+            {risk === 'high' && (
+                <button className="mt-4 w-full py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-xs font-bold text-red-400 flex items-center justify-center gap-2 transition-all active:scale-95">
+                    <AlertTriangle size={14} />
+                    Plan Deload Week
+                </button>
+            )}
         </div>
     );
 };

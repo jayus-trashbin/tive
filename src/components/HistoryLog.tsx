@@ -6,6 +6,7 @@ import { Dumbbell, Filter } from 'lucide-react';
 import { EmptyState } from './ui';
 import { AnimatePresence } from 'framer-motion';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { useTranslation } from '../i18n';
 import {
     HistoryHeader,
     SessionCard,
@@ -31,6 +32,7 @@ const AnalyticsFallback = () => (
 const HistoryLog: React.FC = () => {
     const history = useActiveSessions();
     const exercises = useWorkoutStore(s => s.exercises);
+    const { t } = useTranslation();
 
     const [viewMode, setViewMode] = useState<'journal' | 'analytics'>('journal');
     const [searchQuery, setSearchQuery] = useState('');
@@ -71,9 +73,21 @@ const HistoryLog: React.FC = () => {
                     filteredSessions.length === 0 ? (
                         <EmptyState
                             icon={searchQuery ? Filter : Dumbbell}
-                            title={searchQuery ? 'No Matches' : 'Your Journey Starts Here'}
-                            description={searchQuery ? 'Try a different search term' : 'Complete your first workout to see it logged here'}
-                            subtitle={searchQuery ? 'Filtered' : undefined}
+                            title={searchQuery ? t('historyLog.noMatchesTitle') : t('historyLog.emptyTitle')}
+                            description={searchQuery ? t('historyLog.noMatchesDesc') : t('historyLog.emptyDesc')}
+                            subtitle={searchQuery ? t('historyLog.filteredLabel') : undefined}
+                            action={searchQuery ? {
+                                label: "Clear Search",
+                                onClick: () => setSearchQuery('')
+                            } : {
+                                label: t('historyLog.emptyAction'),
+                                onClick: () => {
+                                    // G-03: Action to create routine if empty
+                                    import('../store/useUIStore').then(({ useUIStore }) => {
+                                        useUIStore.getState().setRoutineEditorOpen(true);
+                                    });
+                                }
+                            }}
                         />
                     ) : (
                         <div className="mt-4 flex-1 h-full w-full">

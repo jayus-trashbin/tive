@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Routine } from '../../types';
 import { estimateRoutineDuration } from '../../utils/engine';
 import { Button, EmptyState } from '../ui';
+import { useTranslation } from '../../i18n';
 
 interface NextMissionProps {
     nextRoutine: Routine | null;
@@ -59,15 +60,23 @@ export const NextMission: React.FC<NextMissionProps> = ({ nextRoutine, onStart }
     );
 };
 
-const EmptyMission: React.FC = () => (
-    <EmptyState
-        icon={Calendar}
-        title="No Routine Scheduled"
-        description="Create a routine to start tracking your progress."
-        action={{
-            label: "New Routine",
-            onClick: () => { /* Handle new routine */ },
-            iconLeft: Plus
-        }}
-    />
-);
+const EmptyMission: React.FC = () => {
+    const { t } = useTranslation();
+    return (
+        <EmptyState
+            icon={Calendar}
+            title={t('dashboard.nextMissionEmptyTitle')}
+            description={t('dashboard.nextMissionEmptyDesc')}
+            action={{
+                label: t('dashboard.nextMissionEmptyAction'),
+                onClick: () => {
+                    import('../../store/useUIStore').then(({ useUIStore }) => {
+                        useUIStore.getState().setRoutineEditorOpen(true);
+                    });
+                },
+                iconLeft: Plus
+            }}
+        />
+    );
+};
+

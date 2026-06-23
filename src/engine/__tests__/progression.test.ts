@@ -80,7 +80,7 @@ describe('progression engine', () => {
             expect(getSmartWeightSuggestion(context)).toBe(102.5);
         });
 
-        it('detects plateau and maintains weight if max diff in e1RM < 2%', () => {
+        it('detects plateau and suggests microload if max diff in e1RM < 2%', () => {
             // e1rms: 110, 109, 110. Max diff is 1. 1/110 = ~0.9%. < 2%.
             const context: ProgressionContext = {
                 previousSet: { id: '1', exerciseId: 'ex1', weight: 100, reps: 5, rpe: 7, type: 'working', isCompleted: true, estimated1RM: 110, isPR: false, timestamp: 0 },
@@ -92,7 +92,7 @@ describe('progression engine', () => {
                 exerciseId: 'ex1',
                 setIndex: 0
             };
-            expect(getSmartWeightSuggestion(context)).toBe(100);
+            expect(getSmartWeightSuggestion(context)).toBe(102.5);
         });
     });
 });

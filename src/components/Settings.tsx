@@ -26,11 +26,14 @@ import {
     EyeOff,
     Info,
     Copy,
-    X
+    X,
+    Bell,
+    Dumbbell
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { useUIStore } from '../store/useUIStore';
+import { requestNotificationPermission } from '../utils/reminders';
 import { credentialsStore } from '../utils/credentialsStore';
 import { cn } from '../lib/utils';
 import { Button, ConfirmModal, IconButton } from './ui';
@@ -107,6 +110,9 @@ const Settings: React.FC = () => {
     const [confirmClear, setConfirmClear] = useState(false);
     const [showSupabaseKey, setShowSupabaseKey] = useState(false);
     const [showSqlHelp, setShowSqlHelp] = useState(false);
+    const [isEditingCloud, setIsEditingCloud] = useState(false);
+    const [isEditingGemini, setIsEditingGemini] = useState(false);
+    
     const [supabaseDraft, setSupabaseDraft] = useState({
         url: userStats.supabaseUrl || '',
         key: userStats.supabaseKey || '',
@@ -123,6 +129,7 @@ const Settings: React.FC = () => {
         : t('common.never');
 
     const isConnected = !!(userStats.supabaseUrl && userStats.supabaseKey);
+    const isGeminiConnected = !!userStats.geminiApiKey;
 
     const handleSyncNow = async () => {
         if (isSyncing) return;
@@ -130,7 +137,6 @@ const Settings: React.FC = () => {
             addNotification(t('settings.toasts.configureSupabase'), 'error');
             return;
         }
-        // SyncService emits its own success/error toast for user-initiated syncs.
         await syncService.sync();
     };
 
@@ -162,6 +168,7 @@ const Settings: React.FC = () => {
             const ok = await syncService.validateConnection(url, key);
             if (ok) {
                 addNotification('Cloud connection saved', 'success');
+                setIsEditingCloud(false);
                 syncService.sync();
             } else {
                 addNotification('Connection failed. Check URL/Key.', 'error');
@@ -261,20 +268,13 @@ const Settings: React.FC = () => {
     const handleClearConfirm = async () => {
         setConfirmClear(false);
         try {
-            // Reset Zustand in-memory state first so UI doesn't display stale data during reload
             useWorkoutStore.getState().resetStorage?.();
-
-            // Delete persisted Zustand storage in IDB
             await del('adaptive-strength-pro-db');
-
-            // Delete photo IDB database
             try {
                 indexedDB.deleteDatabase(PHOTO_DB_NAME);
             } catch (e) {
                 logger.warn('Settings', 'Could not delete photo DB', e);
             }
-
-            // Clear cached credentials
             credentialsStore.clear();
 
             addNotification(t('settings.toasts.cleared'), 'success');
@@ -300,255 +300,17 @@ const Settings: React.FC = () => {
                 </h1>
             </header>
 
-            {/* Sections */}
             <motion.div
                 className="space-y-6"
                 initial="hidden"
                 animate="visible"
                 variants={{
                     visible: {
-                        transition: {
-                            staggerChildren: 0.05
-                        }
+                        transition: { staggerChildren: 0.05 }
                     }
                 }}
             >
-
-                {/* Profile / Identity Section */}
-                <motion.div variants={itemVariants}>
-                    <Section title={t('settings.sections.account')} description={t('settings.sections.accountDesc')}>
-                        <div className="flex items-center gap-4 p-4 border-b border-zinc-800/50">
-                            <div className="w-12 h-12 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center shrink-0">
-                                <span className="font-bold text-brand-primary text-lg">
-                                    {userStats.name ? userStats.name.substring(0, 2).toUpperCase() : 'AT'}
-                                </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="font-bold text-white text-base truncate">
-                                    {userStats.name || t('settings.account.athleteProfile')}
-                                </div>
-                                <div className="text-xs font-medium text-zinc-500 truncate">
-                                    {userStats.bodyweight ? `${userStats.bodyweight} kg` : t('settings.account.noWeight')}
-                                    {userStats.height ? ` • ${userStats.height} cm` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 space-y-3">
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                                <input
-                                    type="text"
-                                    autoComplete="name"
-                                    aria-label="Your Name"
-                                    placeholder="Your Name"
-                                    value={userStats.name || ''}
-                                    onChange={(e) => updateUserStats({ name: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:border-brand-primary focus:outline-none transition-colors"
-                                />
-                            </div>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                                <input
-                                    type="email"
-                                    autoComplete="email"
-                                    aria-label="Email Address"
-                                    placeholder="Email Address"
-                                    value={userStats.email || ''}
-                                    onChange={(e) => updateUserStats({ email: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:border-brand-primary focus:outline-none transition-colors"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label htmlFor="settings-bodyweight" className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">
-                                        Bodyweight (kg)
-                                    </label>
-                                    <input
-                                        id="settings-bodyweight"
-                                        type="number"
-                                        step="0.1"
-                                        value={userStats.bodyweight}
-                                        onChange={(e) => updateUserStats({ bodyweight: Number(e.target.value) })}
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-sm font-medium focus:border-brand-primary focus:outline-none transition-colors text-center"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">Gender</label>
-                                    <div className="flex bg-zinc-950 rounded-xl p-1 border border-zinc-800" role="radiogroup" aria-label="Select Gender">
-                                        {(['male', 'female'] as const).map(g => (
-                                            <button
-                                                key={g}
-                                                type="button"
-                                                onClick={() => updateUserStats({ gender: g })}
-                                                aria-pressed={userStats.gender === g}
-                                                className={cn(
-                                                    "flex-1 py-2 rounded-lg text-xs font-bold capitalize transition-all",
-                                                    userStats.gender === g ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
-                                                )}
-                                            >
-                                                {g}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </Section>
-                </motion.div>
-
-                {/* Sync & Backup Section (Supabase setup inline) */}
-                <motion.div variants={itemVariants}>
-                    <Section title={t('settings.sections.sync')} description={t('settings.sections.syncDesc')}>
-                        <div className="flex items-center justify-between p-4">
-                            <div className="flex items-center gap-3">
-                                <IconBox icon={Cloud} color="bg-blue-500" />
-                                <div>
-                                    <div className="text-sm font-bold text-white">{t('settings.sync.supabaseLabel')}</div>
-                                    <div className="text-[11px] text-zinc-500 flex items-center gap-1">
-                                        {isConnected ? (
-                                            <><CheckCircle2 size={11} className="text-brand-success" /> {t('settings.sync.connected')}</>
-                                        ) : (
-                                            <><AlertCircle size={11} /> {t('settings.sync.notConfigured')}</>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setShowSqlHelp(!showSqlHelp)}
-                                className="text-[10px] font-bold text-brand-primary flex items-center gap-1 hover:underline"
-                            >
-                                <Info size={12} /> Setup
-                            </button>
-                        </div>
-
-                        {showSqlHelp && (
-                            <div className="px-4 pb-4">
-                                <div className="bg-black/50 rounded-xl border border-brand-primary/20 p-3 space-y-2">
-                                    <p className="text-[10px] text-zinc-400">
-                                        Create a free project at <span className="text-white">supabase.com</span>, open the <strong className="text-white">SQL Editor</strong>, and run:
-                                    </p>
-                                    <div className="bg-zinc-950 p-2 rounded-lg border border-white/10 relative">
-                                        <pre className="text-[9px] font-medium text-zinc-300 overflow-x-auto whitespace-pre-wrap max-h-32">
-                                            {SUPABASE_SQL_SCHEMA}
-                                        </pre>
-                                        <button
-                                            type="button"
-                                            onClick={handleCopySql}
-                                            aria-label="Copy SQL"
-                                            className="absolute top-2 right-2 p-1.5 bg-zinc-800 rounded-md text-zinc-400 hover:text-white"
-                                        >
-                                            <Copy size={12} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="p-4 space-y-3">
-                            <div className="relative">
-                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
-                                <input
-                                    type="text"
-                                    aria-label="Supabase Project URL"
-                                    placeholder="Supabase Project URL"
-                                    value={supabaseDraft.url}
-                                    onChange={(e) => setSupabaseDraft({ ...supabaseDraft, url: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs font-medium focus:border-brand-primary focus:outline-none transition-colors"
-                                />
-                            </div>
-                            <div className="relative">
-                                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
-                                <input
-                                    type={showSupabaseKey ? 'text' : 'password'}
-                                    aria-label="Supabase Anon Key"
-                                    placeholder="Supabase Anon Key"
-                                    value={supabaseDraft.key}
-                                    onChange={(e) => setSupabaseDraft({ ...supabaseDraft, key: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-9 py-2.5 text-white text-xs font-medium focus:border-brand-primary focus:outline-none transition-colors"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSupabaseKey(!showSupabaseKey)}
-                                    aria-label={showSupabaseKey ? 'Hide Supabase key' : 'Show Supabase key'}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white"
-                                >
-                                    {showSupabaseKey ? <EyeOff size={14} /> : <Eye size={14} />}
-                                </button>
-                            </div>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                fullWidth
-                                onClick={handleSaveSupabase}
-                                loading={supabaseTesting}
-                                disabled={supabaseTesting || (!supabaseDraft.url && !supabaseDraft.key)}
-                            >
-                                {supabaseTesting ? 'Validating…' : (isConnected ? t('common.edit') : t('common.setup'))}
-                            </Button>
-                        </div>
-
-                        <div className="flex items-center justify-between p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center opacity-0"><RefreshCw size={18} /></div>
-                                <div>
-                                    <div className="text-sm font-bold text-white">{t('settings.sync.lastSync')}</div>
-                                    <div className="text-[11px] text-zinc-500">{lastSync}</div>
-                                    {lastSyncError && (
-                                        <div className="text-[10px] text-brand-danger mt-0.5 max-w-[180px] truncate">
-                                            {lastSyncError}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                iconLeft={RefreshCw}
-                                onClick={handleSyncNow}
-                                disabled={isSyncing || !isConnected}
-                                loading={isSyncing}
-                            >
-                                {isSyncing ? t('settings.sync.syncing') : t('settings.sync.syncNow')}
-                            </Button>
-                        </div>
-                    </Section>
-                </motion.div>
-
-                {/* Assistant Section */}
-                <motion.div variants={itemVariants}>
-                    <Section title={t('settings.sections.aiAssistant')} description={t('settings.sections.aiAssistantDesc')}>
-                        <div className="p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                                <IconBox icon={Sparkles} color="bg-purple-500" />
-                                <label htmlFor="gemini-api-key" className="text-sm font-bold text-white cursor-pointer">
-                                    {t('settings.ai.geminiKeyLabel')}
-                                </label>
-                            </div>
-                            <input
-                                id="gemini-api-key"
-                                type="password"
-                                value={userStats.geminiApiKey || ''}
-                                onChange={(e) => {
-                                    useWorkoutStore.getState().updateUserStats({ geminiApiKey: e.target.value });
-                                    credentialsStore.setGeminiKey(e.target.value);
-                                }}
-                                placeholder="AIzaSy..."
-                                aria-label={t('settings.ai.geminiKeyLabel')}
-                                className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm font-mono text-white placeholder:text-zinc-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none rounded-xl transition-all"
-                            />
-                            <div className="text-[10px] text-zinc-500 mt-2 ml-1">
-                                {t('settings.ai.getKeyHint')}{' '}
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-brand-primary hover:underline">
-                                    {t('settings.ai.googleAIStudio')}
-                                </a>
-                            </div>
-                        </div>
-                    </Section>
-                </motion.div>
-
-                {/* Preferences Section */}
+                {/* 1. Quick Preferences */}
                 <motion.div variants={itemVariants}>
                     <Section title={t('settings.sections.preferences')}>
                         <div className="flex items-center justify-between p-4">
@@ -605,7 +367,54 @@ const Settings: React.FC = () => {
                     </Section>
                 </motion.div>
 
-                {/* Audio & Haptics Section */}
+                {/* 2. Profile */}
+                <motion.div variants={itemVariants}>
+                    <Section title={t('settings.sections.account')} description={t('settings.sections.accountDesc')}>
+                        <div className="p-4 space-y-3">
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                                <input
+                                    type="text"
+                                    autoComplete="name"
+                                    aria-label="Your Name"
+                                    placeholder="Your Name"
+                                    value={userStats.name || ''}
+                                    onChange={(e) => updateUserStats({ name: e.target.value })}
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:border-brand-primary focus:outline-none transition-colors"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 mt-3">
+                                <div>
+                                    <label htmlFor="settings-bodyweight" className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">
+                                        Bodyweight (kg)
+                                    </label>
+                                    <input
+                                        id="settings-bodyweight"
+                                        type="number"
+                                        step="0.1"
+                                        value={userStats.bodyweight || ''}
+                                        onChange={(e) => updateUserStats({ bodyweight: Number(e.target.value) })}
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-sm font-medium focus:border-brand-primary focus:outline-none transition-colors text-center"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">Gender</label>
+                                    <SegmentedControl
+                                        id="gender"
+                                        options={[
+                                            { value: 'male', label: 'Male' },
+                                            { value: 'female', label: 'Female' },
+                                        ]}
+                                        value={userStats.gender || 'male'}
+                                        onChange={(v) => updateUserStats({ gender: v as 'male' | 'female' })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </Section>
+                </motion.div>
+
+                {/* 3. Audio & Haptics */}
                 <motion.div variants={itemVariants}>
                     <Section title={t('settings.sections.audio')} description={t('settings.sections.audioDesc')}>
                         <div className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors">
@@ -649,32 +458,321 @@ const Settings: React.FC = () => {
                                 onChange={() => useWorkoutStore.getState().updateUserStats({ isVibrationEnabled: userStats.isVibrationEnabled === false ? true : false })}
                             />
                         </div>
+
+                        {/* C-03: Gym Mode toggle */}
+                        <div className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <IconBox icon={Dumbbell} color={userStats.gymMode ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.gymMode ? "text-black" : "text-white"} />
+                                <div>
+                                    <div className="text-sm font-bold text-white">{t('settings.prefs.gymMode')}</div>
+                                    <div className="text-[11px] text-zinc-500">{t('settings.prefs.gymModeDesc')}</div>
+                                </div>
+                            </div>
+                            <Toggle
+                                checked={!!userStats.gymMode}
+                                onChange={() => useWorkoutStore.getState().updateUserStats({ gymMode: !userStats.gymMode })}
+                            />
+                        </div>
                     </Section>
                 </motion.div>
 
-                {/* Data Section */}
                 <motion.div variants={itemVariants}>
-                    <Section title={t('settings.sections.data')}>
-                        <div className="grid grid-cols-2 divide-x divide-zinc-800/50 border-b border-zinc-800/50">
-                            <div className="p-4 text-center">
-                                <div className="text-3xl font-black text-white">{historyLength}</div>
-                                <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">{t('settings.data.sessions')}</div>
+                    <Section title="Reminders" description="Never miss a workout with local notifications.">
+                        <div className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <IconBox icon={Bell} color={userStats.reminderSettings?.enabled ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.reminderSettings?.enabled ? "text-black" : "text-white"} />
+                                <div>
+                                    <div className="text-sm font-bold text-white">Workout Reminders</div>
+                                    <div className="text-[11px] text-zinc-500">Get notified when it's time to train</div>
+                                </div>
                             </div>
-                            <div className="p-4 text-center">
-                                <div className="text-3xl font-black text-white">{routinesLength}</div>
-                                <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">{t('settings.data.routines')}</div>
-                            </div>
+                            <Toggle
+                                checked={!!userStats.reminderSettings?.enabled}
+                                onChange={async () => {
+                                    const current = !!userStats.reminderSettings?.enabled;
+                                    if (!current) {
+                                        const granted = await requestNotificationPermission();
+                                        if (!granted) {
+                                            useUIStore.getState().addNotification('Notification permission denied', 'error');
+                                            return;
+                                        }
+                                    }
+                                    useWorkoutStore.getState().updateUserStats({
+                                        reminderSettings: {
+                                            enabled: !current,
+                                            time: userStats.reminderSettings?.time || '18:00',
+                                            days: userStats.reminderSettings?.days || [1, 3, 5]
+                                        }
+                                    });
+                                }}
+                            />
                         </div>
 
+                        {userStats.reminderSettings?.enabled && (
+                            <div className="p-4 pt-0 space-y-4">
+                                <div className="bg-zinc-950/50 p-3 rounded-xl border border-zinc-800 space-y-3">
+                                    <div>
+                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-2">Days of week</label>
+                                        <div className="flex gap-1 justify-between">
+                                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => {
+                                                const isSelected = userStats.reminderSettings?.days.includes(idx);
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => {
+                                                            const days = userStats.reminderSettings?.days || [];
+                                                            const newDays = isSelected ? days.filter(d => d !== idx) : [...days, idx];
+                                                            useWorkoutStore.getState().updateUserStats({
+                                                                reminderSettings: { ...userStats.reminderSettings!, days: newDays }
+                                                            });
+                                                        }}
+                                                        className={cn(
+                                                            "w-10 h-10 rounded-lg text-xs font-bold transition-colors",
+                                                            isSelected ? "bg-brand-primary text-black" : "bg-zinc-900 text-zinc-500 border border-zinc-800"
+                                                        )}
+                                                    >
+                                                        {day}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Time</label>
+                                        <input
+                                            type="time"
+                                            value={userStats.reminderSettings?.time || '18:00'}
+                                            onChange={(e) => {
+                                                useWorkoutStore.getState().updateUserStats({
+                                                    reminderSettings: { ...userStats.reminderSettings!, time: e.target.value }
+                                                });
+                                            }}
+                                            className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm font-medium focus:border-brand-primary focus:outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </Section>
+                </motion.div>
+
+                {/* 4. Connections (Cloud Sync & AI) */}
+                <motion.div variants={itemVariants}>
+                    <Section title="Connections" description="Connect your app to the cloud and AI services">
+                        
+                        {/* Cloud Backup Item */}
+                        <div className={cn("p-4 transition-all duration-300", !isConnected || isEditingCloud ? "bg-blue-500/5 border-b border-blue-500/20" : "border-b border-zinc-800/50")}>
+                            {isConnected && !isEditingCloud ? (
+                                // STATUS CARD: Connected
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shrink-0">
+                                            <CheckCircle2 size={20} className="text-blue-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white">Cloud Backup Active</div>
+                                            <div className="text-[11px] text-zinc-400">Last sync: {lastSync}</div>
+                                            <button 
+                                                onClick={() => setIsEditingCloud(true)}
+                                                className="text-[10px] text-zinc-500 hover:text-blue-400 hover:underline mt-0.5 text-left"
+                                            >
+                                                Edit connection settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        iconLeft={RefreshCw}
+                                        onClick={handleSyncNow}
+                                        disabled={isSyncing}
+                                        loading={isSyncing}
+                                    >
+                                        {isSyncing ? t('settings.sync.syncing') : 'Sync Now'}
+                                    </Button>
+                                </div>
+                            ) : (
+                                // WIZARD: Not Connected or Editing
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                                            <Cloud size={20} className="text-blue-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white">Cloud Backup</div>
+                                            <div className="text-[11px] text-zinc-400">Sync your data across devices securely.</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-3 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Project URL</label>
+                                            <div className="relative">
+                                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://your-project.supabase.co"
+                                                    value={supabaseDraft.url}
+                                                    onChange={(e) => setSupabaseDraft({ ...supabaseDraft, url: e.target.value })}
+                                                    className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs font-medium focus:border-blue-500 focus:outline-none transition-colors"
+                                                />
+                                            </div>
+                                            <p className="text-[10px] text-zinc-500 mt-1 ml-1">Found in Supabase → Project Settings → API</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Anon Key</label>
+                                            <div className="relative">
+                                                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                                                <input
+                                                    type={showSupabaseKey ? 'text' : 'password'}
+                                                    placeholder="eyJhbGciOiJIUzI1..."
+                                                    value={supabaseDraft.key}
+                                                    onChange={(e) => setSupabaseDraft({ ...supabaseDraft, key: e.target.value })}
+                                                    className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-9 py-2.5 text-white text-xs font-medium focus:border-blue-500 focus:outline-none transition-colors"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowSupabaseKey(!showSupabaseKey)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white"
+                                                >
+                                                    {showSupabaseKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                </button>
+                                            </div>
+                                            <p className="text-[10px] text-zinc-500 mt-1 ml-1">Found right below the Project URL</p>
+                                        </div>
+
+                                        {/* Database Setup Guide Accordion */}
+                                        <div className="border border-zinc-800 rounded-xl overflow-hidden mt-2">
+                                            <button 
+                                                onClick={() => setShowSqlHelp(!showSqlHelp)}
+                                                className="w-full flex items-center justify-between p-3 bg-zinc-900 text-[11px] font-bold text-zinc-400 hover:text-white transition-colors"
+                                            >
+                                                <span className="flex items-center gap-2"><Info size={14} /> Database Setup Guide</span>
+                                                <ChevronRight size={14} className={cn("transition-transform duration-200", showSqlHelp && "rotate-90")} />
+                                            </button>
+                                            {showSqlHelp && (
+                                                <div className="p-3 bg-black border-t border-zinc-800 space-y-2">
+                                                    <p className="text-[10px] text-zinc-400">
+                                                        Run this in your Supabase SQL Editor to prepare your database:
+                                                    </p>
+                                                    <div className="bg-zinc-950 p-2 rounded-lg border border-white/10 relative">
+                                                        <pre className="text-[9px] font-medium text-zinc-300 overflow-x-auto whitespace-pre-wrap max-h-32">
+                                                            {SUPABASE_SQL_SCHEMA}
+                                                        </pre>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCopySql}
+                                                            className="absolute top-2 right-2 p-1.5 bg-zinc-800 rounded-md text-zinc-400 hover:text-white"
+                                                        >
+                                                            <Copy size={12} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-2 pt-2">
+                                            {isEditingCloud && isConnected && (
+                                                <Button variant="ghost" onClick={() => setIsEditingCloud(false)} className="flex-1">
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                            <Button
+                                                variant="primary"
+                                                className={cn("flex-1", !isEditingCloud || !isConnected ? "w-full" : "")}
+                                                onClick={handleSaveSupabase}
+                                                loading={supabaseTesting}
+                                                disabled={supabaseTesting || (!supabaseDraft.url || !supabaseDraft.key)}
+                                            >
+                                                {supabaseTesting ? 'Connecting...' : 'Connect Supabase'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* AI Assistant Item */}
+                        <div className={cn("p-4 transition-all duration-300", !isGeminiConnected || isEditingGemini ? "bg-purple-500/5" : "")}>
+                            {isGeminiConnected && !isEditingGemini ? (
+                                // STATUS CARD: Connected
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+                                            <Sparkles size={20} className="text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white">AI Assistant Active</div>
+                                            <button 
+                                                onClick={() => setIsEditingGemini(true)}
+                                                className="text-[10px] text-zinc-500 hover:text-purple-400 hover:underline mt-0.5 text-left"
+                                            >
+                                                Change API key
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // WIZARD: Not Connected or Editing
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                                            <Sparkles size={20} className="text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white">AI Assistant</div>
+                                            <div className="text-[11px] text-zinc-400">Unlock smart routine generation with Gemini.</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
+                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Gemini API Key</label>
+                                        <div className="relative flex items-center gap-2">
+                                            <div className="relative flex-1">
+                                                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                                                <input
+                                                    type="password"
+                                                    value={userStats.geminiApiKey || ''}
+                                                    onChange={(e) => {
+                                                        useWorkoutStore.getState().updateUserStats({ geminiApiKey: e.target.value });
+                                                        credentialsStore.setGeminiKey(e.target.value);
+                                                    }}
+                                                    placeholder="AIzaSy..."
+                                                    className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs font-mono focus:border-purple-500 focus:outline-none transition-colors"
+                                                />
+                                            </div>
+                                            {isEditingGemini && isGeminiConnected && (
+                                                <Button size="sm" variant="primary" onClick={() => setIsEditingGemini(false)}>
+                                                    Save
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-zinc-500 mt-2 ml-1">
+                                            Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">Google AI Studio</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </Section>
+                </motion.div>
+
+                {/* 5. Data & Storage */}
+                <motion.div variants={itemVariants}>
+                    <Section title={t('settings.sections.data')}>
                         <Button
                             variant="ghost"
                             fullWidth
                             iconLeft={Download}
                             iconRight={ChevronRight}
-                            className="justify-start py-6"
+                            className="justify-start py-5 border-b border-zinc-800/50 rounded-none h-auto"
                             onClick={handleExport}
                         >
-                            {t('settings.data.exportJson')}
+                            <div className="flex flex-col items-start ml-2 text-left">
+                                <span className="font-bold leading-tight">{t('settings.data.exportJson')}</span>
+                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Export {historyLength} sessions & {routinesLength} routines</span>
+                            </div>
                         </Button>
 
                         <Button
@@ -682,10 +780,13 @@ const Settings: React.FC = () => {
                             fullWidth
                             iconLeft={Download}
                             iconRight={ChevronRight}
-                            className="justify-start py-6"
+                            className="justify-start py-5 border-b border-zinc-800/50 rounded-none h-auto"
                             onClick={handleExportCSV}
                         >
-                            {t('settings.data.exportCsv')}
+                            <div className="flex flex-col items-start ml-2 text-left">
+                                <span className="font-bold leading-tight">{t('settings.data.exportCsv')}</span>
+                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Spreadsheet format for external tools</span>
+                            </div>
                         </Button>
 
                         <Button
@@ -693,10 +794,13 @@ const Settings: React.FC = () => {
                             fullWidth
                             iconLeft={Upload}
                             iconRight={ChevronRight}
-                            className="justify-start py-6"
+                            className="justify-start py-5 rounded-none h-auto"
                             onClick={handleImportClick}
                         >
-                            {t('settings.data.importBackup')}
+                            <div className="flex flex-col items-start ml-2 text-left">
+                                <span className="font-bold leading-tight">{t('settings.data.importBackup')}</span>
+                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Restore from a previous backup file</span>
+                            </div>
                         </Button>
 
                         <input
@@ -708,18 +812,30 @@ const Settings: React.FC = () => {
                             aria-hidden="true"
                             tabIndex={-1}
                         />
-
-                        <Button
-                            variant="danger"
-                            fullWidth
-                            iconLeft={Trash2}
-                            className="justify-start py-6 border-none bg-transparent hover:bg-red-500/10"
-                            onClick={() => setConfirmClear(true)}
-                        >
-                            {t('settings.data.clearAll')}
-                        </Button>
-
                     </Section>
+                </motion.div>
+
+                {/* 6. Danger Zone */}
+                <motion.div variants={itemVariants}>
+                    <section>
+                        <h2 className="text-[11px] font-bold text-red-500/80 uppercase tracking-widest px-2 mb-2">
+                            Danger Zone
+                        </h2>
+                        <div className="bg-red-950/10 border border-red-900/30 rounded-2xl overflow-hidden p-1 shadow-sm">
+                            <Button
+                                variant="danger"
+                                fullWidth
+                                iconLeft={Trash2}
+                                className="justify-start py-4 border-none bg-transparent hover:bg-red-500/10 text-red-500 h-auto"
+                                onClick={() => setConfirmClear(true)}
+                            >
+                                <div className="flex flex-col items-start ml-2 text-left">
+                                    <span className="font-bold leading-tight">{t('settings.data.clearAll')}</span>
+                                    <span className="text-[10px] text-red-400/70 font-normal leading-tight mt-1">Permanently delete all workouts and settings</span>
+                                </div>
+                            </Button>
+                        </div>
+                    </section>
                 </motion.div>
 
                 {/* App Info */}

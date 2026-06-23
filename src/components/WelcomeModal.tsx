@@ -3,8 +3,10 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useWorkoutStore } from '../store/useWorkoutStore';
 import { Check, Dumbbell, User, Activity, ArrowRight, Moon, Zap, Scale, Loader2 } from 'lucide-react';
 import { FALLBACK_EXERCISES } from '../data/fallbackExercises';
+import { getTemplateForProfile } from '../data/routineTemplates';
 import { Routine, Gender } from '../types';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../i18n';
 
 interface Props {
   onComplete: () => void;
@@ -12,6 +14,7 @@ interface Props {
 
 const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
   const { updateUserStats, saveRoutine, addExercise } = useWorkoutStore();
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   
   // Form State
@@ -26,25 +29,38 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
   const [isBuilding, setIsBuilding] = useState(false);
   const [generatedRoutine, setGeneratedRoutine] = useState<Routine | null>(null);
 
+  const getRoutineName = (): string => {
+    if (goal === 'strength') {
+      return experience === 'beginner'
+        ? t('onboarding.routineNames.foundationStrength')
+        : t('onboarding.routineNames.advancedStrength');
+    }
+    return experience === 'beginner'
+      ? t('onboarding.routineNames.baseHypertrophy')
+      : t('onboarding.routineNames.hyperHypertrophy');
+  };
+
   const generateRoutine = async () => {
     setIsBuilding(true);
     setStep(4);
-    
-    // Simulate thinking/generation delay for premium feel
-    await new Promise(r => setTimeout(r, 2000));
-    
-    const starterExercises = FALLBACK_EXERCISES.slice(0, 5);
-    starterExercises.forEach(ex => addExercise(ex));
 
-    const routineName = goal === 'strength' 
-        ? `${experience === 'beginner' ? 'Foundation' : 'Advanced'} Strength` 
-        : `${experience === 'beginner' ? 'Base' : 'Hyper'} Hypertrophy`;
+    // Simulate thinking/generation delay for premium feel
+    await new Promise(r => setTimeout(r, 1800));
+
+    // Pick the template that best matches the user's profile
+    const template = getTemplateForProfile(experience, goal);
+
+    // Register all exercises that appear in the template into the store
+    const templateExerciseIds = template.blocks?.map(b => b.exerciseId) ?? template.exerciseIds;
+    templateExerciseIds.forEach(id => {
+      const ex = FALLBACK_EXERCISES.find(e => e.id === id);
+      if (ex) addExercise(ex);
+    });
 
     const routine: Routine = {
-      id: crypto.randomUUID(),
-      name: routineName,
-      exerciseIds: starterExercises.map(e => e.id),
-      lastPerformed: undefined
+      ...template,
+      name: getRoutineName(),
+      lastPerformed: undefined,
     };
 
     setGeneratedRoutine(routine);
@@ -111,7 +127,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                 ))}
             </div>
             <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
-                Step {step} of 3
+                {t('onboarding.stepOf', { current: String(step), total: '3' })}
             </div>
         </div>
       )}
@@ -135,21 +151,26 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                         >
                             <User size={32} className="text-black" />
                         </motion.div>
-                        <h1 className="text-4xl font-bold mb-3 tracking-tight">Who are <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-blue-400">you?</span></h1>
-                        <p className="text-zinc-400 text-lg">Let's set up your core identity.</p>
+                        <h1 className="text-4xl font-bold mb-3 tracking-tight">
+                            {t('onboarding.step1.title')}{' '}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-blue-400">
+                                {t('onboarding.step1.titleHighlight')}
+                            </span>
+                        </h1>
+                        <p className="text-zinc-400 text-lg">{t('onboarding.step1.subtitle')}</p>
                     </div>
 
                     <div className="space-y-6">
                         {/* Name Input */}
                         <div className="relative group">
-                            <label htmlFor="welcome-name" className="sr-only">Your Name</label>
+                            <label htmlFor="welcome-name" className="sr-only">{t('onboarding.step1.nameLabel')}</label>
                             <input
                                 id="welcome-name"
                                 autoFocus
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Your Name"
+                                placeholder={t('onboarding.step1.namePlaceholder')}
                                 className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-4 px-5 text-xl font-bold placeholder:text-zinc-600 focus:border-brand-primary focus:bg-black focus:outline-none transition-all"
                             />
                         </div>
@@ -167,7 +188,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                             : "text-zinc-500 hover:text-white"
                                     )}
                                 >
-                                    {g}
+                                    {g === 'male' ? t('onboarding.step1.male') : t('onboarding.step1.female')}
                                 </button>
 
                             ))}
@@ -176,12 +197,12 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                         {/* Weight Input */}
                         <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-sm font-bold text-zinc-400 flex items-center gap-2"><Scale size={16}/> Bodyweight</span>
+                                <span className="text-sm font-bold text-zinc-400 flex items-center gap-2"><Scale size={16}/> {t('onboarding.step1.bodyweightTitle')}</span>
                                 <span className="text-2xl font-bold">{weight} <span className="text-sm text-zinc-500">KG</span></span>
                             </div>
                             <input
                                 type="range"
-                                aria-label="Bodyweight in kilograms"
+                                aria-label={t('onboarding.step1.bodweightLabel')}
                                 min="40" max="150" step="0.5"
                                 value={weight}
                                 onChange={(e) => setWeight(Number(e.target.value))}
@@ -201,19 +222,22 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                     className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full"
                 >
                      <div className="mb-10 text-center">
-                        <h1 className="text-4xl font-bold mb-3 tracking-tight">Experience <br/><span className="text-zinc-500">Level</span></h1>
-                        <p className="text-zinc-400">This calibrates your optimal training volume.</p>
+                        <h1 className="text-4xl font-bold mb-3 tracking-tight">
+                            {t('onboarding.step2.title')} <br/>
+                            <span className="text-zinc-500">{t('onboarding.step2.titleSecondary')}</span>
+                        </h1>
+                        <p className="text-zinc-400">{t('onboarding.step2.subtitle')}</p>
                     </div>
 
                     <div className="space-y-4">
-                        {[
-                            { id: 'beginner', label: 'Beginner', desc: '0-1 years lifting. Focus on learning.', vol: 'Low Volume' },
-                            { id: 'intermediate', label: 'Intermediate', desc: '1-3 years. Built a solid foundation.', vol: 'Moderate Volume' },
-                            { id: 'advanced', label: 'Advanced', desc: '3+ years. Requires high stimulus to grow.', vol: 'High Volume' },
-                        ].map((level) => (
+                        {([
+                            { id: 'beginner', label: t('onboarding.step2.levels.beginner'), desc: t('onboarding.step2.levels.beginnerDesc'), vol: t('onboarding.step2.levels.beginnerVol') },
+                            { id: 'intermediate', label: t('onboarding.step2.levels.intermediate'), desc: t('onboarding.step2.levels.intermediateDesc'), vol: t('onboarding.step2.levels.intermediateVol') },
+                            { id: 'advanced', label: t('onboarding.step2.levels.advanced'), desc: t('onboarding.step2.levels.advancedDesc'), vol: t('onboarding.step2.levels.advancedVol') },
+                        ] as const).map((level) => (
                             <button 
                                 key={level.id}
-                                onClick={() => setExperience(level.id as any)}
+                                onClick={() => setExperience(level.id as 'beginner' | 'intermediate' | 'advanced')}
                                 className={cn(
                                     "w-full text-left p-5 rounded-3xl border transition-all duration-300 relative overflow-hidden",
                                     experience === level.id 
@@ -241,8 +265,11 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                     className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full"
                 >
                     <div className="mb-8 text-center">
-                        <h1 className="text-4xl font-bold mb-3 tracking-tight">Main <span className="text-blue-400">Goal</span></h1>
-                        <p className="text-zinc-400">What are we optimizing for?</p>
+                        <h1 className="text-4xl font-bold mb-3 tracking-tight">
+                            {t('onboarding.step3.title')}{' '}
+                            <span className="text-blue-400">{t('onboarding.step3.titleHighlight')}</span>
+                        </h1>
+                        <p className="text-zinc-400">{t('onboarding.step3.subtitle')}</p>
                     </div>
 
                     <div className="grid gap-4 mb-8">
@@ -258,8 +285,8 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                     <Dumbbell size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white">Strength</h3>
-                                    <p className="text-sm text-zinc-400">Max force, lower reps (1-5).</p>
+                                    <h3 className="text-xl font-bold text-white">{t('onboarding.step3.strength')}</h3>
+                                    <p className="text-sm text-zinc-400">{t('onboarding.step3.strengthDesc')}</p>
                                 </div>
                             </div>
                         </button>
@@ -276,8 +303,8 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                     <Activity size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white">Hypertrophy</h3>
-                                    <p className="text-sm text-zinc-400">Muscle size, mid reps (8-12).</p>
+                                    <h3 className="text-xl font-bold text-white">{t('onboarding.step3.hypertrophy')}</h3>
+                                    <p className="text-sm text-zinc-400">{t('onboarding.step3.hypertrophyDesc')}</p>
                                 </div>
                             </div>
                         </button>
@@ -286,7 +313,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                     <div className="grid grid-cols-2 gap-4">
                         {/* Unit System */}
                         <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
-                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-3">Units</p>
+                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-3">{t('onboarding.step3.units')}</p>
                             <div className="flex gap-2">
                                 {(['metric', 'imperial'] as const).map(u => (
                                     <button
@@ -297,7 +324,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                             unitSystem === u ? "bg-white text-black" : "bg-zinc-800 text-zinc-400"
                                         )}
                                     >
-                                        {u === 'metric' ? 'KG' : 'LBS'}
+                                        {u === 'metric' ? t('settings.prefs.unitsKg') : t('settings.prefs.unitsLbs')}
                                     </button>
                                 ))}
                             </div>
@@ -305,7 +332,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
 
                         {/* Theme */}
                         <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
-                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-3">Theme</p>
+                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-3">{t('onboarding.step3.theme')}</p>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setTheme('dark')}
@@ -348,8 +375,8 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                             >
                                 <Loader2 size={48} />
                             </motion.div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Analyzing Profile...</h2>
-                            <p className="text-zinc-500">Building your optimal starting routine.</p>
+                            <h2 className="text-2xl font-bold text-white mb-2">{t('onboarding.generating.title')}</h2>
+                            <p className="text-zinc-500">{t('onboarding.generating.subtitle')}</p>
                         </>
                     ) : (
                         <>
@@ -359,35 +386,53 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                             >
                                 <Check size={40} className="text-black" />
                             </motion.div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Ready to Lift</h2>
-                            <p className="text-zinc-400 mb-8">We created a starter routine tailored to your level.</p>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('onboarding.ready.title')}</h2>
+                            <p className="text-zinc-400 mb-8">{t('onboarding.ready.subtitle')}</p>
 
-                            {generatedRoutine && (
-                                <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 text-left mb-8">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="font-bold text-white">{generatedRoutine.name}</h3>
-                                        <span className="text-xs font-bold bg-brand-primary/20 text-brand-primary px-2 py-1 rounded">5 Exercises</span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {generatedRoutine.exerciseIds.slice(0, 3).map(id => {
-                                            const exName = FALLBACK_EXERCISES.find(e => e.id === id)?.name;
-                                            return (
-                                                <div key={id} className="text-sm text-zinc-400 flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                                                    {exName}
+                            {generatedRoutine && (() => {
+                                // Use block exerciseIds for accurate preview
+                                const blockIds = generatedRoutine.blocks?.map(b => b.exerciseId)
+                                    ?? generatedRoutine.exerciseIds;
+                                const totalCount = blockIds.length;
+                                const previewIds = blockIds.slice(0, 3);
+                                const remainingCount = totalCount - previewIds.length;
+
+                                return (
+                                    <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 text-left mb-8">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-white">{generatedRoutine.name}</h3>
+                                            <span className="text-xs font-bold bg-brand-primary/20 text-brand-primary px-2 py-1 rounded">
+                                                {t('onboarding.ready.exercisesLabel', { count: String(totalCount) })}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {previewIds.map(id => {
+                                                const ex = FALLBACK_EXERCISES.find(e => e.id === id);
+                                                return (
+                                                    <div key={id} className="text-sm text-zinc-400 flex items-center gap-2">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-primary/50" />
+                                                        <span>{ex?.name ?? id}</span>
+                                                        {ex?.targetMuscle && (
+                                                            <span className="ml-auto text-[10px] text-zinc-600 capitalize">{ex.targetMuscle}</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                            {remainingCount > 0 && (
+                                                <div className="text-sm text-zinc-600 pl-3.5">
+                                                    {t('onboarding.ready.moreExercises', { count: String(remainingCount) })}
                                                 </div>
-                                            )
-                                        })}
-                                        <div className="text-sm text-zinc-600 pl-3.5">+ 2 more</div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             <button 
                                 onClick={handleFinish}
                                 className="w-full py-5 rounded-2xl bg-white text-black font-bold text-lg hover:bg-zinc-200 transition-all shadow-lg active:scale-95"
                             >
-                                ENTER TIVE
+                                {t('onboarding.enterApp')}
                             </button>
                         </>
                     )}
@@ -420,7 +465,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                             : "bg-white text-black shadow-lg hover:bg-zinc-200"
                     )}
                 >
-                    {step === 3 ? "BUILD ROUTINE" : "CONTINUE"}
+                    {step === 3 ? t('onboarding.buildRoutine') : t('onboarding.continue')}
                     {step < 3 && <ArrowRight size={20} />}
                 </button>
             </div>

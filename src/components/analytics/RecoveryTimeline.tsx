@@ -8,6 +8,7 @@ import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { getMuscleFatigueTimeline } from '../../utils/analytics';
 import { MuscleGroup } from '../../types/domain';
 import { Button, EmptyState } from '../ui';
+import { useTranslation } from '../../i18n';
 
 const MUSCLE_COLORS: Record<MuscleGroup, string> = {
     chest: '#f87171',
@@ -43,6 +44,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const RecoveryTimeline: React.FC = () => {
     const history = useWorkoutStore(s => s.history);
     const exercises = useWorkoutStore(s => s.exercises);
+    const { t } = useTranslation();
 
     const chartData = useMemo(() => {
         const snapshots = getMuscleFatigueTimeline(history, exercises, 14);
@@ -62,10 +64,11 @@ const RecoveryTimeline: React.FC = () => {
         return (
             <EmptyState
                 icon={Activity}
-                title="Recovery Data"
-                description="Log more sessions to see recovery"
+                title={t('analytics.recoveryEmptyTitle')}
+                description={t('analytics.recoveryEmptyDesc')}
                 compact
             />
+
         );
     }
 

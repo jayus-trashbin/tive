@@ -13,6 +13,9 @@ import { calculateHybrid1RM } from '../../utils/formulas';
 import ACWRCard from '../analytics/ACWRCard';
 import { cn } from '../../lib/utils';
 import { useTranslation } from '../../i18n';
+import { useWorkoutStore } from '../../store/useWorkoutStore';
+import { requestNotificationPermission } from '../../utils/reminders';
+import { Bell } from 'lucide-react';
 
 interface WorkoutSummaryProps {
     session: Session;
@@ -191,6 +194,34 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
             badges.push({ id: 'consistency', icon: Target, label: 'Consistent', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' });
         }
     }, [acwr, badges]);
+
+    // Smart Prompt for Reminders
+    const [showReminderPrompt, setShowReminderPrompt] = useState(false);
+    const reminderSettings = useWorkoutStore(state => state.userStats.reminderSettings);
+    const updateUserStats = useWorkoutStore(state => state.updateUserStats);
+
+    useEffect(() => {
+        // Show if this is the very first workout and reminders are not enabled
+        if (history.length <= 1 && !reminderSettings?.enabled) {
+            // Delay slightly to not overwhelm
+            const timer = setTimeout(() => setShowReminderPrompt(true), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [history.length, reminderSettings?.enabled]);
+
+    const handleEnableReminder = async () => {
+        const granted = await requestNotificationPermission();
+        if (granted) {
+            updateUserStats({
+                reminderSettings: {
+                    enabled: true,
+                    time: '18:00',
+                    days: [1, 3, 5] // MWF default
+                }
+            });
+            setShowReminderPrompt(false);
+        }
+    };
 
     return (
         <motion.div
@@ -509,28 +540,17 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
-                        className="px-6 py-4 border-b border-zinc-800/50 flex items-center gap-4"
+                        className="px-6 py-6 border-b border-zinc-800/50 flex flex-col items-center justify-center gap-2 bg-zinc-900/10"
                     >
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">
+                            Muscles Trained
+                        </span>
                         <MuscleOverlay
                             muscleGroups={muscleGroups}
                             volumes={useMemo(() => getSessionMuscleIntensity(session, Array.from(exercises.values())), [session, exercises])}
-                            size={80}
+                            size={120}
+                            showToggle={true}
                         />
-                        <div className="flex-1">
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-2">
-                                Muscles Trained
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                                {muscleGroups.map(mg => (
-                                    <span
-                                        key={mg}
-                                        className="px-2.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-[10px] text-brand-primary uppercase font-bold tracking-widest"
-                                    >
-                                        {mg}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
                     </motion.div>
                 )}
 
@@ -608,6 +628,44 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         {t('workoutSummary.doneClose')}
                     </button>
                 </div>
+
+                {/* Smart Prompt Overlay */}
+                <AnimatePresence>
+                    {showReminderPrompt && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                            className="absolute bottom-0 left-0 right-0 p-6 bg-zinc-900 border-t border-zinc-800 rounded-t-3xl z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
+                        >
+                            <div className="flex items-start gap-4 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-brand-primary/20 flex items-center justify-center shrink-0">
+                                    <Bell className="text-brand-primary" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-white font-bold text-lg mb-1">Ótimo primeiro treino!</h3>
+                                    <p className="text-zinc-400 text-sm leading-relaxed">
+                                        Quer um lembrete para não esquecer o próximo? A consistência é o segredo dos resultados.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowReminderPrompt(false)}
+                                    className="flex-1 h-12 rounded-xl bg-zinc-800 text-white font-bold text-sm"
+                                >
+                                    Agora não
+                                </button>
+                                <button
+                                    onClick={handleEnableReminder}
+                                    className="flex-1 h-12 rounded-xl bg-brand-primary text-black font-bold text-sm"
+                                >
+                                    Ativar Lembrete
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </motion.div>
     );

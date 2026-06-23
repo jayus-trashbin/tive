@@ -17,6 +17,10 @@ export interface AIInsight {
     type: 'success' | 'warning' | 'info';
     title: string;
     description: string;
+    action?: {
+        label: string;
+        type: 'DELOAD_ADVICE' | 'ROUTINE_PLANNER' | 'VIEW_HISTORY';
+    };
 }
 
 export interface InsightsResponse {
@@ -125,7 +129,11 @@ export const generateLocalInsights = (history: Session[], exercises: Exercise[])
             insights.push({
                 type: 'warning',
                 title: 'Fatigue Alert (ACWR)',
-                description: `Your acute load is ${Math.round((acwr.ratio - 1) * 100)}% above your chronic baseline. Consider a deload to prevent injury.`
+                description: `Your acute load is ${Math.round((acwr.ratio - 1) * 100)}% above your chronic baseline. Consider a deload to prevent injury.`,
+                action: {
+                    label: 'Plan Deload',
+                    type: 'DELOAD_ADVICE'
+                }
             });
         }
         
@@ -202,7 +210,7 @@ export const generateInsights = async (): Promise<InsightsResponse> => {
         OUTPUT FORMAT (JSON ONLY):
         {
             "insights": [
-                { "type": "success"|"warning"|"info", "title": "Professional Title", "description": "1 short, scientific and motivating sentence." }
+                { "type": "success"|"warning"|"info", "title": "Professional Title", "description": "1 short, scientific and motivating sentence.", "action": { "label": "Button text", "type": "DELOAD_ADVICE" } }
             ]
         }
         

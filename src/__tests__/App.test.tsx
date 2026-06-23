@@ -17,10 +17,12 @@ const defaultState = {
 
 let mockState = { ...defaultState };
 
-vi.mock('../store/useWorkoutStore', () => ({
-    useWorkoutStore: (selector: (s: typeof mockState) => unknown) =>
-        selector ? selector(mockState) : mockState,
-}));
+vi.mock('../store/useWorkoutStore', () => {
+    const useWorkoutStoreFn = (selector: (s: typeof mockState) => unknown) =>
+        selector ? selector(mockState) : mockState;
+    useWorkoutStoreFn.getState = () => mockState;
+    return { useWorkoutStore: useWorkoutStoreFn };
+});
 
 vi.mock('../store/useUIStore', () => ({
     useUIStore: (selector: (s: typeof mockState) => unknown) =>

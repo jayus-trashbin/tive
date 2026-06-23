@@ -1,12 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { WorkoutSet, SetType } from '../../types';
-import { Check, Trash2, Copy } from 'lucide-react';
+import { Check, Trash2, Copy, Plus, Minus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion, PanInfo } from 'framer-motion';
 import { calculateHybrid1RM } from '../../utils/formulas';
 import RpePicker from './RpePicker';
 import { useUIStore } from '../../store/useUIStore';
+import { useHaptic } from '../../hooks/useHaptic';
+import { useWorkoutStore } from '../../store/useWorkoutStore';
 
 interface Props {
     index: number;
@@ -24,6 +26,33 @@ const SetRow: React.FC<Props> = ({
 }) => {
     const isCompleted = set.isCompleted;
     const [showRpePicker, setShowRpePicker] = useState(false);
+    const { trigger: haptic } = useHaptic();
+    const gymMode = useWorkoutStore(s => s.userStats.gymMode ?? false);
+
+    // C-01: Live e1RM — calculated from current weight × reps × RPE
+    const e1rm = useMemo(() => {
+        if (set.weight > 0 && set.reps > 0 && set.type !== 'warmup') {
+            return calculateHybrid1RM(set.weight, set.reps, set.rpe || 10);
+        }
+        return null;
+    }, [set.weight, set.reps, set.rpe, set.type]);
+
+    // C-02: Delta badge — weight diff vs previous set
+    const delta = useMemo(() => {
+        if (!isCompleted || !previousSet || previousSet.weight === 0) return null;
+        return Math.round((set.weight - previousSet.weight) * 10) / 10;
+    }, [isCompleted, set.weight, previousSet]);
+
+    // C-03: Gym Mode steppers
+    const handleStep = useCallback((field: 'weight' | 'reps', direction: 1 | -1) => {
+        const inc = field === 'weight' ? 2.5 : 1;
+        const next = Math.max(0, Math.round(((set[field] as number) + direction * inc) * 10) / 10);
+        onUpdate(field, next);
+        if (field === 'weight' && next > 0) {
+            useUIStore.getState().setPlateTargetWeight(next);
+        }
+        haptic('light');
+    }, [set, onUpdate, haptic]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'weight' | 'reps') => {
         const val = e.target.value;
@@ -132,6 +161,26 @@ const SetRow: React.FC<Props> = ({
                             </span>
                         </div>
                     )}
+
+                    {/* e1RM — live estimated 1-rep max */}
+                    {e1rm !== null && (
+                        <div className="pl-[44px] mb-1 flex items-center gap-2">
+                            <span className="text-[10px] font-mono text-zinc-500">
+                                e1RM ≈ {e1rm}kg
+                            </span>
+                            {/* C-02: Delta badge — shown only when set is completed */}
+                            {delta !== null && (
+                                <span className={cn(
+                                    "text-[9px] font-bold font-mono px-1.5 py-0.5 rounded-md",
+                                    delta > 0 ? "text-brand-success bg-brand-success/10" :
+                                    delta < 0 ? "text-red-400 bg-red-400/10" :
+                                    "text-zinc-500 bg-zinc-800"
+                                )}>
+                                    {delta > 0 ? `+${delta}kg` : delta < 0 ? `${delta}kg` : '='}
+                                </span>
+                            )}
+                        </div>
+                    )}
                     
                     <div className="grid grid-cols-[36px_1fr_1fr_40px_44px] gap-2 items-center">
                         {/* 1. Set Type Indicator */}
@@ -149,38 +198,108 @@ const SetRow: React.FC<Props> = ({
 
                         {/* 2. Weight Input */}
                         <div className="relative flex items-center justify-center h-full min-h-[44px]">
-                            <input
-                                id={getInputId('weight')}
-                                type="number"
-                                inputMode="decimal"
-                                aria-label={`Weight for set ${index + 1}`}
-                                value={set.weight === 0 ? '' : set.weight}
-                                placeholder="—"
-                                onChange={(e) => handleChange(e, 'weight')}
-                                onFocus={(e) => handleFocus(e, 'weight')}
-                                className={cn(
-                                    "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
-                                    isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
-                                )}
-                            />
+                            {gymMode && !isCompleted ? (
+                                <div className="flex items-center gap-0.5 w-full">
+                                    <button
+                                        onPointerDown={(e) => { e.preventDefault(); handleStep('weight', -1); }}
+                                        className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-l-lg flex items-center justify-center text-zinc-400 active:bg-zinc-700 active:scale-95 transition-all"
+                                        aria-label="Decrease weight"
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <div
+                                        className="flex-1 h-9 bg-zinc-800 border-y border-zinc-700 text-center text-sm font-bold text-white flex items-center justify-center cursor-pointer"
+                                        onClick={() => document.getElementById(getInputId('weight'))?.focus()}
+                                    >
+                                        {set.weight || '—'}
+                                    </div>
+                                    <button
+                                        onPointerDown={(e) => { e.preventDefault(); handleStep('weight', 1); }}
+                                        className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-r-lg flex items-center justify-center text-zinc-400 active:bg-zinc-700 active:scale-95 transition-all"
+                                        aria-label="Increase weight"
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                    <input
+                                        id={getInputId('weight')}
+                                        type="number"
+                                        inputMode="decimal"
+                                        value={set.weight === 0 ? '' : set.weight}
+                                        onChange={(e) => handleChange(e, 'weight')}
+                                        onFocus={(e) => { handleFocus(e, 'weight'); e.target.select(); }}
+                                        className="sr-only"
+                                        aria-label={`Weight for set ${index + 1}`}
+                                    />
+                                </div>
+                            ) : (
+                                <input
+                                    id={getInputId('weight')}
+                                    type="number"
+                                    inputMode="decimal"
+                                    aria-label={`Weight for set ${index + 1}`}
+                                    value={set.weight === 0 ? '' : set.weight}
+                                    placeholder="—"
+                                    onChange={(e) => handleChange(e, 'weight')}
+                                    onFocus={(e) => handleFocus(e, 'weight')}
+                                    className={cn(
+                                        "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
+                                        isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
+                                    )}
+                                />
+                            )}
                         </div>
 
                         {/* 3. Reps Input */}
                         <div className="relative flex items-center justify-center h-full min-h-[44px]">
-                            <input
-                                id={getInputId('reps')}
-                                type="number"
-                                inputMode="numeric"
-                                aria-label={`Reps for set ${index + 1}`}
-                                value={set.reps === 0 ? '' : set.reps}
-                                placeholder="—"
-                                onChange={(e) => handleChange(e, 'reps')}
-                                onFocus={(e) => handleFocus(e, 'reps')}
-                                className={cn(
-                                    "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
-                                    isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
-                                )}
-                            />
+                            {gymMode && !isCompleted ? (
+                                <div className="flex items-center gap-0.5 w-full">
+                                    <button
+                                        onPointerDown={(e) => { e.preventDefault(); handleStep('reps', -1); }}
+                                        className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-l-lg flex items-center justify-center text-zinc-400 active:bg-zinc-700 active:scale-95 transition-all"
+                                        aria-label="Decrease reps"
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <div
+                                        className="flex-1 h-9 bg-zinc-800 border-y border-zinc-700 text-center text-sm font-bold text-white flex items-center justify-center cursor-pointer"
+                                        onClick={() => document.getElementById(getInputId('reps'))?.focus()}
+                                    >
+                                        {set.reps || '—'}
+                                    </div>
+                                    <button
+                                        onPointerDown={(e) => { e.preventDefault(); handleStep('reps', 1); }}
+                                        className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-r-lg flex items-center justify-center text-zinc-400 active:bg-zinc-700 active:scale-95 transition-all"
+                                        aria-label="Increase reps"
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                    <input
+                                        id={getInputId('reps')}
+                                        type="number"
+                                        inputMode="numeric"
+                                        value={set.reps === 0 ? '' : set.reps}
+                                        onChange={(e) => handleChange(e, 'reps')}
+                                        onFocus={(e) => { handleFocus(e, 'reps'); e.target.select(); }}
+                                        className="sr-only"
+                                        aria-label={`Reps for set ${index + 1}`}
+                                    />
+                                </div>
+                            ) : (
+                                <input
+                                    id={getInputId('reps')}
+                                    type="number"
+                                    inputMode="numeric"
+                                    aria-label={`Reps for set ${index + 1}`}
+                                    value={set.reps === 0 ? '' : set.reps}
+                                    placeholder="—"
+                                    onChange={(e) => handleChange(e, 'reps')}
+                                    onFocus={(e) => handleFocus(e, 'reps')}
+                                    className={cn(
+                                        "w-full h-9 bg-zinc-800 border border-zinc-700/50 text-center text-sm font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:scale-105 placeholder:text-zinc-500 transition-all appearance-none",
+                                        isCompleted ? "text-brand-success font-mono bg-transparent border-transparent" : "text-white"
+                                    )}
+                                />
+                            )}
                         </div>
 
                         {/* 4. RPE Pill */}
@@ -241,6 +360,9 @@ export default React.memo(SetRow, (prev, next) => {
         prev.set.rpe === next.set.rpe &&
         prev.set.type === next.set.type &&
         prev.set.isCompleted === next.set.isCompleted &&
-        prev.index === next.index
+        prev.index === next.index &&
+        prev.previousSet?.weight === next.previousSet?.weight &&
+        prev.previousSet?.reps === next.previousSet?.reps
+        // gymMode is read from store directly — no prop needed
     );
 });

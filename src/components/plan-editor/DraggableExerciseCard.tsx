@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { RoutineBlock, Exercise, RoutineSet } from '../../types';
@@ -103,6 +103,8 @@ interface Props {
 }
 
 const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpdate, onRemove, isOverlay }) => {
+  const [showRest, setShowRest] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -186,6 +188,21 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
 
           {/* Actions Menu */}
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowRest(!showRest);
+              }}
+              className={cn(
+                "p-2 rounded-lg transition-colors",
+                showRest ? "text-brand-primary bg-brand-primary/10" : "text-zinc-600 hover:text-white"
+              )}
+            >
+              <Timer size={18} />
+            </button>
+
             {/* Superset Toggle (Only valid if not first) */}
             {index > 0 && (
               <button
@@ -215,32 +232,43 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
         </div>
 
         {/* --- REST CONFIGURATION --- */}
-        <div className="flex divide-x divide-white/5 border-t border-white/5 bg-zinc-900/50">
-          <div className="flex-1 flex items-center justify-center gap-2 p-2">
-            <Timer size={12} className="text-zinc-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase">Rest</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={block.restSeconds || 90}
-              onChange={(e) => onUpdate({ restSeconds: Number(e.target.value) })}
-              className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
-            />
-            <span className="text-[10px] text-zinc-600">s</span>
-          </div>
-          <div className="flex-1 flex items-center justify-center gap-2 p-2">
-            <ArrowRightToLine size={12} className="text-zinc-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase">Transition</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={block.transitionSeconds || 180}
-              onChange={(e) => onUpdate({ transitionSeconds: Number(e.target.value) })}
-              className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
-            />
-            <span className="text-[10px] text-zinc-600">s</span>
-          </div>
-        </div>
+        <AnimatePresence>
+          {showRest && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="flex divide-x divide-white/5 border-t border-white/5 bg-zinc-900/50">
+                <div className="flex-1 flex items-center justify-center gap-2 p-2">
+                  <Timer size={12} className="text-zinc-500" />
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase">Rest</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={block.restSeconds || 90}
+                    onChange={(e) => onUpdate({ restSeconds: Number(e.target.value) })}
+                    className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
+                  />
+                  <span className="text-[10px] text-zinc-600">s</span>
+                </div>
+                <div className="flex-1 flex items-center justify-center gap-2 p-2">
+                  <ArrowRightToLine size={12} className="text-zinc-500" />
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase">Transition</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={block.transitionSeconds || 180}
+                    onChange={(e) => onUpdate({ transitionSeconds: Number(e.target.value) })}
+                    className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
+                  />
+                  <span className="text-[10px] text-zinc-600">s</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* --- NOTES FIELD --- */}
         <div className="px-3 py-2 border-t border-white/5 bg-zinc-950/30">

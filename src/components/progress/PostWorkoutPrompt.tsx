@@ -4,6 +4,7 @@ import { Camera, X, ChevronRight } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import MuscleOverlay from './MuscleOverlay';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
+import { useMotion } from '../../hooks/useMotion';
 
 interface PostWorkoutPromptProps {
     onOpenCamera: () => void;
@@ -42,6 +43,8 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
         dismissPostWorkoutPrompt();
     };
 
+    const { shouldReduceMotion } = useMotion();
+
     return (
         <AnimatePresence>
             {showPostWorkoutPrompt && (
@@ -49,14 +52,15 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : undefined}
                     className="fixed inset-0 z-[90] bg-black/90 backdrop-blur-sm flex items-end justify-center p-4"
                     onClick={handleSkip}
                 >
                     <motion.div
-                        initial={{ y: '100%', opacity: 0 }}
+                        initial={shouldReduceMotion ? { y: 0, opacity: 0 } : { y: '100%', opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: '100%', opacity: 0 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        exit={shouldReduceMotion ? { y: 0, opacity: 0 } : { y: '100%', opacity: 0 }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 300 }}
                         onClick={(e) => e.stopPropagation()}
                         className="w-full max-w-md bg-zinc-900 border border-zinc-800 overflow-hidden"
                     >
@@ -81,7 +85,8 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                                     <MuscleOverlay
                                         muscleGroups={pendingMuscleGroups}
                                         volumes={activeVolumes}
-                                        size={80}
+                                        size={100}
+                                        showToggle={true}
                                     />
                                 </div>
 

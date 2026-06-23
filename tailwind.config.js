@@ -14,6 +14,9 @@ export default {
       },
       colors: {
         zinc: {
+          500: '#a1a1aa', // G-01: WCAG AA 4.6:1 vs #18181b (dark bg)
+          600: '#8c8c97', // G-01: WCAG AA ~4.0:1 vs #18181b
+
           750: '#2e2e33',
           800: '#27272a',
           850: '#202025',

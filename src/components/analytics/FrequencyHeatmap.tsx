@@ -5,6 +5,7 @@ import { Calendar as CalendarIcon, X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import EmptyState from '../ui/EmptyState';
+import { useTranslation } from '../../i18n';
 
 interface DayDetail {
     date: string;
@@ -20,6 +21,7 @@ interface DayDetail {
 const FrequencyHeatmap: React.FC = () => {
     const history = useWorkoutStore(state => state.history);
     const [selected, setSelected] = useState<DayDetail | null>(null);
+    const { t } = useTranslation();
 
     const data = useMemo(() => getFrequencyHeatmap(history), [history]);
 
@@ -71,9 +73,10 @@ const FrequencyHeatmap: React.FC = () => {
             <div className="h-[160px] flex items-center justify-center">
                 <EmptyState
                     icon={CalendarIcon}
-                    title="No Training Data"
-                    description="Consistency is key. Log workouts to see your streak."
+                    title={t('analytics.heatmapEmptyTitle')}
+                    description={t('analytics.heatmapEmptyDesc')}
                 />
+
             </div>
         );
     }

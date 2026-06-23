@@ -14,6 +14,7 @@ import { FinishData } from './components/WorkoutPlayer';
 import WorkoutSummary from './components/post-workout/WorkoutSummary';
 import GlobalSearch from './components/ui/GlobalSearch';
 import { X } from 'lucide-react';
+import { checkAndTriggerReminders } from './utils/reminders';
 
 // Lazy load heavy components for better initial load performance
 const WorkoutPlayer = lazy(() => import('./components/WorkoutPlayer'));
@@ -22,6 +23,7 @@ const HistoryLog = lazy(() => import('./components/HistoryLog'));
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard'));
 const ProgressPhotos = lazy(() => import('./components/progress/ProgressPhotos'));
 const Settings = lazy(() => import('./components/Settings'));
+const ExerciseLibrary = lazy(() => import('./components/exercise/ExerciseLibrary'));
 
 import HistorySkeleton from './components/ui/skeletons/HistorySkeleton';
 import PlanSkeleton from './components/ui/skeletons/PlanSkeleton';
@@ -41,8 +43,10 @@ type View = TabId;
 const TAB_ORDER: Record<TabId, number> = {
   'dashboard': 0,
   'plans': 1,
-  'photos': 2,
-  'history': 3,
+  'analytics': 2,
+  'library': 3,
+  'history': 4,
+  'photos': 5,
 };
 
 const App: React.FC = () => {
@@ -114,6 +118,15 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // E-01: Workout Reminders polling (every minute)
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    const interval = setInterval(checkAndTriggerReminders, 60000);
+    // Also check immediately on load
+    checkAndTriggerReminders();
+    return () => clearInterval(interval);
+  }, [_hasHydrated]);
+
   // PWA manifest shortcuts: /?action=start-workout, /?view=history|plans|photos
   useEffect(() => {
     if (!_hasHydrated) return;
@@ -127,7 +140,7 @@ const App: React.FC = () => {
       handled = true;
     }
 
-    if (requestedView && ['dashboard', 'plans', 'photos', 'history'].includes(requestedView)) {
+    if (requestedView && ['dashboard', 'plans', 'photos', 'history', 'library', 'analytics'].includes(requestedView)) {
       setView(requestedView as View);
       handled = true;
     }
@@ -304,6 +317,16 @@ const App: React.FC = () => {
                   {view === 'plans' && (
                     <Suspense fallback={<PlanSkeleton />}>
                       <PlanManager onStartSession={handleStartRoutine} />
+                    </Suspense>
+                  )}
+                  {view === 'analytics' && (
+                    <Suspense fallback={<LazyFallback />}>
+                      <AnalyticsDashboard />
+                    </Suspense>
+                  )}
+                  {view === 'library' && (
+                    <Suspense fallback={<LazyFallback />}>
+                      <ExerciseLibrary />
                     </Suspense>
                   )}
                   {view === 'photos' && (

@@ -35,6 +35,17 @@ export interface UserStats {
   isAudioEnabled?: boolean;
   isVibrationEnabled?: boolean;
   smartAudio?: boolean; // Detect music playing
+
+  // Notifications
+  reminderSettings?: {
+    enabled: boolean;
+    time: string; // 'HH:mm'
+    days: number[]; // 0-6 (Sun-Sat)
+  };
+
+  // UX Preferences
+  gymMode?: boolean;        // Large steppers in SetRow
+  lastRecapShown?: string;  // ISO date (YYYY-MM-DD) of the last weekly recap shown
 }
 
 export interface ProfileFormData {

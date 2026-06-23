@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Download, Sparkles, Table2, CalendarDays, MoreHorizontal } from 'lucide-react';
+import { Plus, Download, Sparkles, Table2, CalendarDays, MoreHorizontal, BookTemplate } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
@@ -11,6 +11,7 @@ interface PlanHeaderProps {
     onStartCreate: () => void;
     onShowTableBuilder: () => void;
     onShowMesocycle: () => void;
+    onShowGallery: () => void;
     hasRoutines: boolean;
 }
 
@@ -22,6 +23,7 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
     onStartCreate,
     onShowTableBuilder,
     onShowMesocycle,
+    onShowGallery,
     hasRoutines
 }) => {
     const [showMore, setShowMore] = useState(false);
@@ -75,8 +77,15 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
                                 className="absolute top-14 left-0 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-1"
                             >
                                 <button
-                                    onClick={() => { onShowAIBuilder(); setShowMore(false); }}
+                                    onClick={() => { onShowGallery(); setShowMore(false); }}
                                     className="flex items-center gap-3 p-3 rounded-lg text-sm font-medium text-brand-primary hover:bg-zinc-800 transition-colors text-left"
+                                >
+                                    <BookTemplate size={16} />
+                                    Template Gallery
+                                </button>
+                                <button
+                                    onClick={() => { onShowAIBuilder(); setShowMore(false); }}
+                                    className="flex items-center gap-3 p-3 rounded-lg text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors text-left"
                                 >
                                     <Sparkles size={16} />
                                     AI Routine Builder

@@ -5,6 +5,7 @@ import { Routine } from '../types/domain';
 import { Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoutineEditor from './plan-editor/RoutineEditor';
+import { useTranslation } from '../i18n';
 import RoutinePreviewScreen from './pre-workout/RoutinePreviewScreen';
 import AIRoutineBuilder from './ai/AIRoutineBuilder';
 import RoutineTableBuilder from './ai/RoutineTableBuilder';
@@ -13,7 +14,8 @@ import {
     PlanHeader,
     SelectionBar,
     RoutineCard,
-    RoutineImporter
+    RoutineImporter,
+    TemplateGallery
 } from './plan-manager';
 import EmptyState from './ui/EmptyState';
 
@@ -32,6 +34,7 @@ interface Props {
 const PlanManager: React.FC<Props> = ({ onStartSession }) => {
     const { routines, exercises: storedExercises, deleteRoutines, saveRoutine } = useWorkoutStore();
     const { setRoutinePreviewOpen } = useUIStore();;
+    const { t } = useTranslation();
 
     const visibleRoutines = useMemo(() =>
         routines.filter(r => !r.deletedAt).sort((a, b) => (b.lastPerformed || 0) - (a.lastPerformed || 0)),
@@ -50,6 +53,7 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
     const [showAIBuilder, setShowAIBuilder] = useState(false);
     const [showTableBuilder, setShowTableBuilder] = useState(false);
     const [showMesocycle, setShowMesocycle] = useState(false);
+    const [showGallery, setShowGallery] = useState(false);
 
     const handleOpenPreview = (id: string) => {
         setPreviewRoutineId(id);
@@ -169,6 +173,7 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                 onStartCreate={() => setIsCreating(true)}
                 onShowTableBuilder={() => setShowTableBuilder(true)}
                 onShowMesocycle={() => setShowMesocycle(true)}
+                onShowGallery={() => setShowGallery(true)}
                 hasRoutines={visibleRoutines.length > 0}
             />
 
@@ -185,13 +190,14 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                 {visibleRoutines.length === 0 ? (
                     <EmptyState
                         icon={Dumbbell}
-                        title="No Routines Yet"
-                        description="Build your first workout plan to get started"
+                        title={t('plans.emptyTitle')}
+                        description={t('plans.emptyDesc')}
                         action={{
-                            label: "Create First Routine",
+                            label: t('plans.emptyAction'),
                             onClick: () => setIsCreating(true)
                         }}
                     />
+
                 ) : (
                     <motion.div
                         initial="hidden"
@@ -238,6 +244,12 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                 )}
                 {showTableBuilder && (
                     <RoutineTableBuilder onClose={() => setShowTableBuilder(false)} />
+                )}
+                {showGallery && (
+                    <TemplateGallery
+                        onClose={() => setShowGallery(false)}
+                        onApplyTemplate={(id) => setEditingRoutineId(id)}
+                    />
                 )}
             </AnimatePresence>
         </div>

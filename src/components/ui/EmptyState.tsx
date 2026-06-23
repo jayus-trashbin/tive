@@ -2,6 +2,8 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button, { ButtonVariant } from './Button';
+import { useMotion } from '../../hooks/useMotion';
+
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -26,17 +28,19 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({
   icon: Icon, title, description, subtitle, action, compact = false
 }) => {
+  const { shouldReduceMotion } = useMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={`flex flex-col items-center justify-center text-center ${compact ? 'py-10' : 'py-20'}`}
     >
       {/* Icon container */}
       <motion.div 
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        animate={shouldReduceMotion ? {} : { y: [0, -4, 0] }}
+        transition={shouldReduceMotion ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
         className={`
           ${compact ? 'w-16 h-16 mb-4' : 'w-20 h-20 mb-5'}
           border border-dashed border-zinc-800

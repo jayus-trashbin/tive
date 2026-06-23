@@ -115,7 +115,19 @@ export const InsightsPanel: React.FC = () => {
                                     {insight.title}
                                     <ChevronRight size={12} className="text-zinc-700" />
                                 </h4>
-                                <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{insight.description}</p>
+                                <p className="text-sm text-zinc-400 mt-1 leading-relaxed mb-2">{insight.description}</p>
+                                {insight.action && (
+                                    <button 
+                                        className="mt-1 px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-white/10 rounded-lg text-xs font-bold text-white flex items-center gap-2 transition-all active:scale-95"
+                                        onClick={() => {
+                                            // Handle CTA logic here
+                                            console.log('Action clicked:', insight.action);
+                                        }}
+                                    >
+                                        <Sparkles size={12} className="text-brand-primary" />
+                                        {insight.action.label}
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     ))}
