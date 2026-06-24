@@ -30,7 +30,7 @@ export const InsightsPanel: React.FC = () => {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2 px-1">
                     <BrainCircuit size={14} className="text-brand-primary" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Analysing Patterns...</span>
+                    <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-500">Analysing Patterns...</span>
                 </div>
                 <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-5 space-y-3">
                     <SkeletonBlock className="h-6 w-[40%]" />
@@ -71,7 +71,7 @@ export const InsightsPanel: React.FC = () => {
             <div className="flex items-center justify-between mb-2 px-1">
                 <div className="flex items-center gap-2">
                     <BrainCircuit size={14} className="text-brand-primary" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    <h3 className="text-caption-xs font-bold uppercase tracking-widest text-zinc-500">
                         Coaching Insights
                     </h3>
                 </div>
@@ -79,10 +79,10 @@ export const InsightsPanel: React.FC = () => {
                     {insightsData.source === 'ai' ? (
                         <>
                             <Sparkles className="w-3 h-3 text-brand-primary animate-pulse" />
-                            <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Gemini Intelligence</span>
+                            <span className="text-caption-xs font-bold text-zinc-400 uppercase tracking-tighter">Gemini Intelligence</span>
                         </>
                     ) : (
-                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Local Engine</span>
+                        <span className="text-caption-xs font-bold text-zinc-600 uppercase tracking-tighter">Local Engine</span>
                     )}
                 </div>
             </div>
@@ -134,7 +134,7 @@ export const InsightsPanel: React.FC = () => {
                 </div>
                 
                 {insightsData.message && insightsData.source === 'local' && (
-                    <div className="mt-4 pt-4 border-t border-white/5 text-[9px] text-zinc-600 italic flex items-center gap-1.5 px-1">
+                    <div className="mt-4 pt-4 border-t border-white/5 text-caption-xs text-zinc-600 italic flex items-center gap-1.5 px-1">
                         <Info size={10} />
                         Configure Gemini API key in settings for deeper AI-driven analysis.
                     </div>

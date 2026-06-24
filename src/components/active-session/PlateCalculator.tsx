@@ -31,7 +31,7 @@ const PlateCalculator: React.FC<Props> = ({ targetWeight }) => {
                 <div 
                     key={`${plate}-${idx}`} 
                     className={`
-                    flex flex-col items-center justify-center w-10 h-10 rounded-full border-2 text-[10px] font-bold shadow-md animate-in zoom-in duration-300
+                    flex flex-col items-center justify-center w-10 h-10 rounded-full border-2 text-caption-xs font-bold shadow-md animate-in zoom-in duration-300
                     ${plate >= 20 ? 'border-red-600 bg-red-900/20 text-red-500' : ''}
                     ${plate === 15 ? 'border-yellow-600 bg-yellow-900/20 text-yellow-500' : ''}
                     ${plate === 10 ? 'border-green-600 bg-green-900/20 text-green-500' : ''}

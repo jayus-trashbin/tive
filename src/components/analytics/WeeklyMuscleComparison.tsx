@@ -62,11 +62,11 @@ const WeeklyMuscleComparison: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
                 <span className="section-title">Weekly Volume</span>
                 <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 text-[9px] text-zinc-500">
+                    <span className="flex items-center gap-1 text-caption-xs text-zinc-500">
                         <span className="w-2 h-2 rounded-full bg-brand-primary/70 inline-block" />
                         This week
                     </span>
-                    <span className="flex items-center gap-1 text-[9px] text-zinc-600">
+                    <span className="flex items-center gap-1 text-caption-xs text-zinc-600">
                         <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
                         Last week
                     </span>
@@ -82,26 +82,26 @@ const WeeklyMuscleComparison: React.FC = () => {
                 return (
                     <div key={muscle} className="space-y-1">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                            <span className="text-caption-xs font-bold text-zinc-400 uppercase tracking-wider">
                                 {MUSCLE_LABELS[muscle as MuscleGroup]}
                             </span>
                             <div className="flex items-center gap-2">
                                 {deltaPct !== null ? (
                                     <span className={cn(
-                                        'flex items-center gap-0.5 text-[9px] font-bold',
+                                        'flex items-center gap-0.5 text-caption-xs font-bold',
                                         isUp ? 'text-brand-success' : isDown ? 'text-red-400' : 'text-zinc-500'
                                     )}>
                                         {isUp ? <TrendingUp size={9} /> : isDown ? <TrendingDown size={9} /> : <Minus size={9} />}
                                         {isUp ? '+' : ''}{deltaPct.toFixed(0)}%
                                     </span>
                                 ) : (
-                                    <span className="text-[9px] text-zinc-600">—</span>
+                                    <span className="text-caption-xs text-zinc-600">—</span>
                                 )}
-                                <span className="text-[9px] text-zinc-600 font-medium">
+                                <span className="text-caption-xs text-zinc-600 font-medium">
                                     {formatVolume(thisWeek)} kg
                                 </span>
                                 {sets > 0 && (
-                                    <span className="text-[9px] text-zinc-700 font-medium">
+                                    <span className="text-caption-xs text-zinc-700 font-medium">
                                         {sets}s
                                     </span>
                                 )}

@@ -33,7 +33,7 @@ export const CoachCard: React.FC<Props> = ({ onStartRoutine }) => {
             <h3 className="font-bold text-white text-base truncate">Tive Coach</h3>
             <div className="px-1.5 py-0.5 rounded flex items-center gap-1 bg-brand-primary/10 border border-brand-primary/20 shrink-0">
               <Sparkles className="text-brand-primary" size={10} />
-              <span className="text-[9px] text-brand-primary font-bold tracking-widest uppercase">
+              <span className="text-caption-xs text-brand-primary font-bold tracking-widest uppercase">
                 AI Powered
               </span>
             </div>

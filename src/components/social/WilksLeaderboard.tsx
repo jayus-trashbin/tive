@@ -107,7 +107,7 @@ const WilksLeaderboard: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Trophy size={14} className="text-yellow-400" />
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <span className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">
                         Wilks Leaderboard
                     </span>
                 </div>
@@ -115,7 +115,7 @@ const WilksLeaderboard: React.FC = () => {
                     <button
                         onClick={fetchLeaderboard}
                         disabled={isLoading}
-                        className="p-1.5 text-zinc-600 hover:text-zinc-400 transition-colors"
+                        className="p-1.5 text-zinc-600 hover:text-zinc-400 transition-colors tap"
                     >
                         <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
                     </button>
@@ -126,11 +126,11 @@ const WilksLeaderboard: React.FC = () => {
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider">Your Wilks</div>
+                        <div className="text-caption-xs font-medium text-zinc-500 uppercase tracking-wider">Your Wilks</div>
                         <div className="text-2xl font-bold text-white mt-0.5">
                             {wilks > 0 ? wilks : '—'}
                         </div>
-                        <div className="text-[9px] font-medium text-zinc-600 mt-0.5">
+                        <div className="text-caption-xs font-medium text-zinc-600 mt-0.5">
                             {userStats.bodyweight}kg · {userStats.gender}
                         </div>
                     </div>
@@ -138,8 +138,7 @@ const WilksLeaderboard: React.FC = () => {
                         <button
                             onClick={postScore}
                             disabled={isPosting || posted}
-                            className={cn(
-                                'flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[9px] font-bold uppercase transition-all',
+                            className={cn('flex items-center gap-1.5 px-3 py-2 rounded-lg border text-caption-xs font-bold uppercase transition-all tap',
                                 posted
                                     ? 'border-brand-success/30 text-brand-success bg-brand-success/10'
                                     : 'border-zinc-700 text-zinc-400 hover:border-brand-primary hover:text-brand-primary'
@@ -157,10 +156,10 @@ const WilksLeaderboard: React.FC = () => {
                 <div className="flex items-start gap-3 p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-xl">
                     <Lock size={14} className="text-zinc-600 shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-[10px] font-medium text-zinc-500">
+                        <p className="text-caption-xs font-medium text-zinc-500">
                             Connect Supabase in Profile settings to join the global leaderboard.
                         </p>
-                        <p className="text-[9px] font-medium text-zinc-700 mt-1">
+                        <p className="text-caption-xs font-medium text-zinc-700 mt-1">
                             Create a <code className="text-zinc-500">wilks_leaderboard</code> table with columns:
                             display_name, wilks_score, bodyweight, gender, submitted_at.
                         </p>
@@ -170,7 +169,7 @@ const WilksLeaderboard: React.FC = () => {
 
             {/* Error */}
             {error && (
-                <p className="text-[9px] font-medium text-red-400 bg-red-900/20 border border-red-900/40 rounded-xl p-3">
+                <p className="text-caption-xs font-medium text-red-400 bg-red-900/20 border border-red-900/40 rounded-xl p-3">
                     {error}
                 </p>
             )}
@@ -192,7 +191,7 @@ const WilksLeaderboard: React.FC = () => {
                             )}
                         >
                             <span className={cn(
-                                'w-6 text-center text-[10px] font-bold',
+                                'w-6 text-center text-caption-xs font-bold',
                                 idx < 3 ? MEDAL_COLORS[idx] : 'text-zinc-600'
                             )}>
                                 {idx < 3 ? ['🥇', '🥈', '🥉'][idx] : `#${idx + 1}`}
@@ -202,14 +201,14 @@ const WilksLeaderboard: React.FC = () => {
                                 <div className="flex items-center gap-1.5">
                                     <User size={9} className="text-zinc-600" />
                                     <span className={cn(
-                                        'text-[10px] font-bold truncate',
+                                        'text-caption-xs font-bold truncate',
                                         entry.isOwn ? 'text-brand-primary' : 'text-white'
                                     )}>
                                         {entry.display_name}
                                         {entry.isOwn && ' (you)'}
                                     </span>
                                 </div>
-                                <div className="text-[8px] font-medium text-zinc-600 mt-0.5">
+                                <div className="text-caption-xs font-medium text-zinc-600 mt-0.5">
                                     {entry.bodyweight}kg · {entry.gender}
                                 </div>
                             </div>

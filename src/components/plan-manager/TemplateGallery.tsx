@@ -54,7 +54,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose, onApplyTempl
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black z-[60] flex flex-col"
+                className="fixed inset-0 bg-black z-modal flex flex-col"
             >
                 <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-900 bg-zinc-950">
                     <div className="flex items-center gap-2">
@@ -88,13 +88,13 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onClose, onApplyTempl
                                     <h3 className="font-heading font-bold text-white text-base uppercase">
                                         {t(`templates.${template.id}.name` as TranslationKey) || template.name}
                                     </h3>
-                                    <p className="font-medium text-[11px] text-zinc-400 mt-1">
+                                    <p className="font-medium text-caption text-zinc-400 mt-1">
                                         {exerciseCount} exercises · {setsCount} total sets
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => handleApply(template)}
-                                    className="flex items-center justify-center gap-2 w-full h-10 bg-zinc-800 text-white font-bold uppercase tracking-wider text-[11px] rounded-lg hover:bg-zinc-700 transition-colors"
+                                    className="flex items-center justify-center gap-2 w-full h-10 bg-zinc-800 text-white font-bold uppercase tracking-wider text-caption rounded-lg hover:bg-zinc-700 transition-colors"
                                 >
                                     <PlusCircle size={14} />
                                     {t('templates.apply') || 'Use Template'}

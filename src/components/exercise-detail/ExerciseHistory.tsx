@@ -29,7 +29,7 @@ export const ExerciseHistory: React.FC<Props> = ({ history }) => {
                 <div className="bg-zinc-900 border border-white/5 rounded-[2rem] p-6">
                     <div className="flex items-center gap-2 mb-4">
                         <TrendingUp size={14} className="text-brand-primary" />
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">1RM Progression</span>
+                        <span className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">1RM Progression</span>
                     </div>
                     <div className="h-[150px] -ml-6">
                         <ResponsiveContainer width="100%" height="100%">
@@ -48,7 +48,7 @@ export const ExerciseHistory: React.FC<Props> = ({ history }) => {
                                         if (active && payload && payload.length) {
                                             return (
                                                 <div className="bg-zinc-950 border border-zinc-800 p-2 font-medium shadow-xl">
-                                                    <p className="text-[10px] text-zinc-500 uppercase">{new Date(payload[0].payload.date).toLocaleDateString()}</p>
+                                                    <p className="text-caption-xs text-zinc-500 uppercase">{new Date(payload[0].payload.date).toLocaleDateString()}</p>
                                                     <p className="text-brand-primary font-bold">{payload[0].value} kg</p>
                                                 </div>
                                             );
@@ -88,12 +88,12 @@ export const ExerciseHistory: React.FC<Props> = ({ history }) => {
 
                             <div className="flex items-center gap-6">
                                 <div className="text-right">
-                                    <div className="text-[9px] text-zinc-500 font-bold uppercase mb-0.5">Reps</div>
+                                    <div className="text-caption-xs text-zinc-500 font-bold uppercase mb-0.5">Reps</div>
                                     <div className="text-white font-bold text-lg leading-none">{log.reps}</div>
                                 </div>
                                 <div className="w-px h-8 bg-zinc-800" />
                                 <div className="text-right">
-                                    <div className="text-[9px] text-zinc-500 font-bold uppercase mb-0.5">Est. 1RM</div>
+                                    <div className="text-caption-xs text-zinc-500 font-bold uppercase mb-0.5">Est. 1RM</div>
                                     <div className="text-brand-primary font-bold text-lg leading-none">{log['1rm']}</div>
                                 </div>
                             </div>

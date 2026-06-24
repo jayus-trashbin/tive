@@ -110,7 +110,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                 <div className="flex items-center justify-between gap-2">
                     {/* Title — can shrink so buttons never get clipped */}
                     <div className="min-w-0 shrink">
-                        <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-1">Visual Progress</div>
+                        <div className="text-caption-xs font-bold text-zinc-600 uppercase tracking-[0.2em] mb-1">Visual Progress</div>
                         <h1 className="text-3xl font-bold text-white tracking-tighter uppercase truncate">
                             Gallery
                         </h1>
@@ -179,7 +179,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                         <button
                             onClick={() => setSelectedMuscle(null)}
                             className={cn(
-                                "px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all whitespace-nowrap",
+                                "px-3 py-1.5 text-caption-xs font-bold uppercase tracking-wider rounded-lg border transition-all whitespace-nowrap",
                                 !selectedMuscle
                                     ? "bg-brand-primary text-black border-brand-primary"
                                     : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white"
@@ -192,7 +192,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                 key={m}
                                 onClick={() => setSelectedMuscle(m === selectedMuscle ? null : m)}
                                 className={cn(
-                                    "px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all whitespace-nowrap",
+                                    "px-3 py-1.5 text-caption-xs font-bold uppercase tracking-wider rounded-lg border transition-all whitespace-nowrap",
                                     selectedMuscle === m
                                         ? "bg-brand-primary text-black border-brand-primary"
                                         : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white"
@@ -226,7 +226,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                     <div className="space-y-12 mt-6">
                         {groupedPhotos.map((group) => (
                             <div key={group.month}>
-                                <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-6 flex items-center gap-4 text-center">
+                                <h3 className="text-caption-xs font-bold text-zinc-600 uppercase tracking-[0.3em] mb-6 flex items-center gap-4 text-center">
                                     <div className="h-px flex-1 bg-zinc-900" />
                                     <span>{group.month}</span>
                                     <div className="h-px flex-1 bg-zinc-900" />
@@ -268,13 +268,13 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                                             ? "bg-brand-primary border-brand-primary text-black"
                                                             : "bg-black/50 border-white/50 text-transparent"
                                                     )}>
-                                                        {isSelectedForCompare ? <div className="text-[10px] font-bold">{compareSelection.findIndex(p => p.id === photo.id) + 1}</div> : null}
+                                                        {isSelectedForCompare ? <div className="text-caption-xs font-bold">{compareSelection.findIndex(p => p.id === photo.id) + 1}</div> : null}
                                                     </div>
                                                 )}
 
                                                 {/* Photo Info Overlay - Tech Style */}
                                                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black to-transparent">
-                                                    <div className="font-medium text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                                                    <div className="font-medium text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">
                                                         {new Date(photo.timestamp).toLocaleDateString('en-US', {
                                                             weekday: 'short',
                                                             month: 'short',
@@ -282,13 +282,13 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                                         }).toUpperCase()}
                                                     </div>
                                                     {photo.muscleGroups.length > 0 && (
-                                                        <div className="font-medium text-[8px] text-brand-primary mt-1 uppercase truncate font-bold">
+                                                        <div className="font-medium text-caption-xs text-brand-primary mt-1 uppercase truncate font-bold">
                                                             [{photo.muscleGroups.join(' + ')}]
                                                         </div>
                                                     )}
                                                     {photo.metadata.bodyweight && (
                                                         <div className="font-medium text-sm font-bold text-white mt-1">
-                                                            {photo.metadata.bodyweight}<span className="text-[10px] text-zinc-600 ml-1">KG</span>
+                                                            {photo.metadata.bodyweight}<span className="text-caption-xs text-zinc-600 ml-1">KG</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -312,7 +312,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                         initial={{ opacity: 0, y: 100 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
-                        className="fixed inset-0 z-[100] bg-black flex flex-col pt-safe"
+                        className="fixed inset-0 z-modal bg-black flex flex-col pt-safe"
                     >
                         <div className="flex items-center justify-between p-4 border-b border-zinc-900 bg-zinc-950">
                             <h2 className="text-sm font-bold text-white uppercase tracking-widest">Comparison Mode</h2>
@@ -328,7 +328,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                             {compareSelection.map((photo, i) => (
                                 <div key={photo.id} className="relative bg-black flex flex-col">
                                     <div className="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-lg border border-white/10 backdrop-blur-sm">
-                                        <div className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">
+                                        <div className="text-caption-xs font-bold text-brand-primary uppercase tracking-widest">
                                             {i === 0 ? "BEFORE" : "AFTER"}
                                         </div>
                                     </div>
@@ -340,7 +340,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                         />
                                     </div>
                                     <div className="p-4 border-t border-zinc-900">
-                                        <div className="text-[10px] font-medium text-zinc-500 uppercase">{new Date(photo.timestamp).toLocaleDateString()}</div>
+                                        <div className="text-caption-xs font-medium text-zinc-500 uppercase">{new Date(photo.timestamp).toLocaleDateString()}</div>
                                         {photo.metadata.bodyweight && (
                                             <div className="text-xl font-bold text-white mt-1">{photo.metadata.bodyweight} KG</div>
                                         )}
@@ -351,11 +351,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
 
                         {/* Diff Footer */}
                         <div className="p-4 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
-                            <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
+                            <div className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">
                                 Time Diff: <span className="text-white font-bold">{Math.round((compareSelection[1].timestamp - compareSelection[0].timestamp) / (1000 * 60 * 60 * 24))} Days</span>
                             </div>
                             {compareSelection[0].metadata.bodyweight && compareSelection[1].metadata.bodyweight && (
-                                <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
+                                <div className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">
                                     Weight: <span className={cn("font-bold",
                                         compareSelection[1].metadata.bodyweight < compareSelection[0].metadata.bodyweight ? "text-brand-primary" : "text-white"
                                     )}>
@@ -375,11 +375,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black flex flex-col pt-safe"
+                        className="fixed inset-0 z-modal bg-black flex flex-col pt-safe"
                     >
                         <div className="flex items-center justify-between p-4 border-b border-zinc-900">
                             <button onClick={() => setSelectedPhoto(null)} className="p-2 text-zinc-500 hover:text-white cursor-pointer"><X size={24} /></button>
-                            <span className="font-medium text-[10px] font-bold uppercase text-zinc-500 tracking-widest">
+                            <span className="font-medium text-caption-xs font-bold uppercase text-zinc-500 tracking-widest">
                                 {new Date(selectedPhoto.timestamp).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}
                             </span>
                             <button onClick={() => setDeleteConfirm(selectedPhoto.id)} className="p-2 text-red-900 hover:text-red-500 cursor-pointer"><Trash2 size={20} /></button>
@@ -401,15 +401,15 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                         <div className="p-6 bg-zinc-950 border-t border-zinc-900">
                             <div className="flex items-end justify-between">
                                 <div>
-                                    <div className="text-[10px] font-bold text-zinc-600 uppercase mb-2">Analysis</div>
+                                    <div className="text-caption-xs font-bold text-zinc-600 uppercase mb-2">Analysis</div>
                                     <div className="flex gap-2">
                                         {selectedPhoto.muscleGroups.map(m => (
-                                            <span key={m} className="px-2 py-1 bg-brand-primary/10 text-brand-primary text-[8px] font-bold uppercase border border-brand-primary/20">{m}</span>
+                                            <span key={m} className="px-2 py-1 bg-brand-primary/10 text-brand-primary text-caption-xs font-bold uppercase border border-brand-primary/20">{m}</span>
                                         ))}
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-bold text-zinc-600 uppercase mb-1">Bodyweight</div>
+                                    <div className="text-caption-xs font-bold text-zinc-600 uppercase mb-1">Bodyweight</div>
                                     <div className="text-3xl font-bold text-white">{selectedPhoto.metadata.bodyweight}<span className="text-sm text-zinc-600 ml-1">KG</span></div>
                                 </div>
                             </div>
@@ -421,14 +421,14 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
             {/* DELETE MODAL */}
             <AnimatePresence>
                 {deleteConfirm && (
-                    <div className="fixed inset-0 z-[120] bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-overlay bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm">
                         <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-zinc-900 border border-zinc-800 p-8 max-w-xs w-full text-center rounded-lg">
                             <Trash2 size={40} className="mx-auto text-red-500 mb-4" />
                             <h3 className="font-medium text-sm font-bold text-white uppercase mb-2">Delete Record?</h3>
-                            <p className="font-medium text-[10px] text-zinc-600 uppercase tracking-tighter mb-8">This asset will be permanently erased from local and cloud storage.</p>
+                            <p className="font-medium text-caption-xs text-zinc-600 uppercase tracking-tighter mb-8">This asset will be permanently erased from local and cloud storage.</p>
                             <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => setDeleteConfirm(null)} className="py-3 bg-zinc-800 text-zinc-400 font-medium text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors cursor-pointer">Abort</button>
-                                <button onClick={() => handleDelete(deleteConfirm)} className="py-3 bg-red-600 text-white font-medium text-[10px] font-bold uppercase tracking-widest shadow-[0_4px_0_0_#991b1b] cursor-pointer">Confirm</button>
+                                <button onClick={() => setDeleteConfirm(null)} className="py-3 bg-zinc-800 text-zinc-400 font-medium text-caption-xs font-bold uppercase tracking-widest hover:text-white transition-colors cursor-pointer">Abort</button>
+                                <button onClick={() => handleDelete(deleteConfirm)} className="py-3 bg-red-600 text-white font-medium text-caption-xs font-bold uppercase tracking-widest shadow-[0_4px_0_0_#991b1b] cursor-pointer">Confirm</button>
                             </div>
                         </motion.div>
                     </div>

@@ -13,7 +13,7 @@ export const MetricPill: React.FC<MetricPillProps> = ({ icon: Icon, value, label
     <div className="bg-zinc-900 rounded-xl p-4 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-1">
             <Icon size={14} className={cn("text-zinc-500", accent)} />
-            <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">{label}</span>
+            <span className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">{label}</span>
         </div>
         <div className="text-2xl font-black text-white leading-none">
             {value}
@@ -43,7 +43,7 @@ export const MetricStrip: React.FC<MetricStripProps> = ({
             <div className="bg-zinc-900 rounded-xl p-4 flex flex-col justify-center">
                 <div className="flex items-center gap-1.5 mb-1">
                     <Clock size={14} className="text-zinc-500" />
-                    <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">Avg</span>
+                    <span className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">Avg</span>
                 </div>
                 <div className="text-2xl font-black text-white leading-none">
                     {avgDurationMin}<span className="text-xs text-zinc-500 ml-0.5">m</span>
@@ -53,7 +53,7 @@ export const MetricStrip: React.FC<MetricStripProps> = ({
             <div className="bg-zinc-900/50 rounded-xl p-4 flex flex-col justify-center opacity-50">
                 <div className="flex items-center gap-1.5 mb-1">
                     <Clock size={14} className="text-zinc-500" />
-                    <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">Avg</span>
+                    <span className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">Avg</span>
                 </div>
                 <div className="text-2xl font-black text-white leading-none">
                     —

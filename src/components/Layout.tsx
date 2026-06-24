@@ -42,6 +42,18 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
         !isRoutinePreviewOpen &&
         !isSettingsOpen;
 
+    const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
+    React.useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
     return (
         <div className="flex justify-center h-[100dvh] w-full overflow-hidden bg-black">
             <div className="w-full max-w-lg md:max-w-2xl h-full flex flex-col relative bg-zinc-950 shadow-2xl sm:border-x sm:border-zinc-800 overflow-hidden">
@@ -59,6 +71,21 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                         >
                             {children}
                         </motion.div>
+                    </AnimatePresence>
+
+                    {/* Offline Banner */}
+                    <AnimatePresence>
+                        {isOffline && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="absolute top-[env(safe-area-inset-top)] left-1/2 -translate-x-1/2 mt-2 px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-full z-[100] flex items-center gap-2 shadow-lg"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                <span className="text-caption-xs font-bold text-zinc-400 uppercase tracking-wider">Modo Offline</span>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
 
                     {/* Bottom Gradient Mask */}
@@ -109,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                                         )}
                                     />
                                     <span className={cn(
-                                        "text-[10px] font-medium transition-colors duration-200",
+                                        "text-caption-xs font-medium transition-colors duration-200",
                                         isActive ? "text-brand-primary" : "text-zinc-500"
                                     )}>
                                         {tab.label}
@@ -166,7 +193,7 @@ const MoreTab: React.FC<MoreTabProps> = ({
                 )}
                 <MoreIcon size={22} highlighted={isHighlighted || open} />
                 <span className={cn(
-                    "text-[10px] font-medium transition-colors duration-200",
+                    "text-caption-xs font-medium transition-colors duration-200",
                     isHighlighted || open ? "text-brand-primary" : "text-zinc-500"
                 )}>
                     {moreLabel}
@@ -181,7 +208,7 @@ const MoreTab: React.FC<MoreTabProps> = ({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.15 }}
-                        className="fixed inset-0 z-[45] bg-black/60 backdrop-blur-[2px]"
+                        className="fixed inset-0 z-dropdown bg-black/60 backdrop-blur-[2px]"
                         onClick={() => setOpen(false)}
                     />
                 )}
@@ -197,8 +224,8 @@ const MoreTab: React.FC<MoreTabProps> = ({
                         animate={{ y: 0, opacity: 1 }}
                         exit={shouldReduceMotion ? { y: 0, opacity: 0 } : { y: '100%', opacity: 0 }}
                         transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', damping: 28, stiffness: 320 }}
-                        className="fixed bottom-[64px] left-0 right-0 z-[46] flex justify-center"
-                        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                        className="fixed bottom-[64px] left-0 right-0 z-dropdown flex justify-center"
+                        style={{ paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 51 }}
                     >
                         <div className="w-full max-w-lg md:max-w-2xl bg-zinc-900 border-t border-zinc-800/60 p-4 flex gap-3">
                             <MoreSheetCard

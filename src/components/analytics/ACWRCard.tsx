@@ -61,9 +61,9 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
                         <span className={cn('text-sm font-bold leading-none', cfg.color)}>
                             {ratio.toFixed(2)}
                         </span>
-                        <span className="text-[8px] text-zinc-600 font-medium">ACWR</span>
+                        <span className="text-caption-xs text-zinc-600 font-medium">ACWR</span>
                     </div>
-                    <span className={cn('text-[8px] font-bold uppercase tracking-wider', cfg.color)}>
+                    <span className={cn('text-caption-xs font-bold uppercase tracking-wider', cfg.color)}>
                         {cfg.label}
                     </span>
                 </div>
@@ -77,7 +77,7 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <Activity size={14} className={cfg.color} />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    <span className="text-caption-xs font-bold text-zinc-400 uppercase tracking-widest">
                         Workload Ratio (ACWR)
                     </span>
                 </div>
@@ -91,7 +91,7 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
                 </span>
                 <div>
                     <div className={cn('text-xs font-bold', cfg.color)}>{cfg.label}</div>
-                    <div className="text-[9px] text-zinc-600">{cfg.sublabel}</div>
+                    <div className="text-caption-xs text-zinc-600">{cfg.sublabel}</div>
                 </div>
             </div>
 
@@ -108,7 +108,7 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
                     style={{ left: `calc(${barPct}% - 2px)` }}
                 />
             </div>
-            <div className="flex justify-between text-[8px] text-zinc-700 font-medium mb-3">
+            <div className="flex justify-between text-caption-xs text-zinc-700 font-medium mb-3">
                 <span>0.0 Low</span>
                 <span>0.8–1.3 Optimal</span>
                 <span>High 2.0</span>
@@ -117,11 +117,11 @@ const ACWRCard: React.FC<Props> = ({ ratio, acute, chronic, risk, compact = fals
             {/* Acute / Chronic breakdown */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="bg-zinc-900/80 rounded-lg p-2">
-                    <div className="text-[8px] text-zinc-600 font-medium uppercase mb-0.5">Acute (7d)</div>
+                    <div className="text-caption-xs text-zinc-600 font-medium uppercase mb-0.5">Acute (7d)</div>
                     <div className="text-lg font-bold text-white">{acute.toFixed(0)}</div>
                 </div>
                 <div className="bg-zinc-900/80 rounded-lg p-2">
-                    <div className="text-[8px] text-zinc-600 font-medium uppercase mb-0.5">Chronic (28d)</div>
+                    <div className="text-caption-xs text-zinc-600 font-medium uppercase mb-0.5">Chronic (28d)</div>
                     <div className="text-lg font-bold text-white">{chronic.toFixed(0)}</div>
                 </div>
             </div>

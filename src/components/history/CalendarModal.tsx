@@ -65,7 +65,7 @@ const CalendarModal: React.FC<Props> = ({ isOpen, onClose, selectedDate, onSelec
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
-                className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                className="fixed inset-0 z-modal bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
             >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -90,7 +90,7 @@ const CalendarModal: React.FC<Props> = ({ isOpen, onClose, selectedDate, onSelec
                     {/* Days Grid */}
                     <div className="grid grid-cols-7 gap-2 text-center mb-2">
                         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-                            <div key={d} className="text-[10px] font-bold text-zinc-600">{d}</div>
+                            <div key={d} className="text-caption-xs font-bold text-zinc-600">{d}</div>
                         ))}
                     </div>
 

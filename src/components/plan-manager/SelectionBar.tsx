@@ -20,7 +20,7 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({ selectedCount, onDel
             <button
                 onClick={onDelete}
                 disabled={selectedCount === 0}
-                className="px-5 py-2 bg-red-600 text-white data-label disabled:opacity-50 shadow-[3px_3px_0px_0px_#991b1b] cursor-pointer"
+                className="px-5 py-2 bg-red-600 text-white data-label disabled:opacity-50 shadow-[3px_3px_0px_0px_#991b1b] cursor-pointer tap"
             >
                 Delete
             </button>

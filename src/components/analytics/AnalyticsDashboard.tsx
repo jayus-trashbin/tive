@@ -102,13 +102,13 @@ const AnalyticsDashboard: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto px-4 pt-safe pb-32 space-y-6 no-scrollbar scroll-smooth">
+        <div className="flex flex-col space-y-6">
             {/* Header */}
             <header className="shrink-0">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <BarChart3 size={16} className="text-brand-primary" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-500">
                             Performance Insights
                         </span>
                     </div>
@@ -120,7 +120,7 @@ const AnalyticsDashboard: React.FC = () => {
                                 key={range.id}
                                 onClick={() => setTimeRange(range.id as any)}
                                 className={cn(
-                                    "px-3 py-1 text-[9px] font-bold transition-colors cursor-pointer rounded-lg",
+                                    "min-h-[44px] px-3 text-caption font-bold transition-colors cursor-pointer rounded-lg tap",
                                     timeRange === range.id
                                         ? "bg-brand-primary text-black"
                                         : "text-zinc-500 hover:text-zinc-300"
@@ -142,35 +142,35 @@ const AnalyticsDashboard: React.FC = () => {
                         <button
                             onClick={handleExportCSV}
                             title="Export as CSV"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-caption-xs font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900 tap"
                         >
                             <Download size={10} /> CSV
                         </button>
                         <button
                             onClick={handleExportJSON}
                             title="Export backup JSON"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-caption-xs font-bold text-zinc-500 hover:text-brand-primary border border-zinc-800 hover:border-brand-primary/30 rounded-lg transition-all bg-zinc-900 tap"
                         >
                             <Download size={10} /> JSON
                         </button>
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             title="Import Tive backup JSON"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-400/30 rounded-lg transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-caption-xs font-bold text-zinc-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-400/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Upload size={10} /> JSON
                         </button>
                         <button
                             onClick={() => hevyInputRef.current?.click()}
                             title="Import Hevy CSV"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-blue-400 border border-zinc-800 hover:border-blue-400/30 rounded-lg transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-caption-xs font-bold text-zinc-500 hover:text-blue-400 border border-zinc-800 hover:border-blue-400/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Upload size={10} /> Hevy
                         </button>
                         <button
                             onClick={() => strongInputRef.current?.click()}
                             title="Import Strong CSV"
-                            className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-purple-400 border border-zinc-800 hover:border-purple-400/30 rounded-lg transition-all bg-zinc-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-caption-xs font-bold text-zinc-500 hover:text-purple-400 border border-zinc-800 hover:border-purple-400/30 rounded-lg transition-all bg-zinc-900"
                         >
                             <Upload size={10} /> Strong
                         </button>
@@ -188,7 +188,7 @@ const AnalyticsDashboard: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             className={cn(
-                                "mt-2 flex items-center gap-2 px-3 py-2 rounded-lg border text-[10px] font-bold",
+                                "mt-2 flex items-center gap-2 px-3 py-2 rounded-lg border text-caption-xs font-bold",
                                 importMsg.type === 'success'
                                     ? "bg-brand-primary/10 border-brand-primary/20 text-brand-primary"
                                     : "bg-red-500/10 border-red-500/20 text-red-400"
@@ -207,7 +207,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 1. Volume Analysis */}
                 <section>
                     <div className="flex items-center justify-between mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Activity size={12} className="text-brand-primary" /> Volume Progression
                         </h2>
                     </div>
@@ -222,7 +222,7 @@ const AnalyticsDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section>
                         <div className="flex items-center mb-3 px-1">
-                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                 <Filter size={12} className="text-brand-primary" /> 1RM Est. Progress
                             </h2>
                         </div>
@@ -235,7 +235,7 @@ const AnalyticsDashboard: React.FC = () => {
 
                     <section>
                         <div className="flex items-center mb-3 px-1">
-                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                            <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                 <Target size={12} className="text-brand-primary" /> Muscle Distribution
                             </h2>
                         </div>
@@ -250,7 +250,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 3. A-05: Frequency Heatmap with drill-down */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Calendar size={12} className="text-brand-primary" /> Training Frequency (90 Days)
                         </h2>
                     </div>
@@ -264,7 +264,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 4. E-03: Weekly Muscle Volume */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <TrendingUp size={12} className="text-brand-primary" /> Weekly Muscle Load
                         </h2>
                     </div>
@@ -278,7 +278,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 5. A-04: Top Exercises */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Dumbbell size={12} className="text-brand-primary" /> Top Exercises
                         </h2>
                     </div>
@@ -290,7 +290,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 6. A-08: PR Timeline with filter */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Trophy size={12} className="text-brand-primary" /> PR Achievement Log
                         </h2>
                     </div>
@@ -302,7 +302,7 @@ const AnalyticsDashboard: React.FC = () => {
                 {/* 7. Recovery Timeline — 14-day muscle readiness */}
                 <section>
                     <div className="flex items-center mb-3 px-1">
-                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <h2 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                             <Zap size={12} className="text-brand-primary" /> 14-Day Recovery Timeline
                         </h2>
                     </div>
@@ -315,7 +315,7 @@ const AnalyticsDashboard: React.FC = () => {
 
                 {/* Footer */}
                 <div className="py-8 text-center bg-zinc-950">
-                    <p className="text-[8px] font-medium text-zinc-700 uppercase tracking-[0.3em]">
+                    <p className="text-caption-xs font-medium text-zinc-700 uppercase tracking-[0.3em]">
                         Systems Operational • Real-time Data Stream • v1.2
                     </p>
                 </div>

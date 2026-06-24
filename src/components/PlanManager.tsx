@@ -18,6 +18,7 @@ import {
     TemplateGallery
 } from './plan-manager';
 import EmptyState from './ui/EmptyState';
+import { Page } from './ui/Page';
 
 interface Props {
     onStartSession: (routineId: string) => void;
@@ -186,7 +187,7 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                 )}
             </AnimatePresence>
 
-            <div className="flex-1 overflow-y-auto px-5 pb-32 no-scrollbar scroll-smooth">
+            <Page className="flex-1 px-page">
                 {visibleRoutines.length === 0 ? (
                     <EmptyState
                         icon={Dumbbell}
@@ -226,7 +227,7 @@ const PlanManager: React.FC<Props> = ({ onStartSession }) => {
                         </AnimatePresence>
                     </motion.div>
                 )}
-            </div>
+            </Page>
 
             <AnimatePresence>
                 {showImporter && (

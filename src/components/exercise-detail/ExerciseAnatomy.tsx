@@ -55,7 +55,7 @@ export const ExerciseAnatomy: React.FC<Props> = ({ exercise }) => {
             <section className="pt-4 border-t border-zinc-900">
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-zinc-900/50 p-4 rounded-2xl border border-white/5">
-                        <div className="text-[10px] font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5">
+                        <div className="text-caption-xs font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5">
                             <Zap size={12} /> Fatigue Impact
                         </div>
                         <div className="text-white font-bold flex items-center gap-2">
@@ -67,7 +67,7 @@ export const ExerciseAnatomy: React.FC<Props> = ({ exercise }) => {
                         </div>
                     </div>
                     <div className="bg-zinc-900/50 p-4 rounded-2xl border border-white/5">
-                        <div className="text-[10px] font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5">
+                        <div className="text-caption-xs font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5">
                             <Calendar size={12} /> Last Performed
                         </div>
                         <div className="text-white font-bold flex items-center gap-2">

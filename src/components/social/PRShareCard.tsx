@@ -57,7 +57,7 @@ const PRShareCard: React.FC = () => {
         <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <Trophy size={14} className="text-brand-primary" />
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                <span className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">
                     Share Your PRs
                 </span>
             </div>
@@ -80,7 +80,7 @@ const PRShareCard: React.FC = () => {
                             <span className="text-xs font-bold text-white font-medium uppercase tracking-wide">
                                 {userStats.name || 'My'} PRs
                             </span>
-                            <span className="text-[9px] font-medium text-brand-primary border border-brand-primary/30 px-2 py-0.5 rounded-lg">
+                            <span className="text-caption-xs font-medium text-brand-primary border border-brand-primary/30 px-2 py-0.5 rounded-lg">
                                 TIVE
                             </span>
                         </div>
@@ -90,15 +90,15 @@ const PRShareCard: React.FC = () => {
                                 <div key={i} className="flex items-center gap-3">
                                     <span className="text-sm">{['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</span>
                                     <div className="flex-1 min-w-0">
-                                        <span className="text-[10px] font-medium text-zinc-300 truncate block">
+                                        <span className="text-caption-xs font-medium text-zinc-300 truncate block">
                                             {pr.exerciseName}
                                         </span>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <span className="text-[11px] font-bold text-white font-medium">
+                                        <span className="text-caption font-bold text-white font-medium">
                                             {pr.estimated1RM.toFixed(1)}kg
                                         </span>
-                                        <span className="text-[9px] font-medium text-zinc-600 ml-1">1RM</span>
+                                        <span className="text-caption-xs font-medium text-zinc-600 ml-1">1RM</span>
                                     </div>
                                 </div>
                             ))}
@@ -106,7 +106,7 @@ const PRShareCard: React.FC = () => {
 
                         {(userStats.wilksScore || 0) > 0 && (
                             <div className="pt-3 border-t border-zinc-800 flex justify-between items-center">
-                                <span className="text-[9px] font-medium text-zinc-500">Wilks Score</span>
+                                <span className="text-caption-xs font-medium text-zinc-500">Wilks Score</span>
                                 <span className="text-sm font-bold text-brand-primary font-medium">
                                     {Math.round(userStats.wilksScore)}
                                 </span>
@@ -119,7 +119,7 @@ const PRShareCard: React.FC = () => {
                         {'share' in navigator && (
                             <button
                                 onClick={handleShare}
-                                className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-primary text-black text-[10px] font-bold uppercase rounded-lg transition-all active:scale-95"
+                                className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-primary text-black text-caption-xs font-bold uppercase rounded-lg transition-all active:scale-95"
                             >
                                 <Share2 size={12} />
                                 Share
@@ -127,7 +127,7 @@ const PRShareCard: React.FC = () => {
                         )}
                         <button
                             onClick={handleCopy}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase rounded-lg hover:border-zinc-500 hover:text-white transition-all active:scale-95"
+                            className="flex-1 flex items-center justify-center gap-2 py-3 border border-zinc-700 text-zinc-400 text-caption-xs font-bold uppercase rounded-lg hover:border-zinc-500 hover:text-white transition-all active:scale-95"
                         >
                             {copied ? <CheckCheck size={12} className="text-brand-success" /> : <Copy size={12} />}
                             {copied ? 'Copied!' : 'Copy Text'}

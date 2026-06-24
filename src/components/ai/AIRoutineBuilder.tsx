@@ -43,12 +43,12 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-white uppercase tracking-wider font-medium">AI Architect</h2>
-                        <div className="text-[10px] text-zinc-500 font-medium">Data Processing Unit</div>
+                        <div className="text-caption-xs text-zinc-500 font-medium">Data Processing Unit</div>
                     </div>
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-2 text-zinc-500 hover:text-white rounded-full hover:bg-zinc-900 transition-colors"
+                    className="p-2 text-zinc-500 hover:text-white rounded-full hover:bg-zinc-900 transition-colors tap"
                 >
                     <X size={20} />
                 </button>
@@ -60,7 +60,7 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
                 <section>
                     <div className="flex items-center gap-2 mb-2">
                         <Clipboard size={14} className="text-brand-primary" />
-                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Input Stream</h3>
+                        <h3 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">Input Stream</h3>
                     </div>
                     <p className="text-xs text-zinc-600 font-medium leading-relaxed mb-4">
                         Paste your workout plan, exercise table, or routine description below.
@@ -101,7 +101,7 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
                         >
                             <div className="flex items-center gap-2 mb-4">
                                 <Sparkles size={14} className="text-brand-primary" />
-                                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Output Feed</h3>
+                                <h3 className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">Output Feed</h3>
                             </div>
 
                             {isProcessing ? (
@@ -113,7 +113,7 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
                                             transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                                         />
                                     </div>
-                                    <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-widest animate-pulse">Analysing structure...</span>
+                                    <span className="text-caption-xs font-medium text-zinc-600 uppercase tracking-widest animate-pulse">Analysing structure...</span>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -132,9 +132,9 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
                                             <div className="p-5 border-b border-zinc-900 bg-brand-primary/5">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h4 className="text-xl font-bold text-white uppercase tracking-tighter italic">{generatedRoutine.name}</h4>
-                                                    <span className="px-2 py-0.5 bg-brand-primary text-black text-[9px] font-bold uppercase rounded-lg">AI Generated</span>
+                                                    <span className="px-2 py-0.5 bg-brand-primary text-black text-caption-xs font-bold uppercase rounded-lg">AI Generated</span>
                                                 </div>
-                                                <div className="flex items-center gap-4 font-medium text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
+                                                <div className="flex items-center gap-4 font-medium text-caption-xs text-zinc-500 font-bold uppercase tracking-widest">
                                                     <span className="flex items-center gap-1.5"><Dumbbell size={12} className="text-brand-primary" /> {generatedRoutine.exerciseIds.length} Exercises</span>
                                                     <span>•</span>
                                                     <span>Synced with library</span>
@@ -160,7 +160,7 @@ const AIRoutineBuilder: React.FC<AIRoutineBuilderProps> = ({ onClose, onImport }
 
             {/* Footer / Meta */}
             <div className="p-4 border-t border-zinc-900 bg-zinc-950 shrink-0">
-                <div className="flex justify-between items-center text-[8px] font-medium text-zinc-700 uppercase tracking-widest">
+                <div className="flex justify-between items-center text-caption-xs font-medium text-zinc-700 uppercase tracking-widest">
                     <span>Protocol: RoutineExtract_v1.0</span>
                     <span>Status: Healthy</span>
                 </div>

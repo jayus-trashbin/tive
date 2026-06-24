@@ -44,14 +44,14 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                 <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-3xl">
                     <div className="flex items-center gap-2 text-zinc-500 mb-2">
                         <Scale size={16} />
-                        <span className="text-[10px] font-bold uppercase">Workouts</span>
+                        <span className="text-caption-xs font-bold uppercase">Workouts</span>
                     </div>
                     <div className="text-3xl font-bold text-white">{totalWorkouts}</div>
                 </div>
                 <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-3xl">
                     <div className="flex items-center gap-2 text-zinc-500 mb-2">
                         <BarChart3 size={16} />
-                        <span className="text-[10px] font-bold uppercase">Wilks Score</span>
+                        <span className="text-caption-xs font-bold uppercase">Wilks Score</span>
                     </div>
                     <div className="text-3xl font-bold text-white">{calculatedWilks > 0 ? calculatedWilks : '--'}</div>
                     {calculatedWilks > 0 && (() => {
@@ -62,7 +62,7 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                             { label: 'Beginner', color: 'text-zinc-500', pct: 25 };
                         return (
                             <div className="mt-2">
-                                <span className={`text-[10px] font-bold uppercase tracking-wider ${level.color}`}>
+                                <span className={`text-caption-xs font-bold uppercase tracking-wider ${level.color}`}>
                                     {level.label}
                                 </span>
                                 <div className="mt-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
@@ -74,7 +74,7 @@ export const ProfileStatsComponent: React.FC<Props> = ({ history, exercises, use
                             </div>
                         );
                     })()}
-                    {calculatedWilks === 0 && <div className="text-[10px] text-zinc-600">Points</div>}
+                    {calculatedWilks === 0 && <div className="text-caption-xs text-zinc-600">Points</div>}
                 </div>
             </div>
 

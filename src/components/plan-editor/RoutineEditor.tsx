@@ -226,13 +226,13 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
     };
 
     const content = (
-        <div className="fixed inset-0 z-[60] bg-zinc-950 flex flex-col animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-modal bg-zinc-950 flex flex-col animate-in fade-in duration-200">
 
             {/* Header */}
             <div className="border-b border-zinc-900 bg-black pt-safe z-20">
                 {/* Row 1: Back + Name + Save */}
                 <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-                    <button onClick={onClose} className="w-10 h-10 shrink-0 flex items-center justify-center text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors">
+                    <button onClick={onClose} className="w-10 h-10 shrink-0 flex items-center justify-center text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors tap">
                         <ArrowLeft size={22} />
                     </button>
                     <input
@@ -257,19 +257,21 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
                     </div>
                     <span className="text-zinc-800">|</span>
                     <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
-                        <span className="uppercase tracking-wider text-[10px]">Rest</span>
+                        <span className="uppercase tracking-wider text-caption-xs">Rest</span>
                         <input 
-                            type="number" 
+                            type="text" 
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={globalRest} 
                             onChange={handleGlobalRestChange}
                             className="w-10 bg-zinc-900 text-white text-xs font-bold text-center rounded px-1 py-0.5 border border-zinc-800 focus:outline-none focus:border-brand-primary"
                         />
-                        <span className="text-[10px] text-zinc-600">s</span>
+                        <span className="text-caption-xs text-zinc-600">s</span>
                     </div>
                     {blocks.length > 0 && (
                         <>
                             <span className="text-zinc-800">|</span>
-                            <div className="flex items-center gap-1.5 text-zinc-500 overflow-hidden whitespace-nowrap uppercase tracking-wider text-[10px] font-bold">
+                            <div className="flex items-center gap-1.5 text-zinc-500 overflow-hidden whitespace-nowrap uppercase tracking-wider text-caption-xs font-bold">
                                 {Array.from(new Set(blocks.map(b => getExercise(b.exerciseId).targetMuscle))).slice(0, 3).join(' · ')}
                             </div>
                         </>
@@ -288,7 +290,7 @@ const RoutineEditor: React.FC<Props> = ({ initialRoutineId, onClose }) => {
                             <Plus size={28} className="text-zinc-500 group-hover:text-brand-primary transition-colors" />
                         </div>
                         <p className="text-zinc-500 group-hover:text-zinc-300 text-sm font-medium transition-colors">Tap to add exercises</p>
-                        <p className="text-zinc-700 text-[11px] mt-1">Build your routine</p>
+                        <p className="text-zinc-700 text-caption mt-1">Build your routine</p>
                     </button>
                 ) : (
                     <DndContext

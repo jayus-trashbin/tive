@@ -8,6 +8,7 @@ export { default as Button } from './Button';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as EmptyState } from './EmptyState';
 export { default as IconButton } from './IconButton';
+export { default as Modal } from './Modal';
 export { Notifications } from './Notifications';
 export { default as SkeletonBlock } from './SkeletonBlock';
 export * from './SectionBoundaries';

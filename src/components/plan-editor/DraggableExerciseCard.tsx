@@ -41,7 +41,7 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
         <button
           onClick={() => onUpdate(set.id, 'type', set.type === 'warmup' ? 'working' : set.type === 'working' ? 'failure' : 'warmup')}
           className={cn(
-            "text-[10px] font-bold uppercase py-1.5 rounded text-center border transition-colors",
+            "text-caption-xs font-bold uppercase py-1.5 rounded text-center border transition-colors",
             set.type === 'warmup' ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" :
               set.type === 'failure' ? "bg-red-500/10 text-red-500 border-red-500/20" :
                 "bg-zinc-800 text-zinc-400 border-zinc-700"
@@ -52,14 +52,15 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
 
         <div className="relative">
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
+            pattern="[0-9.,]*"
             placeholder="-"
             value={set.targetWeight === 0 ? '' : set.targetWeight}
             onChange={(e) => onUpdate(set.id, 'targetWeight', e.target.value === '' ? 0 : parseFloat(e.target.value))}
             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm font-bold text-white text-center focus:border-brand-primary focus:outline-none"
           />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-zinc-600 pointer-events-none">KG</span>
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-caption-xs font-bold text-zinc-600 pointer-events-none">KG</span>
         </div>
 
         <div className="relative">
@@ -71,19 +72,19 @@ const SetRow: React.FC<SetRowProps> = ({ set, idx, onUpdate, onRemove }) => {
             onChange={(e) => onUpdate(set.id, 'targetReps', e.target.value)}
             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm font-bold text-white text-center focus:border-brand-primary focus:outline-none"
           />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-zinc-600 pointer-events-none">REPS</span>
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-caption-xs font-bold text-zinc-600 pointer-events-none">REPS</span>
         </div>
 
         {/* R-05: RPE Target */}
         <div className="flex flex-col items-center gap-0.5">
           <button
             onClick={() => onUpdate(set.id, 'targetRpe', Math.min(10, (set.targetRpe || 8) + 1))}
-            className="w-full text-[9px] font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+            className="w-full text-caption-xs font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
           >▲</button>
           <span className="text-xs font-bold text-zinc-300 font-medium">{set.targetRpe || 8}</span>
           <button
             onClick={() => onUpdate(set.id, 'targetRpe', Math.max(1, (set.targetRpe || 8) - 1))}
-            className="w-full text-[9px] font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
+            className="w-full text-caption-xs font-bold text-zinc-600 hover:text-brand-primary leading-none py-0.5"
           >▼</button>
         </div>
       </motion.div>
@@ -181,7 +182,7 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
 
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-white truncate">{exercise.name}</h4>
-            <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
+            <div className="text-caption-xs text-zinc-500 font-bold uppercase tracking-wide">
               {exercise.targetMuscle}
             </div>
           </div>
@@ -207,8 +208,7 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
             {index > 0 && (
               <button
                 onClick={toggleSuperset}
-                className={cn(
-                  "p-2 rounded-lg transition-colors",
+                className={cn("p-2 rounded-lg transition-colors tap",
                   block.isSuperset ? "text-blue-500 bg-blue-500/10" : "text-zinc-600 hover:text-blue-400"
                 )}
               >
@@ -243,27 +243,29 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
               <div className="flex divide-x divide-white/5 border-t border-white/5 bg-zinc-900/50">
                 <div className="flex-1 flex items-center justify-center gap-2 p-2">
                   <Timer size={12} className="text-zinc-500" />
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase">Rest</span>
+                  <span className="text-caption-xs font-bold text-zinc-500 uppercase">Rest</span>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
+                    pattern="[0-9]*"
                     value={block.restSeconds || 90}
                     onChange={(e) => onUpdate({ restSeconds: Number(e.target.value) })}
                     className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
                   />
-                  <span className="text-[10px] text-zinc-600">s</span>
+                  <span className="text-caption-xs text-zinc-600">s</span>
                 </div>
                 <div className="flex-1 flex items-center justify-center gap-2 p-2">
                   <ArrowRightToLine size={12} className="text-zinc-500" />
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase">Transition</span>
+                  <span className="text-caption-xs font-bold text-zinc-500 uppercase">Transition</span>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
+                    pattern="[0-9]*"
                     value={block.transitionSeconds || 180}
                     onChange={(e) => onUpdate({ transitionSeconds: Number(e.target.value) })}
                     className="w-12 bg-transparent text-xs font-bold text-white text-center border-b border-zinc-700 focus:border-brand-primary focus:outline-none"
                   />
-                  <span className="text-[10px] text-zinc-600">s</span>
+                  <span className="text-caption-xs text-zinc-600">s</span>
                 </div>
               </div>
             </motion.div>
@@ -286,11 +288,11 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
       <div className="bg-zinc-900">
         {/* Table Header */}
         <div className="grid grid-cols-[26px_54px_1fr_1fr_44px] gap-1.5 py-1.5 px-2 border-b border-white/5 bg-zinc-950/30">
-          <div className="text-[9px] text-zinc-600 text-center font-bold">#</div>
-          <div className="text-[9px] text-zinc-600 text-center font-bold">TYPE</div>
-          <div className="text-[9px] text-zinc-600 text-center font-bold">TARGET KG</div>
-          <div className="text-[9px] text-zinc-600 text-center font-bold">REPS</div>
-          <div className="text-[9px] text-zinc-600 text-center font-bold">RPE</div>
+          <div className="text-caption-xs text-zinc-600 text-center font-bold">#</div>
+          <div className="text-caption-xs text-zinc-600 text-center font-bold">TYPE</div>
+          <div className="text-caption-xs text-zinc-600 text-center font-bold">TARGET KG</div>
+          <div className="text-caption-xs text-zinc-600 text-center font-bold">REPS</div>
+          <div className="text-caption-xs text-zinc-600 text-center font-bold">RPE</div>
         </div>
 
         <div className="max-h-[300px] overflow-y-auto">
@@ -310,7 +312,7 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
         {/* Add Set Button */}
         <button
           onClick={handleAddSet}
-          className="w-full py-4 bg-zinc-800/50 hover:bg-zinc-800 text-brand-primary text-xs font-bold uppercase flex items-center justify-center gap-2 border-t border-white/5 transition-colors"
+          className="w-full py-4 bg-zinc-800/50 hover:bg-zinc-800 text-brand-primary text-xs font-bold uppercase flex items-center justify-center gap-2 border-t border-white/5 transition-colors tap"
         >
           <Plus size={16} /> Add Set
         </button>

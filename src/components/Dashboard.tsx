@@ -19,6 +19,7 @@ import { InsightsPanel } from './analytics/InsightsPanel';
 import { StrengthStandards } from './analytics/StrengthStandards';
 import SocialHub from './social/SocialHub';
 import { WeeklyRecap } from './dashboard/WeeklyRecap';
+import { Page } from './ui/Page';
 
 
 /**
@@ -91,53 +92,51 @@ const Dashboard: React.FC = () => {
     }, [history]);
 
     return (
-        <div
-            className="flex flex-col h-full overflow-y-auto px-5 pb-32 space-y-8 no-scrollbar scroll-smooth"
-            style={{ paddingTop: 'calc(var(--sat) + 1.5rem)' }}
-        >
-            <WeeklyRecap />
-            <DashboardHeader />
+        <Page noPadding>
+            <div className="px-page space-y-6 pt-6">
+                <WeeklyRecap />
+                <DashboardHeader />
 
+                <MetricStrip
+                    sessionCount={weeklyStats.count}
+                    formattedVolume={formattedVolume}
+                    avgDurationMin={avgDurationMin}
+                    streakCard={<StreakCard streak={streak} history={history} />}
+                />
 
-            <MetricStrip
-                sessionCount={weeklyStats.count}
-                formattedVolume={formattedVolume}
-                avgDurationMin={avgDurationMin}
-                streakCard={<StreakCard streak={streak} history={history} />}
-            />
+                <CoachCard onStartRoutine={startSession} />
+                <NextMission nextRoutine={nextRoutine} onStart={startSession} />
 
-            <CoachCard onStartRoutine={startSession} />
-            <NextMission nextRoutine={nextRoutine} onStart={startSession} />
+                <MuscleReadiness readiness={readinessData} />
 
-            <MuscleReadiness readiness={readinessData} />
-
-            {/* A-01: Insights Panel */}
-            <section>
-                <InsightsPanel />
-            </section>
-
-            {/* A-01.5: Strength Standards */}
-            <section>
-                <StrengthStandards />
-            </section>
-
-            {/* A-02: ACWR Card */}
-            {acwr && history.length >= 4 && (
+                {/* A-01: Insights Panel */}
                 <section>
-                    <ACWRCard
-                        ratio={acwr.ratio}
-                        acute={acwr.acute}
-                        chronic={acwr.chronic}
-                        risk={acwr.risk}
-                    />
+                    <InsightsPanel />
                 </section>
-            )}
 
-            {/* 6.3: Social Layer */}
-            <section>
-                <SocialHub />
-            </section>
-        </div>
+                {/* A-01.5: Strength Standards */}
+                <section>
+                    <StrengthStandards />
+                </section>
+
+                {/* A-02: ACWR Card */}
+                {acwr && history.length >= 4 && (
+                    <section>
+                        <ACWRCard
+                            ratio={acwr.ratio}
+                            acute={acwr.acute}
+                            chronic={acwr.chronic}
+                            risk={acwr.risk}
+                        />
+                    </section>
+                )}
+
+                {/* 6.3: Social Layer */}
+                <section>
+                    <SocialHub />
+                </section>
+            </div>
+        </Page>
     );
 };
 

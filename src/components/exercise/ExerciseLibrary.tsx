@@ -9,6 +9,8 @@ import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { Exercise } from '../../types';
 import { useTranslation } from '../../i18n';
 import EmptyState from '../ui/EmptyState';
+import { Page } from '../ui/Page';
+import { AppHeader } from '../ui/AppHeader';
 
 interface Props {
   onSelect?: (exerciseId: string) => void;
@@ -97,33 +99,35 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
 
   return (
     <>
-      <div className="pb-24 space-y-6">
-        <header className="sticky top-0 bg-zinc-950/80 backdrop-blur-md pt-4 pb-2 z-10">
-            <h1 className="page-title mb-4">{t('exerciseLibrary.title')}</h1>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
-              <input 
-                  type="text" 
-                  placeholder={t('exerciseLibrary.searchPlaceholder')}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-all shadow-lg"
-              />
-              {loading && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <Loader2 className="animate-spin text-brand-primary" size={20} />
-                  </div>
-              )}
+        <Page className="px-page pb-24 space-y-6" noPadding>
+        <AppHeader className="!pb-2">
+            <div className="w-full">
+                <h1 className="page-title mb-4">{t('exerciseLibrary.title')}</h1>
+                <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+                <input 
+                    type="text" 
+                    placeholder={t('exerciseLibrary.searchPlaceholder')}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-all shadow-lg"
+                />
+                {loading && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <Loader2 className="animate-spin text-brand-primary" size={20} />
+                    </div>
+                )}
+                </div>
             </div>
+        </AppHeader>
             {!loading && viewExercises.length > 0 && (
                 <div className="flex items-center gap-2 mt-2 px-1">
                     <Database size={10} className="text-zinc-600" />
-                    <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
+                    <span className="text-caption-xs text-zinc-600 font-bold uppercase tracking-wider">
                         {viewExercises.length} Exercises Loaded
                     </span>
                 </div>
             )}
-        </header>
         
         {loading && viewExercises.length === 0 ? (
           <div className="grid grid-cols-1 gap-4 animate-pulse">
@@ -149,7 +153,7 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
                                           <button 
                                             onClick={handleLoadMore}
                                             disabled={loadingMore}
-                                            className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                                            className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50 tap"
                                           >
                                               {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
                                               {loadingMore ? t('exerciseLibrary.loading') : t('exerciseLibrary.loadMore')}
@@ -188,7 +192,7 @@ const ExerciseLibrary: React.FC<Props> = ({ onSelect }) => {
 
           </div>
         )}
-      </div>
+      </Page>
       
       {/* Details Modal */}
       <ExerciseDetailModal 

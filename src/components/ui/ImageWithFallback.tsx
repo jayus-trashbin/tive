@@ -54,7 +54,7 @@ export const ImageWithFallback: React.FC<Props> = ({
           <div className="text-zinc-700 mb-2">
             {fallbackIcon || <ImageOff size={24} />}
           </div>
-          <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">
+          <span className="text-caption-xs font-bold text-zinc-600 uppercase tracking-widest text-center">
             {alt || 'Image'} Unavailable
           </span>
         </div>

@@ -163,20 +163,20 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-modal"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: '0%' }}
             exit={{ y: '100%' }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 top-8 z-[70] bg-zinc-950 border-t border-zinc-800 flex flex-col shadow-2xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 top-8 z-modal bg-zinc-950 border-t border-zinc-800 flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-b border-white/5 z-10">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Add Exercise</h2>
-                <button onClick={onClose} className="p-2 bg-zinc-900 rounded-full text-zinc-400 hover:text-white">
+                <button onClick={onClose} className="p-2 bg-zinc-900 rounded-full text-zinc-400 hover:text-white tap">
                   <X size={20} />
                 </button>
               </div>
@@ -269,11 +269,11 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                                   {ex.name}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
+                                  <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">
                                     {ex.targetMuscle}
                                   </span>
                                   {isExisting && (
-                                    <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                                    <span className="text-caption-xs bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                                       Added
                                     </span>
                                   )}
@@ -310,13 +310,13 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                                     <div className="flex-1 flex flex-col justify-center gap-2">
                                       {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
                                         <div>
-                                          <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Secondary</span>
+                                          <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Secondary</span>
                                           <p className="text-xs text-zinc-300 capitalize">{ex.secondaryMuscles.join(', ')}</p>
                                         </div>
                                       )}
                                       {ex.equipment && (
                                         <div>
-                                          <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Equipment</span>
+                                          <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Equipment</span>
                                           <p className="text-xs text-zinc-300 capitalize">{ex.equipment}</p>
                                         </div>
                                       )}
@@ -334,7 +334,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
                         <button
                           onClick={handleLoadMore}
                           disabled={loadingMore}
-                          className="w-full py-4 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                          className="w-full py-4 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50 tap"
                         >
                           {loadingMore ? (
                             <Loader2 className="animate-spin" size={16} />
@@ -354,7 +354,7 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
             <div className="shrink-0 px-4 pb-3 border-t border-zinc-900 pt-3">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-[11px] font-bold uppercase tracking-widest transition-all rounded-lg"
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-caption font-bold uppercase tracking-widest transition-all rounded-lg"
               >
                 <PenLine size={12} /> Create Custom Exercise
               </button>

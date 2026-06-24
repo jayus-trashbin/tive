@@ -22,6 +22,8 @@ import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { VOLUME_LANDMARKS, getVolumeZone, getVolumeZoneColor, getVolumeZoneLabel } from '../../engine/volumeLandmarks';
 import { MuscleGroup } from '../../types/domain';
 import { Button, IconButton, EmptyState } from '../ui';
+import { Page } from '../ui/Page';
+import { AppHeader } from '../ui/AppHeader';
 
 
 // ─── Draggable Routine Chip ─────────────────────────────────────────────────
@@ -50,7 +52,7 @@ const DraggableChip: React.FC<DraggableChipProps> = ({ routineId, name, color })
             {...listeners}
             {...attributes}
             className={cn(
-                'px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider cursor-grab active:cursor-grabbing whitespace-nowrap select-none touch-none',
+                'px-3 py-1.5 rounded-lg border text-caption-xs font-bold uppercase tracking-wider cursor-grab active:cursor-grabbing whitespace-nowrap select-none touch-none',
                 color
             )}
         >
@@ -92,14 +94,14 @@ const DroppableDay: React.FC<DroppableDayProps> = ({
                     : 'border-zinc-800/50 bg-zinc-900/20 border-dashed'
             )}
         >
-            <span className="text-[8px] text-zinc-600 font-medium absolute top-0.5 left-1">
+            <span className="text-caption-xs text-zinc-600 font-medium absolute top-0.5 left-1">
                 {DAY_SHORT[dayIndex]}
             </span>
             {isDeload ? (
-                <span className="text-[8px] text-zinc-600 font-medium">—</span>
+                <span className="text-caption-xs text-zinc-600 font-medium">—</span>
             ) : routineId ? (
                 <>
-                    <span className="text-[8px] font-medium text-brand-primary text-center leading-tight px-1 mt-2">
+                    <span className="text-caption-xs font-medium text-brand-primary text-center leading-tight px-1 mt-2">
                         {(routineName ?? 'Routine').length > 6
                             ? (routineName ?? 'Routine').slice(0, 5) + '…'
                             : routineName ?? 'Routine'}
@@ -114,7 +116,7 @@ const DroppableDay: React.FC<DroppableDayProps> = ({
 
                 </>
             ) : (
-                <span className="text-[8px] text-zinc-700 font-medium mt-2">+</span>
+                <span className="text-caption-xs text-zinc-700 font-medium mt-2">+</span>
             )}
         </div>
     );
@@ -157,7 +159,7 @@ const VolumeProjection: React.FC<VolumeProjectionProps> = ({ plan, routinesById 
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
                 <BarChart2 size={12} className="text-brand-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-500">
                     Weekly Volume Projection
                 </span>
             </div>
@@ -172,8 +174,8 @@ const VolumeProjection: React.FC<VolumeProjectionProps> = ({ plan, routinesById 
                     return (
                         <div key={muscle}>
                             <div className="flex justify-between items-center mb-0.5">
-                                <span className="text-[9px] font-medium text-zinc-400 capitalize">{muscle}</span>
-                                <span className={cn('text-[9px] font-bold', color)}>
+                                <span className="text-caption-xs font-medium text-zinc-400 capitalize">{muscle}</span>
+                                <span className={cn('text-caption-xs font-bold', color)}>
                                     {sets} sets/wk
                                 </span>
                             </div>
@@ -190,7 +192,7 @@ const VolumeProjection: React.FC<VolumeProjectionProps> = ({ plan, routinesById 
                                     )}
                                 />
                             </div>
-                            <div className="text-[8px] font-medium text-zinc-600 mt-0.5">
+                            <div className="text-caption-xs font-medium text-zinc-600 mt-0.5">
                                 {getVolumeZoneLabel(zone)}
                             </div>
                         </div>
@@ -231,7 +233,7 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onCreate, onCancel }) =
             className="p-5 space-y-5"
         >
             <div>
-                <label className="text-[9px] font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
+                <label className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
                     Plan Name
                 </label>
                 <input
@@ -243,7 +245,7 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onCreate, onCancel }) =
             </div>
 
             <div>
-                <label className="text-[9px] font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
+                <label className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
                     Duration
                 </label>
                 <div className="flex gap-2">
@@ -262,13 +264,13 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onCreate, onCancel }) =
                         </button>
                     ))}
                 </div>
-                <p className="text-[9px] font-medium text-zinc-600 mt-1">
+                <p className="text-caption-xs font-medium text-zinc-600 mt-1">
                     Week {weeks} will auto-mark as Deload
                 </p>
             </div>
 
             <div>
-                <label className="text-[9px] font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
+                <label className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest block mb-1.5">
                     Focus
                 </label>
                 <div className="space-y-2">
@@ -289,7 +291,7 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onCreate, onCancel }) =
                                 )}>
                                     {opt.label}
                                 </div>
-                                <div className="text-[9px] font-medium text-zinc-500">{opt.desc}</div>
+                                <div className="text-caption-xs font-medium text-zinc-500">{opt.desc}</div>
                             </div>
                             {focus === opt.value && (
                                 <div className="w-2 h-2 rounded-full bg-brand-primary" />
@@ -408,28 +410,25 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
         assignRoutine(activePlan.id, weekNumber, dayIndex, null);
     };
 
-    // Empty state: no plans
     if (activePlans.length === 0 && !showCreate) {
         return (
-            <div className="flex flex-col h-full bg-black">
-                <header
-                    className="shrink-0 px-5 pb-4 border-b border-zinc-900 bg-zinc-950/80 flex items-center gap-3"
-                    style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
-                >
-                    <IconButton
-                        icon={ChevronLeft}
-                        onClick={onBack}
-                        variant="ghost"
-                        size="md"
-                        aria-label="Back"
-                        className="-ml-2"
-                    />
-
-                    <div>
-                        <div className="section-title">Training Block</div>
-                        <h1 className="page-title">Mesocycle<span className="text-brand-primary">_</span>Planner</h1>
+            <Page className="flex-1 px-page" noPadding>
+                <AppHeader>
+                    <div className="flex items-center gap-3">
+                        <IconButton
+                            icon={ChevronLeft}
+                            onClick={onBack}
+                            variant="ghost"
+                            size="md"
+                            aria-label="Back"
+                            className="-ml-2"
+                        />
+                        <div>
+                            <div className="section-title">Training Block</div>
+                            <h1 className="page-title">Mesocycle<span className="text-brand-primary">_</span>Planner</h1>
+                        </div>
                     </div>
-                </header>
+                </AppHeader>
                 <div className="flex-1 flex flex-col items-center justify-center p-8">
                     <EmptyState
                         icon={Calendar}
@@ -443,29 +442,26 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                         }}
                     />
                 </div>
-
-            </div>
+            </Page>
         );
     }
 
     if (showCreate) {
         return (
-            <div className="flex flex-col h-full bg-black overflow-y-auto">
-                <header
-                    className="shrink-0 px-5 py-4 border-b border-zinc-900 flex items-center gap-3"
-                    style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
-                >
-                    <IconButton
-                        icon={ChevronLeft}
-                        onClick={() => setShowCreate(false)}
-                        variant="ghost"
-                        size="md"
-                        aria-label="Back"
-                        className="-ml-2"
-                    />
-
-                    <h2 className="text-sm font-bold text-white uppercase tracking-wider font-medium">New Training Block</h2>
-                </header>
+            <Page className="flex-1 px-page" noPadding>
+                <AppHeader>
+                    <div className="flex items-center gap-3">
+                        <IconButton
+                            icon={ChevronLeft}
+                            onClick={() => setShowCreate(false)}
+                            variant="ghost"
+                            size="md"
+                            aria-label="Back"
+                            className="-ml-2"
+                        />
+                        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-medium">New Training Block</h2>
+                    </div>
+                </AppHeader>
                 <CreatePlanForm
                     onCreate={(name, weeks, focus) => {
                         createPlan(name, weeks, focus);
@@ -473,7 +469,7 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                     }}
                     onCancel={() => setShowCreate(false)}
                 />
-            </div>
+            </Page>
         );
     }
 
@@ -481,101 +477,99 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className="flex flex-col h-full bg-black overflow-hidden">
+            <Page className="flex-1 px-page" noPadding>
                 {/* Header */}
-                <header
-                    className="shrink-0 px-5 pb-4 border-b border-zinc-900 bg-zinc-950/80"
-                    style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
-                >
-                    <div className="flex items-center gap-3 mb-3">
-                        <IconButton
-                            icon={ChevronLeft}
-                            onClick={onBack}
-                            variant="ghost"
-                            size="md"
-                            aria-label="Back"
-                            className="-ml-2"
-                        />
+                <AppHeader>
+                    <div className="w-full">
+                        <div className="flex items-center gap-3 mb-3">
+                            <IconButton
+                                icon={ChevronLeft}
+                                onClick={onBack}
+                                variant="ghost"
+                                size="md"
+                                aria-label="Back"
+                                className="-ml-2"
+                            />
 
-                        <div className="flex-1 min-w-0">
-                            <div className="section-title">Training Block</div>
-                            <h1 className="page-title truncate">
-                                {currentPlan.name}<span className="text-brand-primary">_</span>
-                            </h1>
+                            <div className="flex-1 min-w-0">
+                                <div className="section-title">Training Block</div>
+                                <h1 className="page-title truncate">
+                                    {currentPlan.name}<span className="text-brand-primary">_</span>
+                                </h1>
+                            </div>
+                            <IconButton
+                                icon={Plus}
+                                onClick={() => setShowCreate(true)}
+                                variant="ghost"
+                                size="sm"
+                                aria-label="New Plan"
+                            />
+                            <IconButton
+                                icon={CheckCircle2}
+                                onClick={() => {
+                                    if (confirm('Mark this block as completed and archive it?')) {
+                                        completePlan(currentPlan.id);
+                                    }
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Complete Block"
+                            />
+                            <IconButton
+                                icon={Trash2}
+                                onClick={() => { if (confirm('Delete this plan?')) deletePlan(currentPlan.id); }}
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Delete Plan"
+                            />
                         </div>
-                        <IconButton
-                            icon={Plus}
-                            onClick={() => setShowCreate(true)}
-                            variant="ghost"
-                            size="sm"
-                            aria-label="New Plan"
-                        />
-                        <IconButton
-                            icon={CheckCircle2}
-                            onClick={() => {
-                                if (confirm('Mark this block as completed and archive it?')) {
-                                    completePlan(currentPlan.id);
-                                }
-                            }}
-                            variant="ghost"
-                            size="sm"
-                            aria-label="Complete Block"
-                        />
-                        <IconButton
-                            icon={Trash2}
-                            onClick={() => { if (confirm('Delete this plan?')) deletePlan(currentPlan.id); }}
-                            variant="ghost"
-                            size="sm"
-                            aria-label="Delete Plan"
-                        />
 
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <span className={cn(
-                            'px-2 py-0.5 rounded-lg border text-[9px] font-bold uppercase',
-                            FOCUS_COLOR[currentPlan.focus]
-                        )}>
-                            {currentPlan.focus}
-                        </span>
-                        <span className="text-[9px] font-medium text-zinc-600">
-                            {currentPlan.totalWeeks} weeks · Auto-deload W{currentPlan.totalWeeks}
-                        </span>
-                    </div>
-
-                    {/* Plan selector (active plans only) */}
-                    {activePlans.length > 1 && (
-                        <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
-                            {activePlans.map(p => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => setActivePlan(p.id)}
-                                    className={cn(
-                                        'shrink-0 px-3 py-1 rounded-lg border text-[9px] font-bold uppercase transition-all',
-                                        currentPlan.id === p.id
-                                            ? 'bg-brand-primary text-black border-brand-primary'
-                                            : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
-                                    )}
-                                >
-                                    {p.name.length > 12 ? p.name.slice(0, 11) + '…' : p.name}
-                                </button>
-                            ))}
+                        <div className="flex items-center gap-2">
+                            <span className={cn(
+                                'px-2 py-0.5 rounded-lg border text-caption-xs font-bold uppercase',
+                                FOCUS_COLOR[currentPlan.focus]
+                            )}>
+                                {currentPlan.focus}
+                            </span>
+                            <span className="text-caption-xs font-medium text-zinc-600">
+                                {currentPlan.totalWeeks} weeks · Auto-deload W{currentPlan.totalWeeks}
+                            </span>
                         </div>
-                    )}
-                </header>
 
-                <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
+                        {/* Plan selector (active plans only) */}
+                        {activePlans.length > 1 && (
+                            <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+                                {activePlans.map(p => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => setActivePlan(p.id)}
+                                        className={cn(
+                                            'shrink-0 px-3 py-1 rounded-lg border text-caption-xs font-bold uppercase transition-all',
+                                            currentPlan.id === p.id
+                                                ? 'bg-brand-primary text-black border-brand-primary'
+                                                : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
+                                        )}
+                                    >
+                                        {p.name.length > 12 ? p.name.slice(0, 11) + '…' : p.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </AppHeader>
+
+                <div className="flex-1 w-full pb-32">
                     {/* Routine Palette */}
                     <div className="px-5 pt-4 pb-2">
                         <div className="flex items-center gap-2 mb-2">
                             <Zap size={10} className="text-brand-primary" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600">
+                            <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-600">
                                 Drag routines to days
                             </span>
                         </div>
                         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                             {visibleRoutines.length === 0 ? (
-                                <span className="text-[9px] font-medium text-zinc-700">No routines — create some first</span>
+                                <span className="text-caption-xs font-medium text-zinc-700">No routines — create some first</span>
                             ) : (
                                 visibleRoutines.map(r => (
                                     <DraggableChip
@@ -616,11 +610,11 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                                     week.isDeload ? 'bg-zinc-900/30' : 'bg-zinc-900/60'
                                 )}>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                                        <span className="text-caption-xs font-bold text-zinc-400 uppercase">
                                             Week {week.weekNumber}
                                         </span>
                                         {week.isDeload && (
-                                            <span className="px-1.5 py-0.5 bg-blue-900/40 border border-blue-800/40 rounded-lg text-[8px] font-medium text-blue-400 uppercase tracking-wider">
+                                            <span className="px-1.5 py-0.5 bg-blue-900/40 border border-blue-800/40 rounded-lg text-caption-xs font-medium text-blue-400 uppercase tracking-wider">
                                                 Deload
                                             </span>
                                         )}
@@ -630,7 +624,7 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                                         size="sm"
                                         iconLeft={RotateCcw}
                                         onClick={() => toggleDeload(currentPlan.id, week.weekNumber)}
-                                        className="h-7 px-2 text-[8px] text-zinc-500"
+                                        className="h-7 px-2 text-caption-xs text-zinc-500"
                                     >
                                         {week.isDeload ? 'Unmark' : 'Deload'}
                                     </Button>
@@ -669,7 +663,7 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                         <div className="px-5 mt-6">
                             <button
                                 onClick={() => setShowArchive(v => !v)}
-                                className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
+                                className="flex items-center gap-2 text-caption-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
                             >
                                 <Archive size={11} />
                                 Past Cycles ({archivedPlans.length})
@@ -691,7 +685,7 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                                             >
                                                 <div>
                                                     <p className="text-xs font-bold text-zinc-300">{plan.name}</p>
-                                                    <p className="text-[9px] text-zinc-600 mt-0.5">
+                                                    <p className="text-caption-xs text-zinc-600 mt-0.5">
                                                         <span className={cn('capitalize', FOCUS_COLOR[plan.focus].split(' ')[0])}>
                                                             {plan.focus}
                                                         </span>
@@ -720,12 +714,12 @@ const MesocyclePlanner: React.FC<MesocyclePlannerProps> = ({ onBack }) => {
                 {/* Drag Overlay */}
                 <DragOverlay>
                     {activeRoutineId ? (
-                        <div className="px-3 py-1.5 rounded-lg border border-brand-primary bg-brand-primary/10 text-[10px] font-bold uppercase tracking-wider text-brand-primary shadow-lg whitespace-nowrap">
+                        <div className="px-3 py-1.5 rounded-lg border border-brand-primary bg-brand-primary/10 text-caption-xs font-bold uppercase tracking-wider text-brand-primary shadow-lg whitespace-nowrap">
                             {routinesById.get(activeRoutineId)?.name ?? 'Routine'}
                         </div>
                     ) : null}
                 </DragOverlay>
-            </div>
+            </Page>
         </DndContext>
     );
 };

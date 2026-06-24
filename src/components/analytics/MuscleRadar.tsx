@@ -69,7 +69,7 @@ const MuscleRadar: React.FC = () => {
                         <span className="text-2xl font-medium text-zinc-700">?</span>
                     </div>
                     <p className="text-sm font-medium text-zinc-500">No training data</p>
-                    <p className="text-[10px] font-medium text-zinc-600 mt-1">
+                    <p className="text-caption-xs font-medium text-zinc-600 mt-1">
                         Complete workouts to see muscle balance
                     </p>
                 </div>
@@ -80,8 +80,8 @@ const MuscleRadar: React.FC = () => {
                     {data.map(d => (
                         <div key={d.muscle} className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-brand-primary" />
-                            <span className="text-[11px] text-zinc-400 truncate">{d.muscle}</span>
-                            <span className="text-[11px] font-bold text-white ml-auto">{d.value}%</span>
+                            <span className="text-caption text-zinc-400 truncate">{d.muscle}</span>
+                            <span className="text-caption font-bold text-white ml-auto">{d.value}%</span>
                         </div>
                     ))}
                 </div>

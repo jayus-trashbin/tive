@@ -217,7 +217,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black flex flex-col"
+            className="fixed inset-0 z-modal bg-black flex flex-col"
         >
             <input
                 ref={fileInputRef}
@@ -229,7 +229,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
 
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-safe pb-4 bg-gradient-to-b from-black/80 to-transparent">
-                <button onClick={onCancel} className="p-2 text-white/80 hover:text-white transition-colors">
+                <button onClick={onCancel} className="p-2 text-white/80 hover:text-white transition-colors tap">
                     <X size={24} strokeWidth={2.5} />
                 </button>
 
@@ -238,11 +238,11 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                 </span>
 
                 <div className="flex items-center gap-2">
-                    <button onClick={triggerFileUpload} className="p-2 text-white/80 hover:text-white transition-colors">
+                    <button onClick={triggerFileUpload} className="p-2 text-white/80 hover:text-white transition-colors tap">
                         <Upload size={24} strokeWidth={2} />
                     </button>
                     {state === 'ready' && (
-                        <button onClick={handleSwitchCamera} className="p-2 text-white/80 hover:text-white transition-colors">
+                        <button onClick={handleSwitchCamera} className="p-2 text-white/80 hover:text-white transition-colors tap">
                             <SwitchCamera size={24} strokeWidth={2} />
                         </button>
                     )}
@@ -299,7 +299,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                             <div className="flex flex-col gap-3 w-full max-w-xs">
                                 <button
                                     onClick={triggerFileUpload}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary text-black font-bold uppercase text-xs rounded-xl hover:bg-brand-primaryHover transition-colors"
+                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary text-black font-bold uppercase text-xs rounded-xl hover:bg-brand-primaryHover transition-colors tap"
                                 >
                                     <ImageIcon size={16} />
                                     Upload Image
@@ -314,7 +314,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
                                 )}
                                 <button
                                     onClick={onCancel}
-                                    className="px-6 py-3 bg-zinc-800 text-white font-bold text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase rounded-xl"
+                                    className="px-6 py-3 bg-zinc-800 text-white font-bold text-xs border border-zinc-700 hover:bg-zinc-700 transition-colors uppercase rounded-xl tap"
                                 >
                                     Cancel
                                 </button>

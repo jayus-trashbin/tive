@@ -102,7 +102,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black text-white flex flex-col overflow-hidden font-sans">
+    <div className="fixed inset-0 z-modal bg-black text-white flex flex-col overflow-hidden font-sans">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -413,7 +413,7 @@ const WelcomeModal: React.FC<Props> = ({ onComplete }) => {
                                                         <div className="w-1.5 h-1.5 rounded-full bg-brand-primary/50" />
                                                         <span>{ex?.name ?? id}</span>
                                                         {ex?.targetMuscle && (
-                                                            <span className="ml-auto text-[10px] text-zinc-600 capitalize">{ex.targetMuscle}</span>
+                                                            <span className="ml-auto text-caption-xs text-zinc-600 capitalize">{ex.targetMuscle}</span>
                                                         )}
                                                     </div>
                                                 );

@@ -79,10 +79,10 @@ const PlateauAlert: React.FC<Props> = ({ status, suggestions }) => {
                 {/* Header row */}
                 <div className="flex items-center gap-2 px-3 py-2">
                     <div className={cn('flex items-center gap-1.5 flex-1 min-w-0', config.color)}>
-                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                        <span className="text-caption-xs font-bold uppercase tracking-widest">
                             ⚠ {config.label}
                         </span>
-                        <span className="text-[10px] text-zinc-500 truncate hidden sm:inline">
+                        <span className="text-caption-xs text-zinc-500 truncate hidden sm:inline">
                             {status.message}
                         </span>
                     </div>
@@ -90,7 +90,7 @@ const PlateauAlert: React.FC<Props> = ({ status, suggestions }) => {
                         <button
                             onClick={() => setExpanded(prev => !prev)}
                             className={cn(
-                                'text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0 transition-colors',
+                                'text-caption-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0 transition-colors',
                                 config.color
                             )}
                         >
@@ -130,10 +130,10 @@ const PlateauAlert: React.FC<Props> = ({ status, suggestions }) => {
                                                 <Icon size={12} />
                                             </div>
                                             <div>
-                                                <p className={cn('text-[10px] font-bold leading-tight', config.color)}>
+                                                <p className={cn('text-caption-xs font-bold leading-tight', config.color)}>
                                                     {s.title}
                                                 </p>
-                                                <p className="text-[9px] text-zinc-500 leading-tight mt-0.5">
+                                                <p className="text-caption-xs text-zinc-500 leading-tight mt-0.5">
                                                     {s.description}
                                                 </p>
                                             </div>

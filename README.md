@@ -43,11 +43,11 @@ To become the definitive "Operating System" for strength training—where every 
 
 ---
 
-## 🎨 Design Philosophy: "Tech-Brutalism"
+## 🎨 Design Philosophy
 TIVE rejects the "softness" of modern app design in favor of structural clarity and futuristic utility.
-- **Palette:** High-contrast Dark Mode (Pure Black #000000, Zinc #09090b).
-- **Typography:** Outfit (Headings), Inter (Body), and JetBrains Mono (Data/Tech).
-- **Mechanical UX:** Tactile haptic-style transitions, sharp [4px] corners, and grid-based layouts.
+- **Palette:** High-contrast Dark Mode (Pure Black #000000, Zinc #09090b) with Lime Accent (`#bef264`).
+- **Typography:** Inter (Global), and JetBrains Mono (Data/Tech).
+- **Mechanical UX:** Tactile haptic-style transitions, rounded corners (8-24px), and grid-based layouts.
 
 ---
 

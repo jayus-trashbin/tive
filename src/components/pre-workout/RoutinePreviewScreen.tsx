@@ -9,6 +9,7 @@ import ExerciseDetailModal from '../exercise/ExerciseDetailModal';
 import { estimateRoutineDuration } from '../../utils/engine';
 import { calculateACWR } from '../../utils/engine';
 import { cn } from '../../lib/utils';
+import { Button } from '../ui';
 
 interface Props {
   routineId: string;
@@ -120,7 +121,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
     : null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex justify-center">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-modal flex justify-center">
         <div className="w-full max-w-lg md:max-w-2xl h-full bg-zinc-950 flex flex-col animate-in slide-in-from-bottom-10 shadow-2xl overflow-hidden relative">
       
             {/* Header Image/Gradient */}
@@ -130,23 +131,23 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                 
                 {/* Header Controls */}
                 <div className="absolute top-0 left-0 right-0 p-4 pt-safe flex items-center justify-between z-10">
-                    <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/40 transition-colors">
+                    <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/40 transition-colors tap">
                         <ArrowLeft size={20} />
                     </button>
 
-                     <button onClick={onEdit} className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/40 transition-colors">
+                     <button onClick={onEdit} className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/40 transition-colors tap">
                         <Edit2 size={18} />
                     </button>
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="px-2 py-0.5 rounded bg-brand-primary text-white text-[10px] font-bold uppercase tracking-wider">
+                        <span className="px-2 py-0.5 rounded bg-brand-primary text-white text-caption-xs font-bold uppercase tracking-wider">
                             Strength
                         </span>
                         {/* R-04: Readiness badge */}
                         {riskLabel && (
-                            <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${riskLabel.color}`}>
+                            <span className={`px-2 py-0.5 rounded border text-caption-xs font-bold uppercase tracking-wider ${riskLabel.color}`}>
                                 <Target size={9} className="inline mr-1" />{riskLabel.text}
                             </span>
                         )}
@@ -172,7 +173,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                             </div>
                             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
                                 {muscleDistribution.slice(0, 4).map(({ muscle, pct }) => (
-                                    <span key={muscle} className="text-[9px] font-medium text-zinc-500">
+                                    <span key={muscle} className="text-caption-xs font-medium text-zinc-500">
                                         {muscle} <span className="text-zinc-400">{pct}%</span>
                                     </span>
                                 ))}
@@ -232,7 +233,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
             <div className="absolute bottom-0 left-0 right-0 bg-zinc-950 px-4 pb-safe z-50 pt-2">
                 <div className="pointer-events-auto">
                     <div className="text-center mb-3">
-                        <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                        <p className="text-caption font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2">
                             <span>{displayItems.length} Exercises</span>
                             <span className="w-1 h-1 rounded-full bg-zinc-700" />
                             <span>{totalSets} Sets</span>
@@ -240,12 +241,15 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                             <span>~{estTime} Min</span>
                         </p>
                     </div>
-                    <button 
+                    <Button 
+                        variant="primary"
+                        size="lg"
+                        fullWidth
                         onClick={onBegin}
-                        className="w-full mb-6 py-4 bg-brand-primary text-black font-black text-lg tracking-widest rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_24px_-4px] shadow-brand-primary/40 active:scale-[0.98] hover:brightness-110 transition-all"
+                        className="mb-6 shadow-[0_4px_24px_-4px] shadow-brand-primary/40 rounded-2xl font-black text-lg tracking-widest"
                     >
                         <Play size={20} fill="currentColor" /> BEGIN WORKOUT
-                    </button>
+                    </Button>
                 </div>
             </div>
 

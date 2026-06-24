@@ -67,11 +67,6 @@
     @apply text-2xl font-bold text-white tracking-tight leading-tight;
   }
 
-  /* --- Buttons --- */
-  .btn-primary {
-    @apply px-5 py-3 bg-brand-primary text-black font-semibold rounded-xl hover:bg-brand-primaryHover transition-all active:scale-[0.98] flex items-center justify-center gap-2;
-  }
-
   .gpu-accelerated {
     @apply transform-gpu;
     backface-visibility: hidden;
@@ -86,6 +81,22 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  /* D1-4: Libera seleção em elementos de dados (pesos, e1RM, notas).
+     Adicione a classe .select-text em spans/divs de dados numéricos e texto de treino. */
+  .select-text {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  
+  /* D2-2: Foco e feedback táctil para botões estruturais que não usam <Button> */
+  .tap {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] transition-transform duration-150;
+  }
+
+  /* Typography Refinements */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 

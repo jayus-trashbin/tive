@@ -37,6 +37,8 @@ import { requestNotificationPermission } from '../utils/reminders';
 import { credentialsStore } from '../utils/credentialsStore';
 import { cn } from '../lib/utils';
 import { Button, ConfirmModal, IconButton } from './ui';
+import { Page } from './ui/Page';
+import { AppHeader } from './ui/AppHeader';
 import { syncService } from '../services/SyncService';
 import { photoSyncService } from '../services/PhotoSyncService';
 import { downloadJSON, parseBackupJSON, exportToCSV, downloadCSV } from '../utils/exportImport';
@@ -286,19 +288,21 @@ const Settings: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto px-4 pt-safe pb-32 no-scrollbar scroll-smooth">
+        <Page className="flex-1 px-page">
             {/* Header */}
-            <header className="shrink-0 mb-6 mt-2">
-                <div className="flex items-center gap-2 mb-1">
-                    <SettingsIcon size={16} className="text-brand-primary" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                        {t('settings.headerTag')}
-                    </span>
+            <AppHeader>
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <SettingsIcon size={16} className="text-brand-primary" />
+                        <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-500">
+                            {t('settings.headerTag')}
+                        </span>
+                    </div>
+                    <h1 className="text-h1 font-bold text-white tracking-tight">
+                        {t('settings.title')}
+                    </h1>
                 </div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">
-                    {t('settings.title')}
-                </h1>
-            </header>
+            </AppHeader>
 
             <motion.div
                 className="space-y-6"
@@ -385,12 +389,14 @@ const Settings: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-3 mt-3">
                                 <div>
-                                    <label htmlFor="settings-bodyweight" className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">
+                                    <label htmlFor="settings-bodyweight" className="text-caption-xs font-bold text-zinc-500 uppercase ml-1 block mb-1">
                                         Bodyweight (kg)
                                     </label>
                                     <input
                                         id="settings-bodyweight"
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
+                                        pattern="[0-9.,]*"
                                         step="0.1"
                                         value={userStats.bodyweight || ''}
                                         onChange={(e) => updateUserStats({ bodyweight: Number(e.target.value) })}
@@ -398,7 +404,7 @@ const Settings: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold text-zinc-500 uppercase ml-1 block mb-1">Gender</label>
+                                    <label className="text-caption-xs font-bold text-zinc-500 uppercase ml-1 block mb-1">Gender</label>
                                     <SegmentedControl
                                         id="gender"
                                         options={[
@@ -422,7 +428,7 @@ const Settings: React.FC = () => {
                                 <IconBox icon={Volume2} color={userStats.isAudioEnabled !== false ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.isAudioEnabled !== false ? "text-black" : "text-white"} />
                                 <div>
                                     <div className="text-sm font-bold text-white">{t('settings.audio.appSounds')}</div>
-                                    <div className="text-[11px] text-zinc-500">{t('settings.audio.appSoundsDesc')}</div>
+                                    <div className="text-caption text-zinc-500">{t('settings.audio.appSoundsDesc')}</div>
                                 </div>
                             </div>
                             <Toggle
@@ -436,7 +442,7 @@ const Settings: React.FC = () => {
                                 <IconBox icon={Music} color={userStats.smartAudio !== false ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.smartAudio !== false ? "text-black" : "text-white"} />
                                 <div>
                                     <div className="text-sm font-bold text-white">{t('settings.audio.smartAudio')}</div>
-                                    <div className="text-[11px] text-zinc-500 max-w-[200px]">{t('settings.audio.smartAudioDesc')}</div>
+                                    <div className="text-caption text-zinc-500 max-w-[200px]">{t('settings.audio.smartAudioDesc')}</div>
                                 </div>
                             </div>
                             <Toggle
@@ -450,7 +456,7 @@ const Settings: React.FC = () => {
                                 <IconBox icon={Vibrate} color={userStats.isVibrationEnabled !== false ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.isVibrationEnabled !== false ? "text-black" : "text-white"} />
                                 <div>
                                     <div className="text-sm font-bold text-white">{t('settings.audio.haptic')}</div>
-                                    <div className="text-[11px] text-zinc-500">{t('settings.audio.hapticDesc')}</div>
+                                    <div className="text-caption text-zinc-500">{t('settings.audio.hapticDesc')}</div>
                                 </div>
                             </div>
                             <Toggle
@@ -465,7 +471,7 @@ const Settings: React.FC = () => {
                                 <IconBox icon={Dumbbell} color={userStats.gymMode ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.gymMode ? "text-black" : "text-white"} />
                                 <div>
                                     <div className="text-sm font-bold text-white">{t('settings.prefs.gymMode')}</div>
-                                    <div className="text-[11px] text-zinc-500">{t('settings.prefs.gymModeDesc')}</div>
+                                    <div className="text-caption text-zinc-500">{t('settings.prefs.gymModeDesc')}</div>
                                 </div>
                             </div>
                             <Toggle
@@ -483,7 +489,7 @@ const Settings: React.FC = () => {
                                 <IconBox icon={Bell} color={userStats.reminderSettings?.enabled ? "bg-brand-primary" : "bg-zinc-600"} iconColor={userStats.reminderSettings?.enabled ? "text-black" : "text-white"} />
                                 <div>
                                     <div className="text-sm font-bold text-white">Workout Reminders</div>
-                                    <div className="text-[11px] text-zinc-500">Get notified when it's time to train</div>
+                                    <div className="text-caption text-zinc-500">Get notified when it's time to train</div>
                                 </div>
                             </div>
                             <Toggle
@@ -512,7 +518,7 @@ const Settings: React.FC = () => {
                             <div className="p-4 pt-0 space-y-4">
                                 <div className="bg-zinc-950/50 p-3 rounded-xl border border-zinc-800 space-y-3">
                                     <div>
-                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-2">Days of week</label>
+                                        <label className="text-caption-xs font-bold text-zinc-400 uppercase ml-1 block mb-2">Days of week</label>
                                         <div className="flex gap-1 justify-between">
                                             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => {
                                                 const isSelected = userStats.reminderSettings?.days.includes(idx);
@@ -538,7 +544,7 @@ const Settings: React.FC = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Time</label>
+                                        <label className="text-caption-xs font-bold text-zinc-400 uppercase ml-1 block mb-1">Time</label>
                                         <input
                                             type="time"
                                             value={userStats.reminderSettings?.time || '18:00'}
@@ -571,10 +577,10 @@ const Settings: React.FC = () => {
                                         </div>
                                         <div>
                                             <div className="text-sm font-bold text-white">Cloud Backup Active</div>
-                                            <div className="text-[11px] text-zinc-400">Last sync: {lastSync}</div>
+                                            <div className="text-caption text-zinc-400">Last sync: {lastSync}</div>
                                             <button 
                                                 onClick={() => setIsEditingCloud(true)}
-                                                className="text-[10px] text-zinc-500 hover:text-blue-400 hover:underline mt-0.5 text-left"
+                                                className="text-caption-xs text-zinc-500 hover:text-blue-400 hover:underline mt-0.5 text-left"
                                             >
                                                 Edit connection settings
                                             </button>
@@ -600,13 +606,13 @@ const Settings: React.FC = () => {
                                         </div>
                                         <div>
                                             <div className="text-sm font-bold text-white">Cloud Backup</div>
-                                            <div className="text-[11px] text-zinc-400">Sync your data across devices securely.</div>
+                                            <div className="text-caption text-zinc-400">Sync your data across devices securely.</div>
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-3 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
                                         <div>
-                                            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Project URL</label>
+                                            <label className="text-caption-xs font-bold text-zinc-400 uppercase ml-1 block mb-1">Project URL</label>
                                             <div className="relative">
                                                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
                                                 <input
@@ -617,11 +623,11 @@ const Settings: React.FC = () => {
                                                     className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs font-medium focus:border-blue-500 focus:outline-none transition-colors"
                                                 />
                                             </div>
-                                            <p className="text-[10px] text-zinc-500 mt-1 ml-1">Found in Supabase → Project Settings → API</p>
+                                            <p className="text-caption-xs text-zinc-500 mt-1 ml-1">Found in Supabase → Project Settings → API</p>
                                         </div>
 
                                         <div>
-                                            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Anon Key</label>
+                                            <label className="text-caption-xs font-bold text-zinc-400 uppercase ml-1 block mb-1">Anon Key</label>
                                             <div className="relative">
                                                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
                                                 <input
@@ -639,31 +645,31 @@ const Settings: React.FC = () => {
                                                     {showSupabaseKey ? <EyeOff size={14} /> : <Eye size={14} />}
                                                 </button>
                                             </div>
-                                            <p className="text-[10px] text-zinc-500 mt-1 ml-1">Found right below the Project URL</p>
+                                            <p className="text-caption-xs text-zinc-500 mt-1 ml-1">Found right below the Project URL</p>
                                         </div>
 
                                         {/* Database Setup Guide Accordion */}
                                         <div className="border border-zinc-800 rounded-xl overflow-hidden mt-2">
                                             <button 
                                                 onClick={() => setShowSqlHelp(!showSqlHelp)}
-                                                className="w-full flex items-center justify-between p-3 bg-zinc-900 text-[11px] font-bold text-zinc-400 hover:text-white transition-colors"
+                                                className="w-full flex items-center justify-between p-3 bg-zinc-900 text-caption font-bold text-zinc-400 hover:text-white transition-colors"
                                             >
                                                 <span className="flex items-center gap-2"><Info size={14} /> Database Setup Guide</span>
                                                 <ChevronRight size={14} className={cn("transition-transform duration-200", showSqlHelp && "rotate-90")} />
                                             </button>
                                             {showSqlHelp && (
                                                 <div className="p-3 bg-black border-t border-zinc-800 space-y-2">
-                                                    <p className="text-[10px] text-zinc-400">
+                                                    <p className="text-caption-xs text-zinc-400">
                                                         Run this in your Supabase SQL Editor to prepare your database:
                                                     </p>
                                                     <div className="bg-zinc-950 p-2 rounded-lg border border-white/10 relative">
-                                                        <pre className="text-[9px] font-medium text-zinc-300 overflow-x-auto whitespace-pre-wrap max-h-32">
+                                                        <pre className="text-caption-xs font-medium text-zinc-300 overflow-x-auto whitespace-pre-wrap max-h-32">
                                                             {SUPABASE_SQL_SCHEMA}
                                                         </pre>
                                                         <button
                                                             type="button"
                                                             onClick={handleCopySql}
-                                                            className="absolute top-2 right-2 p-1.5 bg-zinc-800 rounded-md text-zinc-400 hover:text-white"
+                                                            className="absolute top-2 right-2 p-1.5 bg-zinc-800 rounded-md text-zinc-400 hover:text-white tap"
                                                         >
                                                             <Copy size={12} />
                                                         </button>
@@ -706,7 +712,7 @@ const Settings: React.FC = () => {
                                             <div className="text-sm font-bold text-white">AI Assistant Active</div>
                                             <button 
                                                 onClick={() => setIsEditingGemini(true)}
-                                                className="text-[10px] text-zinc-500 hover:text-purple-400 hover:underline mt-0.5 text-left"
+                                                className="text-caption-xs text-zinc-500 hover:text-purple-400 hover:underline mt-0.5 text-left"
                                             >
                                                 Change API key
                                             </button>
@@ -722,12 +728,12 @@ const Settings: React.FC = () => {
                                         </div>
                                         <div>
                                             <div className="text-sm font-bold text-white">AI Assistant</div>
-                                            <div className="text-[11px] text-zinc-400">Unlock smart routine generation with Gemini.</div>
+                                            <div className="text-caption text-zinc-400">Unlock smart routine generation with Gemini.</div>
                                         </div>
                                     </div>
                                     
                                     <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
-                                        <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1 block mb-1">Gemini API Key</label>
+                                        <label className="text-caption-xs font-bold text-zinc-400 uppercase ml-1 block mb-1">Gemini API Key</label>
                                         <div className="relative flex items-center gap-2">
                                             <div className="relative flex-1">
                                                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
@@ -748,7 +754,7 @@ const Settings: React.FC = () => {
                                                 </Button>
                                             )}
                                         </div>
-                                        <p className="text-[10px] text-zinc-500 mt-2 ml-1">
+                                        <p className="text-caption-xs text-zinc-500 mt-2 ml-1">
                                             Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">Google AI Studio</a>
                                         </p>
                                     </div>
@@ -771,7 +777,7 @@ const Settings: React.FC = () => {
                         >
                             <div className="flex flex-col items-start ml-2 text-left">
                                 <span className="font-bold leading-tight">{t('settings.data.exportJson')}</span>
-                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Export {historyLength} sessions & {routinesLength} routines</span>
+                                <span className="text-caption-xs text-zinc-500 font-normal leading-tight mt-1">Export {historyLength} sessions & {routinesLength} routines</span>
                             </div>
                         </Button>
 
@@ -785,7 +791,7 @@ const Settings: React.FC = () => {
                         >
                             <div className="flex flex-col items-start ml-2 text-left">
                                 <span className="font-bold leading-tight">{t('settings.data.exportCsv')}</span>
-                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Spreadsheet format for external tools</span>
+                                <span className="text-caption-xs text-zinc-500 font-normal leading-tight mt-1">Spreadsheet format for external tools</span>
                             </div>
                         </Button>
 
@@ -799,7 +805,7 @@ const Settings: React.FC = () => {
                         >
                             <div className="flex flex-col items-start ml-2 text-left">
                                 <span className="font-bold leading-tight">{t('settings.data.importBackup')}</span>
-                                <span className="text-[10px] text-zinc-500 font-normal leading-tight mt-1">Restore from a previous backup file</span>
+                                <span className="text-caption-xs text-zinc-500 font-normal leading-tight mt-1">Restore from a previous backup file</span>
                             </div>
                         </Button>
 
@@ -818,7 +824,7 @@ const Settings: React.FC = () => {
                 {/* 6. Danger Zone */}
                 <motion.div variants={itemVariants}>
                     <section>
-                        <h2 className="text-[11px] font-bold text-red-500/80 uppercase tracking-widest px-2 mb-2">
+                        <h2 className="text-caption font-bold text-red-500/80 uppercase tracking-widest px-2 mb-2">
                             Danger Zone
                         </h2>
                         <div className="bg-red-950/10 border border-red-900/30 rounded-2xl overflow-hidden p-1 shadow-sm">
@@ -831,7 +837,7 @@ const Settings: React.FC = () => {
                             >
                                 <div className="flex flex-col items-start ml-2 text-left">
                                     <span className="font-bold leading-tight">{t('settings.data.clearAll')}</span>
-                                    <span className="text-[10px] text-red-400/70 font-normal leading-tight mt-1">Permanently delete all workouts and settings</span>
+                                    <span className="text-caption-xs text-red-400/70 font-normal leading-tight mt-1">Permanently delete all workouts and settings</span>
                                 </div>
                             </Button>
                         </div>
@@ -840,10 +846,10 @@ const Settings: React.FC = () => {
 
                 {/* App Info */}
                 <motion.div variants={itemVariants} className="text-center py-6 opacity-60">
-                    <div className="font-bold text-[11px] text-zinc-500 tracking-wider">
+                    <div className="font-bold text-caption text-zinc-500 tracking-wider">
                         {t('settings.appInfo.brand')}
                     </div>
-                    <div className="font-medium text-[9px] text-zinc-600 mt-1 uppercase tracking-widest">
+                    <div className="font-medium text-caption-xs text-zinc-600 mt-1 uppercase tracking-widest">
                         {t('settings.appInfo.version')}
                     </div>
                 </motion.div>
@@ -878,7 +884,7 @@ const Settings: React.FC = () => {
                 onConfirm={handleClearConfirm}
                 onCancel={() => setConfirmClear(false)}
             />
-        </div>
+        </Page>
     );
 };
 
@@ -886,13 +892,13 @@ const Settings: React.FC = () => {
 
 const Section = ({ title, description, children }: { title: string, description?: string, children: React.ReactNode }) => (
     <section>
-        <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-2 mb-2">
+        <h2 className="text-caption font-bold text-zinc-500 uppercase tracking-widest px-2 mb-2">
             {title}
         </h2>
         <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden divide-y divide-zinc-800/50 shadow-sm">
             {children}
         </div>
-        {description && <p className="text-[10px] text-zinc-600 px-3 mt-2">{description}</p>}
+        {description && <p className="text-caption-xs text-zinc-600 px-3 mt-2">{description}</p>}
     </section>
 );
 
@@ -916,7 +922,7 @@ const SegmentedControl = ({ id, options, value, onChange }: { id: string, option
                     onClick={() => onChange(option.value)}
                     role="radio"
                     aria-checked={value === option.value}
-                    className="relative flex-1 py-1.5 text-[10px] font-bold uppercase transition-colors rounded-lg cursor-pointer z-10"
+                    className="relative flex-1 py-1.5 text-caption-xs font-bold uppercase transition-colors rounded-lg cursor-pointer z-10"
                 >
                     {value === option.value && (
                         <motion.div

@@ -59,7 +59,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
 
     const SectionHeader = ({ label }: { label: string }) => (
         <div className="px-4 py-2 flex items-center gap-2">
-            <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
+            <span className="text-caption-xs font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
             <div className="flex-1 h-px bg-zinc-800" />
         </div>
     );
@@ -83,7 +83,7 @@ const GlobalSearch: React.FC<Props> = ({ onClose }) => {
         >
             {iconFor(item.section)}
             <span className="flex-1 text-sm text-white font-medium truncate">{item.label}</span>
-            {item.sub && <span className="text-[9px] text-zinc-600 uppercase font-bold shrink-0">{item.sub}</span>}
+            {item.sub && <span className="text-caption-xs text-zinc-600 uppercase font-bold shrink-0">{item.sub}</span>}
             <ChevronRight size={13} className="text-zinc-700 shrink-0 ml-1" />
         </button>
     );
@@ -221,7 +221,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
                     <X size={16} />
                 </button>
             ) : showKbd ? (
-                <kbd className="flex items-center px-1.5 py-0.5 text-[9px] font-bold text-zinc-600 border border-zinc-800 rounded">ESC</kbd>
+                <kbd className="flex items-center px-1.5 py-0.5 text-caption-xs font-bold text-zinc-600 border border-zinc-800 rounded">ESC</kbd>
             ) : null}
         </div>
 
@@ -274,11 +274,11 @@ const SearchContent: React.FC<SearchContentProps> = ({
         {/* Keyboard hints (desktop only) */}
         {showKbd && allResults.length > 0 && (
             <div className="flex items-center justify-center gap-4 py-2 border-t border-zinc-900">
-                <span className="text-[9px] font-bold text-zinc-700 flex items-center gap-1">
-                    <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-[8px]">↑↓</kbd> navigate
+                <span className="text-caption-xs font-bold text-zinc-700 flex items-center gap-1">
+                    <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-caption-xs">↑↓</kbd> navigate
                 </span>
-                <span className="text-[9px] font-bold text-zinc-700 flex items-center gap-1">
-                    <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-[8px]">↵</kbd> select
+                <span className="text-caption-xs font-bold text-zinc-700 flex items-center gap-1">
+                    <kbd className="text-zinc-700 border border-zinc-800 px-1 rounded text-caption-xs">↵</kbd> select
                 </span>
             </div>
         )}

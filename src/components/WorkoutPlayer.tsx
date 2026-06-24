@@ -21,6 +21,8 @@ import PRCelebration from './active-session/PRCelebration';
 import { Button, EmptyState } from './ui';
 import { useTranslation } from '../i18n';
 import AutoRegulationBanner from './active-session/AutoRegulationBanner';
+import { useBackDismiss } from '../hooks/useBackDismiss';
+import Modal from './ui/Modal';
 
 import {
     DndContext,
@@ -107,6 +109,12 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
     const { message: autoRegMessage, analyzeSet: analyzeAutoReg, clearMessage: clearAutoReg } = useAutoRegulation();
 
     const { registerRef, scrollToExercise } = useAutoScroll();
+    // BACK BUTTON INTERCEPTION
+    const [showDiscardModal, setShowDiscardModal] = useState(false);
+    useBackDismiss(true, () => {
+        // When hardware back is pressed, prompt to discard or minimize
+        setShowDiscardModal(true);
+    });
 
     // DND Sensors
     const sensors = useSensors(
@@ -349,7 +357,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     <div className="flex items-center gap-2 min-w-0">
                         <button
                             onClick={() => toggleMinimize(true)}
-                            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-95 transition-all rounded-full shrink-0"
+                            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full shrink-0 tap"
                         >
                             <ChevronDown size={24} />
                         </button>
@@ -368,7 +376,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         <button
                             onClick={() => setShowPlateCalc(!showPlateCalc)}
                             className={cn(
-                                "flex items-center justify-center w-8 h-8 rounded-full transition-colors active:scale-95",
+                                "flex items-center justify-center w-8 h-8 rounded-full transition-colors tap",
                                 showPlateCalc ? "bg-brand-primary text-black" : "text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800"
                             )}
                             title={t('workoutPlayer.plateCalculator')}
@@ -380,7 +388,7 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         </span>
                         <button
                             onClick={() => setShowFinishModal(true)}
-                            className="rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-primary border border-brand-primary/30 hover:bg-brand-primary/10 transition-colors"
+                            className="rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-primary border border-brand-primary/30 hover:bg-brand-primary/10 tap"
                         >
                             Finish
                         </button>
@@ -398,10 +406,10 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                         />
                     </div>
                     <div className="flex justify-between items-center mt-1.5 px-1">
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                        <span className="text-caption-xs text-zinc-500 font-bold uppercase tracking-wider">
                             {completedSets}/{estimatedTotal} Sets
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-bold tracking-wider">
+                        <span className="text-caption-xs text-zinc-500 font-bold tracking-wider">
                             {Math.round(progressPercent)}%
                         </span>
                     </div>
@@ -569,6 +577,38 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* ──── DISCARD MODAL ──── */}
+            <Modal
+                isOpen={showDiscardModal}
+                onClose={() => setShowDiscardModal(false)}
+                title="Descartar treino?"
+                position="bottom"
+            >
+                <div className="flex flex-col gap-4 pb-4">
+                    <p className="text-zinc-400 text-sm px-1">
+                        Você tem uma sessão em andamento. Se descartar agora, nenhum progresso será salvo.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowDiscardModal(false)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                setShowDiscardModal(false);
+                                finishSession(); // This essentially discards it if not saving
+                                onFinish();
+                            }}
+                        >
+                            Descartar
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
 
         </div>
     );

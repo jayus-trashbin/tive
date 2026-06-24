@@ -64,7 +64,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, onClick, styl
             className={cn("p-1", completedCount === 0 && "opacity-60")} // Wrapper padding for virtualized items
         >
             <div className={cn(
-                "bg-zinc-900 border border-zinc-800 rounded-2xl active:scale-[0.98] transition-all cursor-pointer hover:border-zinc-700 w-full h-full text-left p-0 overflow-hidden flex group",
+                "bg-zinc-900 border border-zinc-800 rounded-2xl cursor-pointer hover:border-zinc-700 w-full h-full text-left p-0 overflow-hidden flex group tap",
                 isLatest && "border-l-2 border-l-brand-primary rounded-l-md"
             )}>
                 <div className={cn("w-1 shrink-0", getAccentColor(session.name))} />

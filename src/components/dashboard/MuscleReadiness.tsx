@@ -60,7 +60,7 @@ export const MuscleReadiness: React.FC<MuscleReadinessProps> = ({ readiness }) =
                                     <div className="flex justify-between items-center">
                                         <span className="text-xs font-medium text-zinc-300 capitalize">{item.muscle}</span>
                                         <div className="flex items-center gap-2">
-                                            <span className={cn("text-[9px] font-bold uppercase tracking-wider", getReadinessText(item.score))}>
+                                            <span className={cn("text-caption-xs font-bold uppercase tracking-wider", getReadinessText(item.score))}>
                                                 {item.label}
                                             </span>
                                         </div>

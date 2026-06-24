@@ -115,7 +115,7 @@ class ErrorBoundary extends React.Component<Props, State> {
           {(process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') && this.state.error && (
             <div className="mt-8 p-4 bg-black/80 rounded-xl border border-red-900/30 text-left max-w-md w-full overflow-x-auto shadow-inner">
               <p className="text-red-400 font-bold text-xs mb-2 uppercase">Developer Diagnostics:</p>
-              <code className="text-[10px] text-red-300/80 font-medium whitespace-pre-wrap break-all">
+              <code className="text-caption-xs text-red-300/80 font-medium whitespace-pre-wrap break-all">
                 {this.state.error.toString()}
                 {this.state.errorInfo?.componentStack}
               </code>

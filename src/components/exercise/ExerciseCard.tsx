@@ -69,7 +69,7 @@ const ExerciseCard: React.FC<Props> = ({ exercise, onClick, onInfoClick, compact
             <div className="absolute inset-0 p-5 flex flex-col justify-end z-20 pointer-events-none">
                 <div className="flex items-center gap-2 mb-1">
                     <div className={cn("w-2 h-2 rounded-full", tagColor)} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                    <span className="text-caption-xs font-bold uppercase tracking-widest text-zinc-400">
                         {exercise.targetMuscle}
                     </span>
                 </div>

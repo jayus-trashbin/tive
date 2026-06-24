@@ -36,7 +36,7 @@ export const ExerciseGuide: React.FC<Props> = ({ exercise }) => {
                     <ul className="space-y-4 relative z-10">
                         {exercise.tips.map((tip, i) => (
                             <li key={i} className="text-sm text-zinc-200 flex items-start gap-3">
-                                <div className="w-5 h-5 rounded-full bg-brand-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-brand-primary font-bold text-[10px]">
+                                <div className="w-5 h-5 rounded-full bg-brand-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-brand-primary font-bold text-caption-xs">
                                     {i + 1}
                                 </div>
                                 <span className="leading-snug">{tip}</span>

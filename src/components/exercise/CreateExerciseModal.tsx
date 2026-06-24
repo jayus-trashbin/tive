@@ -68,7 +68,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
     };
 
     const content = (
-        <div className="fixed inset-0 z-[80] bg-black/75 backdrop-blur-sm flex items-end justify-center">
+        <div className="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-end justify-center">
             <motion.div
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -84,7 +84,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                             New Exercise
                         </h2>
                     </div>
-                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors">
+                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors tap">
                         <X size={16} />
                     </button>
                 </div>
@@ -94,7 +94,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
                     {/* Name */}
                     <div>
-                        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
                             Exercise Name *
                         </label>
                         <input
@@ -106,7 +106,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                             className="w-full bg-zinc-900 border border-zinc-800 px-3 py-3 text-white font-bold text-sm font-medium placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-colors rounded-lg"
                         />
                         {error && (
-                            <p className="flex items-center gap-1.5 mt-1.5 text-[10px] text-red-400 font-medium">
+                            <p className="flex items-center gap-1.5 mt-1.5 text-caption-xs text-red-400 font-medium">
                                 <AlertCircle size={10} /> {error}
                             </p>
                         )}
@@ -114,7 +114,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
                     {/* Target Muscle */}
                     <div>
-                        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
                             Target Muscle *
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -123,7 +123,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                     key={m}
                                     onClick={() => setTargetMuscle(m)}
                                     className={cn(
-                                        "px-2.5 py-1.5 text-[10px] font-bold uppercase border rounded-lg transition-all",
+                                        "px-2.5 py-1.5 text-caption-xs font-bold uppercase border rounded-lg transition-all",
                                         targetMuscle === m
                                             ? MUSCLE_COLORS[m]
                                             : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
@@ -137,7 +137,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
                     {/* Equipment */}
                     <div>
-                        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
                             Equipment
                         </label>
                         <div className="flex flex-wrap gap-1.5">
@@ -146,7 +146,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                     key={eq}
                                     onClick={() => setEquipment(eq)}
                                     className={cn(
-                                        "px-2.5 py-1.5 text-[10px] font-bold border rounded-lg transition-all",
+                                        "px-2.5 py-1.5 text-caption-xs font-bold border rounded-lg transition-all",
                                         equipment === eq
                                             ? 'bg-brand-primary/10 border-brand-primary/30 text-brand-primary'
                                             : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
@@ -164,7 +164,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                         <div className="flex-1 flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3">
                             <div>
                                 <p className="text-xs font-bold text-white font-medium">Unilateral</p>
-                                <p className="text-[10px] text-zinc-500">Each side individually</p>
+                                <p className="text-caption-xs text-zinc-500">Each side individually</p>
                             </div>
                             <button
                                 onClick={() => setIsUnilateral(v => !v)}
@@ -189,7 +189,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                 onChange={e => setFatigueFactor(parseFloat(e.target.value))}
                                 className="w-full accent-brand-primary"
                             />
-                            <div className="flex justify-between text-[9px] text-zinc-600 font-medium mt-0.5">
+                            <div className="flex justify-between text-caption-xs text-zinc-600 font-medium mt-0.5">
                                 <span>Low</span><span>High</span>
                             </div>
                         </div>
@@ -197,7 +197,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
                     {/* GIF / Preview URL */}
                     <div>
-                        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
                             GIF / Image URL <span className="text-zinc-700 normal-case">(optional)</span>
                         </label>
                         <input
@@ -216,7 +216,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
                     {/* Instructions */}
                     <div>
-                        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-caption-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
                             Instructions <span className="text-zinc-700 normal-case">(one step per line)</span>
                         </label>
                         <textarea
@@ -233,13 +233,13 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                 <div className="shrink-0 px-5 py-4 border-t border-zinc-800 flex gap-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors"
+                        className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors tap"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
-                        className="flex-1 py-3 bg-brand-primary text-black font-bold text-sm uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none"
+                        className="flex-1 py-3 bg-brand-primary text-black font-bold text-sm uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none tap"
                     >
                         <Save size={14} /> Create Exercise
                     </button>

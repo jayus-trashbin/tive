@@ -15,6 +15,8 @@ interface PlanHeaderProps {
     hasRoutines: boolean;
 }
 
+import { AppHeader } from '../ui/AppHeader';
+
 export const PlanHeader: React.FC<PlanHeaderProps> = ({
     isSelectionMode,
     toggleSelectionMode,
@@ -29,10 +31,7 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
     const [showMore, setShowMore] = useState(false);
 
     return (
-        <header
-            className="shrink-0 px-5 pb-4 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-30"
-            style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
-        >
+        <AppHeader>
             <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
                     <div className="section-title">Your Training Plans</div>
@@ -47,8 +46,7 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
                 {hasRoutines && (
                     <button
                         onClick={toggleSelectionMode}
-                        className={cn(
-                            "flex-1 h-11 text-[10px] font-bold uppercase tracking-widest transition-all rounded-xl text-center flex items-center justify-center border max-w-[80px]",
+                        className={cn("flex-1 h-11 text-caption-xs font-bold uppercase tracking-widest transition-all rounded-xl text-center flex items-center justify-center border max-w-[80px] tap",
                             isSelectionMode
                                 ? "bg-zinc-800 border-zinc-700 text-white"
                                 : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700"
@@ -120,12 +118,12 @@ export const PlanHeader: React.FC<PlanHeaderProps> = ({
                 <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={onStartCreate}
-                    className="flex-1 h-11 flex items-center justify-center gap-2 bg-brand-primary text-black font-bold uppercase tracking-wider text-[11px] rounded-xl cursor-pointer shadow-lg hover:brightness-110 transition-all"
+                    className="flex-1 h-11 flex items-center justify-center gap-2 bg-brand-primary text-black font-bold uppercase tracking-wider text-caption rounded-xl cursor-pointer shadow-lg hover:brightness-110 transition-all"
                 >
                     <Plus size={16} strokeWidth={3} />
                     CREATE
                 </motion.button>
             </div>
-        </header>
+        </AppHeader>
     );
 };

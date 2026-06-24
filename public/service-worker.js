@@ -13,7 +13,7 @@ const PRECACHE_ASSETS = [
 
 // Install Event: Pre-cache static assets
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  // Wait for SKIP_WAITING message to activate
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[Service Worker] Pre-caching offline page');
@@ -37,6 +37,13 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+});
+
+// Listen for messages from client
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Fetch Event: Network-first for API, Cache-first for images, Stale-while-revalidate for JS/CSS
@@ -100,7 +107,17 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         // Fallback to cache if network fails
-        return caches.match(event.request);
+        return caches.match(event.request).then(cached => {
+            if (cached) return cached;
+            // If it's a navigation request and no cache, fallback to index.html
+            if (event.request.mode === 'navigate') {
+                return caches.match('/index.html');
+            }
+            return new Response('Network error happened', {
+                status: 408,
+                headers: { 'Content-Type': 'text/plain' },
+            });
+        });
       })
   );
 });

@@ -41,7 +41,7 @@ export const ConsistencyCard: React.FC<ConsistencyCardProps> = ({ data }) => {
                     <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">
                         <AlertTriangle className="w-4 h-4 text-red-400" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-red-300 uppercase tracking-wider">Conflict Detected</span>
+                            <span className="text-caption-xs text-red-300 uppercase tracking-wider">Conflict Detected</span>
                             <span className="text-sm font-semibold text-red-200">
                                 {DAYS[data.problematicDay] || 'Day'}s are tricky
                             </span>

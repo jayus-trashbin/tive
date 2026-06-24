@@ -55,12 +55,12 @@ export const RestTimerOverlay = () => {
                 if (userStats.isVibrationEnabled !== false && navigator.vibrate) navigator.vibrate(10);
                 addRestTime(seconds);
             }}
-            className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-zinc-800 border border-white/5 active:bg-zinc-700 active:scale-95 transition-all"
+            className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-zinc-800 border border-white/5 active:bg-zinc-700 tap"
         >
             <span className={cn("text-xs font-bold", seconds > 0 ? "text-brand-success" : "text-brand-danger")}>
                 {seconds > 0 ? '+' : ''}{seconds}
             </span>
-            <span className="text-[9px] text-zinc-500 uppercase font-medium">Sec</span>
+            <span className="text-caption-xs text-zinc-500 uppercase font-medium">Sec</span>
         </button>
     );
 
@@ -70,7 +70,7 @@ export const RestTimerOverlay = () => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-[100] bg-zinc-950 border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] overflow-hidden pb-safe"
+            className="fixed inset-x-0 bottom-0 z-modal bg-zinc-950 border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] overflow-hidden pb-safe"
         >
             {/* Progress Bar Background */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-zinc-900">
@@ -116,12 +116,12 @@ export const RestTimerOverlay = () => {
                                     <img src={nextExercise.staticImageUrl || (nextExercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(nextExercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" loading="lazy" alt="" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">Next Up</p>
+                                    <p className="text-caption-xs font-bold text-brand-primary uppercase tracking-widest">Next Up</p>
                                     <p className="text-sm font-bold text-white truncate">{nextExercise.name}</p>
                                 </div>
                                 <div className="text-right shrink-0 pr-2">
                                     <p className="text-xs font-bold text-zinc-400">{remainingSets} sets</p>
-                                    <p className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider">Left</p>
+                                    <p className="text-caption-xs font-medium text-zinc-500 uppercase tracking-wider">Left</p>
                                 </div>
                             </motion.div>
                         )}
@@ -142,7 +142,7 @@ export const RestTimerOverlay = () => {
                             if (userStats.isVibrationEnabled !== false && navigator.vibrate) navigator.vibrate(20);
                             skipRest();
                         }}
-                        className="w-full py-4 bg-white text-black font-bold text-lg rounded-2xl shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-white text-black font-bold text-lg rounded-2xl shadow-lg flex items-center justify-center gap-2 tap"
                     >
                         <ChevronsRight size={24} className="text-black" />
                         SKIP REST

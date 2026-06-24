@@ -120,7 +120,7 @@ const RecoveryTimeline: React.FC = () => {
                             className="w-2 h-2 rounded-full"
                             style={{ background: MUSCLE_COLORS[muscle] }}
                         />
-                        <span className="text-[9px] font-medium text-zinc-500 capitalize">{muscle}</span>
+                        <span className="text-caption-xs font-medium text-zinc-500 capitalize">{muscle}</span>
                     </div>
                 ))}
             </div>

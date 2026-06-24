@@ -56,20 +56,20 @@ const SupersetGroup: React.FC<Props> = ({
                     <div className="flex items-center justify-center w-5 h-5 rounded-sm bg-amber-500 text-black">
                         <Link2 size={11} strokeWidth={3} />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 font-heading">
+                    <span className="text-caption-xs font-bold uppercase tracking-widest text-amber-400 font-heading">
                         Superset
                     </span>
-                    <span className="hidden text-[9px] text-amber-500/60 font-medium sm:inline truncate max-w-[160px]">
+                    <span className="hidden text-caption-xs text-amber-500/60 font-medium sm:inline truncate max-w-[160px]">
                         {exerciseNames}
                     </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     {allDone ? (
-                        <span className="text-[9px] font-bold text-brand-success uppercase tracking-wider">
+                        <span className="text-caption-xs font-bold text-brand-success uppercase tracking-wider">
                             ✓ Done
                         </span>
                     ) : (
-                        <span className="flex items-center gap-1 text-[9px] text-amber-400 font-bold">
+                        <span className="flex items-center gap-1 text-caption-xs text-amber-400 font-bold">
                             <Zap size={9} />
                             {items.length} exercises
                         </span>
@@ -89,7 +89,7 @@ const SupersetGroup: React.FC<Props> = ({
                         )}
 
                         {/* Round label pill in top-left */}
-                        <div className="absolute top-4 left-3 z-20 w-5 h-5 rounded-sm bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[9px] font-bold flex items-center justify-center font-medium">
+                        <div className="absolute top-4 left-3 z-20 w-5 h-5 rounded-sm bg-amber-500/20 border border-amber-500/40 text-amber-400 text-caption-xs font-bold flex items-center justify-center font-medium">
                             {String.fromCharCode(65 + index)}{/* A, B, C… */}
                         </div>
 
@@ -116,7 +116,7 @@ const SupersetGroup: React.FC<Props> = ({
                     animate={{ opacity: 1, y: 0 }}
                     className="px-4 py-2 bg-brand-success/5 border-t border-brand-success/20 flex items-center gap-2"
                 >
-                    <span className="text-[10px] text-brand-success font-bold uppercase tracking-wider">
+                    <span className="text-caption-xs text-brand-success font-bold uppercase tracking-wider">
                         Superset complete — rest before next round
                     </span>
                 </motion.div>

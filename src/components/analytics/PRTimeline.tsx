@@ -44,7 +44,7 @@ const PRTimeline: React.FC = () => {
                     <Trophy size={20} className="text-zinc-600" />
                 </div>
                 <p className="text-xs font-medium text-zinc-500 uppercase">No PRs recorded yet</p>
-                <p className="text-[10px] text-zinc-600 mt-1 max-w-[200px]">Push your limits to see your achievements here.</p>
+                <p className="text-caption-xs text-zinc-600 mt-1 max-w-[200px]">Push your limits to see your achievements here.</p>
             </div>
         );
     }
@@ -53,12 +53,12 @@ const PRTimeline: React.FC = () => {
         <div className="space-y-4">
             {/* Filter Row */}
             <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">Filter:</span>
+                <span className="text-caption-xs font-bold text-zinc-600 uppercase tracking-wider">Filter:</span>
                 <div className="relative">
                     <button
                         onClick={() => setDropdownOpen(v => !v)}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-lg border transition-colors",
+                            "flex items-center gap-1.5 px-2.5 py-1 text-caption-xs font-bold rounded-lg border transition-colors",
                             activeEx
                                 ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary"
                                 : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -81,7 +81,7 @@ const PRTimeline: React.FC = () => {
                                 >
                                     <button
                                         onClick={() => { setFilterExId(null); setDropdownOpen(false); }}
-                                        className="w-full text-left px-3 py-2 text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors border-b border-zinc-800"
+                                        className="w-full text-left px-3 py-2 text-caption-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors border-b border-zinc-800"
                                     >
                                         All Exercises
                                     </button>
@@ -90,7 +90,7 @@ const PRTimeline: React.FC = () => {
                                             key={ex.id}
                                             onClick={() => { setFilterExId(ex.id); setDropdownOpen(false); }}
                                             className={cn(
-                                                "w-full text-left px-3 py-2 text-[10px] font-bold transition-colors border-b border-zinc-800 last:border-0",
+                                                "w-full text-left px-3 py-2 text-caption-xs font-bold transition-colors border-b border-zinc-800 last:border-0",
                                                 filterExId === ex.id
                                                     ? "text-brand-primary bg-brand-primary/5"
                                                     : "text-zinc-400 hover:text-white hover:bg-zinc-800"
@@ -111,7 +111,7 @@ const PRTimeline: React.FC = () => {
                     </button>
                 )}
 
-                <span className="ml-auto text-[9px] text-zinc-700 font-medium">{filtered.length} PR{filtered.length !== 1 ? 's' : ''}</span>
+                <span className="ml-auto text-caption-xs text-zinc-700 font-medium">{filtered.length} PR{filtered.length !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Timeline */}
@@ -141,7 +141,7 @@ const PRTimeline: React.FC = () => {
                                 <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl hover:border-zinc-700 transition-colors">
                                     <div className="flex justify-between items-start mb-1">
                                         <h3 className="text-xs font-bold text-white font-medium uppercase truncate mr-2">{pr.exerciseName}</h3>
-                                        <span className="text-[9px] font-medium text-zinc-500 flex items-center gap-1 shrink-0">
+                                        <span className="text-caption-xs font-medium text-zinc-500 flex items-center gap-1 shrink-0">
                                             <Calendar size={9} />
                                             {date.toLocaleDateString()}
                                         </span>
@@ -149,9 +149,9 @@ const PRTimeline: React.FC = () => {
 
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-lg font-bold text-brand-primary font-medium tracking-tighter">
-                                            {pr.estimated1RM} <span className="text-[10px] text-zinc-600">KG (1RM)</span>
+                                            {pr.estimated1RM} <span className="text-caption-xs text-zinc-600">KG (1RM)</span>
                                         </span>
-                                        <span className="text-[10px] font-medium text-zinc-500">
+                                        <span className="text-caption-xs font-medium text-zinc-500">
                                             {pr.weight}kg × {pr.reps}
                                         </span>
                                     </div>
@@ -159,7 +159,7 @@ const PRTimeline: React.FC = () => {
                                     {isRecent && (
                                         <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-lg">
                                             <Trophy size={10} className="text-brand-primary" />
-                                            <span className="text-[8px] font-bold text-brand-primary uppercase tracking-wider">New Record</span>
+                                            <span className="text-caption-xs font-bold text-brand-primary uppercase tracking-wider">New Record</span>
                                         </div>
                                     )}
                                 </div>

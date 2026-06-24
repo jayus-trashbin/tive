@@ -62,13 +62,13 @@ export const ExerciseInfo: React.FC<Props> = ({ exercise }) => {
                     {/* Primary Muscle Pill */}
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={cn(
-                            'px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border',
+                            'px-2.5 py-1 rounded-md text-caption-xs font-bold uppercase tracking-wide border',
                             getMuscleColor(exercise.targetMuscle)
                         )}>
                             {exercise.targetMuscle}
                         </span>
                         {exercise.isUnilateral && (
-                            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border border-zinc-800 bg-zinc-900 text-zinc-500 flex items-center gap-1.5">
+                            <span className="px-2.5 py-1 rounded-md text-caption-xs font-bold uppercase tracking-wide border border-zinc-800 bg-zinc-900 text-zinc-500 flex items-center gap-1.5">
                                 <Target size={9} />
                                 Unilateral
                             </span>
@@ -83,14 +83,14 @@ export const ExerciseInfo: React.FC<Props> = ({ exercise }) => {
                 {/* Personal Record Badge */}
                 {exercise.personalRecord && (
                     <div className="flex flex-col items-end shrink-0 bg-gradient-to-br from-brand-primary/20 to-brand-primary/5 px-4 py-3 rounded-2xl border border-brand-primary/20">
-                        <span className="text-[9px] font-bold text-brand-primary uppercase tracking-widest flex items-center gap-1 mb-0.5">
+                        <span className="text-caption-xs font-bold text-brand-primary uppercase tracking-widest flex items-center gap-1 mb-0.5">
                             <Trophy size={9} /> Best
                         </span>
                         <div className="flex items-baseline gap-1">
                             <span className="text-2xl font-bold text-white font-medium leading-none">
                                 {exercise.personalRecord}
                             </span>
-                            <span className="text-[10px] text-zinc-400 font-bold uppercase">KG</span>
+                            <span className="text-caption-xs text-zinc-400 font-bold uppercase">KG</span>
                         </div>
                     </div>
                 )}
@@ -105,7 +105,7 @@ export const ExerciseInfo: React.FC<Props> = ({ exercise }) => {
                         {equipMeta.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Equipment</div>
+                        <div className="text-caption-xs text-zinc-500 font-bold uppercase tracking-widest">Equipment</div>
                         <div className="text-sm font-bold text-white capitalize">{equipMeta.label}</div>
                     </div>
                     <Dumbbell size={14} className="text-zinc-700 shrink-0" />
@@ -118,18 +118,18 @@ export const ExerciseInfo: React.FC<Props> = ({ exercise }) => {
                             <Users size={14} className="text-zinc-500" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Also Works</div>
+                            <div className="text-caption-xs text-zinc-500 font-bold uppercase tracking-widest mb-2">Also Works</div>
                             <div className="flex flex-wrap gap-1.5">
                                 {secondaryMuscles.slice(0, 5).map((muscle, i) => (
                                     <span
                                         key={i}
-                                        className="px-2 py-0.5 rounded-md text-[10px] font-semibold text-zinc-400 bg-zinc-800 border border-zinc-700/80 capitalize"
+                                        className="px-2 py-0.5 rounded-md text-caption-xs font-semibold text-zinc-400 bg-zinc-800 border border-zinc-700/80 capitalize"
                                     >
                                         {muscle.toLowerCase()}
                                     </span>
                                 ))}
                                 {secondaryMuscles.length > 5 && (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold text-zinc-600 bg-zinc-900 border border-zinc-800">
+                                    <span className="px-2 py-0.5 rounded-md text-caption-xs font-semibold text-zinc-600 bg-zinc-900 border border-zinc-800">
                                         +{secondaryMuscles.length - 5}
                                     </span>
                                 )}

@@ -64,12 +64,12 @@ const OneRMProgress: React.FC = () => {
             const rpe = payload.find(p => p.dataKey === 'rpe');
             return (
                 <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-xl">
-                    <p className="text-[10px] text-zinc-500 font-medium mb-1 uppercase">
+                    <p className="text-caption-xs text-zinc-500 font-medium mb-1 uppercase">
                         {new Date(label).toLocaleDateString()}
                     </p>
                     {rm && (
                         <p className="text-sm font-bold text-brand-primary">
-                            {rm.value} kg <span className="text-zinc-500 font-normal text-[10px]">e1RM</span>
+                            {rm.value} kg <span className="text-zinc-500 font-normal text-caption-xs">e1RM</span>
                         </p>
                     )}
                     {rpe && (
@@ -136,7 +136,7 @@ const OneRMProgress: React.FC = () => {
                     {rpeData.length > 0 && (
                         <div className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-amber-400" />
-                            <span className="text-[9px] font-medium text-zinc-500 uppercase">RPE</span>
+                            <span className="text-caption-xs font-medium text-zinc-500 uppercase">RPE</span>
                         </div>
                     )}
                     <div className="text-right">

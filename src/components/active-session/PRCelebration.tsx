@@ -56,7 +56,7 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -30, scale: 0.9 }}
                     transition={{ type: 'spring', damping: 18, stiffness: 320 }}
-                    className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none"
+                    className="fixed top-20 left-1/2 -translate-x-1/2 z-modal pointer-events-none"
                 >
                     <div className="relative flex flex-col items-center">
                         {particles.map(p => (
@@ -81,7 +81,7 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                             className="absolute inset-0 rounded-full pointer-events-none"
                             style={{ background: 'radial-gradient(circle, rgba(190,242,100,0.3) 0%, transparent 70%)' }}
                         />
-                        <div className="relative bg-zinc-950 border border-brand-primary/50 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg">
+                        <div className="relative bg-zinc-950 border border-brand-primary/50 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg" role="status" aria-live="polite">
                             <motion.div
                                 initial={{ rotate: -25, scale: 0 }}
                                 animate={{ rotate: [-25, 15, -8, 5, 0], scale: 1 }}
@@ -92,7 +92,7 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                             <div>
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                     <Zap size={10} className="text-brand-primary" />
-                                    <span className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">
+                                    <span className="text-caption-xs font-bold text-brand-primary uppercase tracking-widest">
                                         New PR!
                                     </span>
                                 </div>

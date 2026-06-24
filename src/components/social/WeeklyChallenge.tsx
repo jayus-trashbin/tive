@@ -82,11 +82,11 @@ const WeeklyChallenge: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Flame size={14} className="text-orange-400" />
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <span className="text-caption-xs font-bold text-zinc-500 uppercase tracking-widest">
                         Weekly Challenge
                     </span>
                 </div>
-                <span className="text-[9px] font-medium text-zinc-600">{weekLabel}</span>
+                <span className="text-caption-xs font-medium text-zinc-600">{weekLabel}</span>
             </div>
 
             {/* Challenge selector */}
@@ -96,7 +96,7 @@ const WeeklyChallenge: React.FC = () => {
                         key={c.type}
                         onClick={() => setSelected(c.type)}
                         className={cn(
-                            'flex-1 py-2 px-1 rounded-lg border text-[8px] font-bold uppercase transition-all text-center',
+                            'flex-1 py-2 px-1 rounded-lg border text-caption-xs font-bold uppercase transition-all text-center',
                             selected === c.type
                                 ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
                                 : 'border-zinc-800 text-zinc-600 hover:border-zinc-700'
@@ -124,7 +124,7 @@ const WeeklyChallenge: React.FC = () => {
                             <span className="text-xs font-bold text-white">{challenge.label}</span>
                             {done && <CheckCircle2 size={14} className="text-brand-success" />}
                         </div>
-                        <div className="text-[9px] font-medium text-zinc-500 mt-0.5">
+                        <div className="text-caption-xs font-medium text-zinc-500 mt-0.5">
                             Goal: {challenge.goal.toLocaleString()} {challenge.unit}
                         </div>
                     </div>
@@ -161,7 +161,7 @@ const WeeklyChallenge: React.FC = () => {
                     <motion.div
                         initial={{ scale: 0.9 }}
                         animate={{ scale: 1 }}
-                        className="text-center text-[10px] font-bold text-brand-success mt-3"
+                        className="text-center text-caption-xs font-bold text-brand-success mt-3"
                     >
                         🎉 Challenge Complete!
                     </motion.div>
@@ -170,7 +170,7 @@ const WeeklyChallenge: React.FC = () => {
 
             {/* Daily activity dots */}
             <div>
-                <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-2">This Week</div>
+                <div className="text-caption-xs font-bold text-zinc-600 uppercase tracking-widest mb-2">This Week</div>
                 <div className="flex gap-2 justify-between">
                     {dayDots.map((d, i) => {
                         const today = new Date();
@@ -193,11 +193,11 @@ const WeeklyChallenge: React.FC = () => {
                                 )}>
                                     {d.hasSession
                                         ? <CheckCircle2 size={14} />
-                                        : <span className="text-[10px] font-bold">{d.label}</span>
+                                        : <span className="text-caption-xs font-bold">{d.label}</span>
                                     }
                                 </div>
                                 <span className={cn(
-                                    'text-[8px] font-medium',
+                                    'text-caption-xs font-medium',
                                     isToday ? 'text-brand-primary' : 'text-zinc-700'
                                 )}>
                                     {d.label}

@@ -86,7 +86,7 @@ const FrequencyHeatmap: React.FC = () => {
             {/* Day-of-week labels */}
             <div className="flex gap-1 mb-1 pl-0">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                    <div key={i} className="w-[10px] text-center text-[7px] text-zinc-700 font-bold">
+                    <div key={i} className="w-[10px] text-center text-caption-xs text-zinc-700 font-bold">
                         {d}
                     </div>
                 ))}
@@ -113,11 +113,11 @@ const FrequencyHeatmap: React.FC = () => {
 
             {/* Legend */}
             <div className="flex items-center gap-2 mt-3 justify-end">
-                <span className="text-[8px] text-zinc-700 font-medium">Less</span>
+                <span className="text-caption-xs text-zinc-700 font-medium">Less</span>
                 {([0, 1, 2, 3] as const).map(v => (
                     <div key={v} className={cn('w-[8px] h-[8px] rounded-lg', colorForIntensity(v).split(' ')[0])} />
                 ))}
-                <span className="text-[8px] text-zinc-700 font-medium">More</span>
+                <span className="text-caption-xs text-zinc-700 font-medium">More</span>
             </div>
 
             {/* Drill-down panel */}
@@ -131,7 +131,7 @@ const FrequencyHeatmap: React.FC = () => {
                     >
                         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-bold text-zinc-300 font-medium flex items-center gap-1">
+                                <span className="text-caption-xs font-bold text-zinc-300 font-medium flex items-center gap-1">
                                     <CalendarIcon size={10} className="text-brand-primary" />
                                     {new Date(selected.date).toLocaleDateString(undefined, {
                                         weekday: 'short', month: 'short', day: 'numeric'
@@ -144,8 +144,8 @@ const FrequencyHeatmap: React.FC = () => {
                             <div className="space-y-1.5">
                                 {selected.sessions.map((s, i) => (
                                     <div key={i} className="flex items-center justify-between">
-                                        <span className="text-[10px] text-white font-bold truncate mr-2">{s.name}</span>
-                                        <span className="text-[9px] text-zinc-500 font-medium shrink-0">
+                                        <span className="text-caption-xs text-white font-bold truncate mr-2">{s.name}</span>
+                                        <span className="text-caption-xs text-zinc-500 font-medium shrink-0">
                                             {s.volumeLoad > 1000 ? `${(s.volumeLoad / 1000).toFixed(1)}k` : s.volumeLoad} kg
                                         </span>
                                     </div>

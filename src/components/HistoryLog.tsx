@@ -4,6 +4,7 @@ import { useActiveSessions } from '../store/selectors';
 import { startOfDay, endOfDay } from '../utils/date';
 import { Dumbbell, Filter } from 'lucide-react';
 import { EmptyState } from './ui';
+import { Page } from './ui/Page';
 import { AnimatePresence } from 'framer-motion';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { useTranslation } from '../i18n';
@@ -68,7 +69,7 @@ const HistoryLog: React.FC = () => {
                 onShowCalendar={() => setShowCalendar(true)}
             />
 
-            <div className="flex-1 overflow-y-auto px-5 pb-32 no-scrollbar scroll-smooth">
+            <Page className="flex-1 px-page">
                 {viewMode === 'journal' ? (
                     filteredSessions.length === 0 ? (
                         <EmptyState
@@ -118,7 +119,7 @@ const HistoryLog: React.FC = () => {
                         <AnalyticsDashboard />
                     </Suspense>
                 )}
-            </div>
+            </Page>
 
             <AnimatePresence>
                 {selectedSession && (

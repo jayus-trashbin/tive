@@ -10,6 +10,8 @@ interface HistoryHeaderProps {
     onShowCalendar: () => void;
 }
 
+import { AppHeader } from '../ui/AppHeader';
+
 export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
     viewMode,
     setViewMode,
@@ -18,10 +20,7 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
     onShowCalendar
 }) => {
     return (
-        <header
-            className="shrink-0 px-5 pb-4 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-30"
-            style={{ paddingTop: `calc(var(--sat) + 1.25rem)` }}
-        >
+        <AppHeader>
             <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
                     <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Your Workouts</div>
@@ -73,13 +72,13 @@ export const HistoryHeader: React.FC<HistoryHeaderProps> = ({
                     <button
                         onClick={onShowCalendar}
                         aria-label="Show Calendar"
-                        className="px-3 bg-zinc-900 border border-zinc-800 hover:border-brand-primary/50 text-zinc-400 hover:text-brand-primary transition-colors rounded-xl"
+                        className="px-3 bg-zinc-900 border border-zinc-800 hover:border-brand-primary/50 text-zinc-400 hover:text-brand-primary transition-colors rounded-xl tap"
                     >
                         <CalendarIcon size={18} />
                     </button>
 
                 </div>
             )}
-        </header>
+        </AppHeader>
     );
 };

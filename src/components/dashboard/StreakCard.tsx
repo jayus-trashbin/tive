@@ -34,7 +34,7 @@ export const StreakCard: React.FC<StreakCardProps> = ({ streak, history }) => {
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Flame size={14} className={streak > 0 ? "text-orange-500" : "text-zinc-500"} />
-                        <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">Day Streak</span>
+                        <span className="text-caption-xs font-medium text-zinc-500 uppercase tracking-widest">Day Streak</span>
                     </div>
                     <div className="text-2xl font-black text-white leading-none tracking-tight flex items-center gap-2">
                         {streak}
@@ -49,7 +49,7 @@ export const StreakCard: React.FC<StreakCardProps> = ({ streak, history }) => {
                             "w-full h-8 rounded-full transition-colors max-w-[8px]",
                             d.active ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" : "bg-zinc-800"
                         )} />
-                        <span className="text-[10px] font-medium text-zinc-500">{d.day}</span>
+                        <span className="text-caption-xs font-medium text-zinc-500">{d.day}</span>
                     </div>
                 ))}
             </div>

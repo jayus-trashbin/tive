@@ -31,7 +31,7 @@ const SocialHub: React.FC = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={cn(
-                            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all',
+                            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-caption-xs font-bold uppercase tracking-wider transition-all',
                             activeTab === tab.id
                                 ? 'bg-zinc-800 text-white'
                                 : 'text-zinc-600 hover:text-zinc-400'

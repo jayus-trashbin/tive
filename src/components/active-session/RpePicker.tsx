@@ -54,7 +54,7 @@ const RpePicker: React.FC<Props> = ({ isOpen, currentRpe, onSelect, onClose }) =
                         <Flame className="text-brand-warning" size={14} />
                         <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide">RPE / Intensity</span>
                     </div>
-                    <div className="text-[10px] text-zinc-500 font-medium">
+                    <div className="text-caption-xs text-zinc-500 font-medium">
                         {currentRpe >= 9 ? 'FAILURE' : currentRpe >= 7 ? 'HARD' : 'MODERATE'}
                     </div>
                 </div>

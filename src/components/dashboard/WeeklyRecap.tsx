@@ -122,7 +122,7 @@ export const WeeklyRecap: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 pt-safe"
+                    className="fixed inset-0 z-modal bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 pt-safe"
                 >
                     <motion.div
                         initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -151,22 +151,22 @@ export const WeeklyRecap: React.FC = () => {
                                 <div className="bg-black/50 border border-zinc-800/50 rounded-2xl p-4 flex flex-col items-center justify-center">
                                     <Activity size={20} className="text-brand-primary mb-2" />
                                     <div className="text-xl font-bold text-white mb-0.5">{stats.count}</div>
-                                    <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.workoutsLabel') || 'Workouts'}</div>
+                                    <div className="text-caption-xs text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.workoutsLabel') || 'Workouts'}</div>
                                 </div>
                                 <div className="bg-black/50 border border-zinc-800/50 rounded-2xl p-4 flex flex-col items-center justify-center">
                                     <TrendingUp size={20} className="text-brand-primary mb-2" />
                                     <div className="text-xl font-bold text-white mb-0.5">{stats.volume > 1000 ? (stats.volume / 1000).toFixed(1) + 'k' : stats.volume}</div>
-                                    <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.volumeLabel') || 'Volume (KG)'}</div>
+                                    <div className="text-caption-xs text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.volumeLabel') || 'Volume (KG)'}</div>
                                 </div>
                                 <div className="bg-black/50 border border-zinc-800/50 rounded-2xl p-4 flex flex-col items-center justify-center">
                                     <Flame size={20} className="text-brand-primary mb-2" />
                                     <div className="text-xl font-bold text-white mb-0.5">{stats.prs}</div>
-                                    <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.prsLabel') || 'New PRs'}</div>
+                                    <div className="text-caption-xs text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.prsLabel') || 'New PRs'}</div>
                                 </div>
                                 <div className="bg-black/50 border border-zinc-800/50 rounded-2xl p-4 flex flex-col items-center justify-center">
                                     <div className="text-2xl mb-1">💪</div>
                                     <div className="text-sm font-bold text-white mb-0.5 capitalize truncate w-full px-1">{stats.topMuscle || '-'}</div>
-                                    <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.topMuscleLabel') || 'Top Muscle'}</div>
+                                    <div className="text-caption-xs text-zinc-500 font-medium uppercase tracking-widest">{t('weeklyRecap.topMuscleLabel') || 'Top Muscle'}</div>
                                 </div>
                             </div>
 

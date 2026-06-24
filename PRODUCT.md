@@ -19,6 +19,7 @@ Tive is a high-performance strength training OS designed for serious lifters. It
 - **Offline-First:** Must work flawlessly in gym basements with poor connectivity.
 
 ## Design Constraints
-- **Color Strategy:** Restrained. Tinted Zinc neutrals (#09090b) with high-contrast primary accents (#ffffff).
-- **Typography:** Modern grotesque or geometric sans (Inter/Outfit). Mono for numerical data.
+- **Color Strategy:** Restrained. Tinted Zinc neutrals (#09090b) with Lime Accent (#bef264).
+- **Typography:** Inter (Global). JetBrains Mono for numerical data.
+- **Shape Language:** Rounded corners (8-24px) for organic usability.
 - **Z-Index Scale:** Semantic (raised: 10, modal: 100, toast: 200, debug: 9999).

@@ -200,7 +200,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] flex items-end justify-center"
+                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-modal flex items-end justify-center"
                 onClick={onClose}
             >
                 <motion.div
@@ -236,7 +236,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                 role="tab"
                                 aria-selected={activeTab === tab.id}
                                 className={cn(
-                                    'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-[10px] font-bold uppercase tracking-widest transition-all',
+                                    'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-caption-xs font-bold uppercase tracking-widest transition-all',
                                     activeTab === tab.id
                                         ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30'
                                         : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
@@ -288,7 +288,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                                 <div className="font-heading font-bold text-white text-sm uppercase">
                                                     {template.name}
                                                 </div>
-                                                <div className="font-medium text-[10px] text-zinc-500 mt-0.5">
+                                                <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
                                                     {template.category} · {template.exerciseCount} exercises
                                                 </div>
                                             </div>
@@ -324,7 +324,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                                         <div className="font-heading font-bold text-white text-sm uppercase">
                                                             {session.name}
                                                         </div>
-                                                        <div className="font-medium text-[10px] text-zinc-500 mt-0.5">
+                                                        <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
                                                             {exerciseCount} exercises · {setCount} sets · {new Date(session.date).toLocaleDateString()}
                                                         </div>
                                                     </div>
@@ -340,7 +340,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                         {/* External Import Tab */}
                         {activeTab === 'external' && (
                             <div className="space-y-4">
-                                <p className="font-medium text-[10px] text-zinc-400 leading-relaxed">
+                                <p className="font-medium text-caption-xs text-zinc-400 leading-relaxed">
                                     Paste a JSON routine or a **Hevy/Strong CSV** export.
                                     We'll extract the exercises to create a new routine.
                                 </p>
@@ -351,7 +351,7 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
                                     className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-medium text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
                                 />
                                 {jsonError && (
-                                    <div className="flex items-center gap-2 text-red-400 font-medium text-[10px]">
+                                    <div className="flex items-center gap-2 text-red-400 font-medium text-caption-xs">
                                         <AlertTriangle size={12} />
                                         {jsonError}
                                     </div>

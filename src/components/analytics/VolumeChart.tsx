@@ -122,7 +122,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ days = 30 }) => {
             </div>
 
             {/* Subtitle */}
-            <p className="text-[10px] font-bold text-zinc-500 text-center mt-2 uppercase tracking-widest">
+            <p className="text-caption-xs font-bold text-zinc-500 text-center mt-2 uppercase tracking-widest">
                 Daily Training Volume (Weight × Reps)
             </p>
         </div>

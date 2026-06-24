@@ -228,7 +228,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[95] bg-zinc-950 flex flex-col justify-between overflow-y-auto sm:p-4"
+            className="fixed inset-0 z-modal bg-zinc-950 flex flex-col justify-between overflow-y-auto sm:p-4"
         >
             {/* Confetti particles for PR */}
             <AnimatePresence>
@@ -252,7 +252,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                     delay: Math.random() * 0.3,
                                     ease: 'easeOut'
                                 }}
-                                className="fixed w-2 h-2 pointer-events-none z-[100]"
+                                className="fixed w-2 h-2 pointer-events-none z-modal"
                                 style={{
                                     backgroundColor: ['#bef264', '#facc15', '#f472b6', '#60a5fa', '#a78bfa'][
                                         Math.floor(Math.random() * 5)
@@ -295,7 +295,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     <h2 className="text-4xl font-black text-white tracking-tight mb-2">
                         {t('workoutSummary.title')}
                     </h2>
-                    <p className="text-[13px] font-medium text-zinc-400">
+                    <p className="text-body-sm font-medium text-zinc-400">
                         {session.name || t('workoutSummary.freeSession')} • {new Date(session.date).toLocaleDateString()}
                     </p>
 
@@ -309,7 +309,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.5 + i * 0.1, type: "spring", stiffness: 400 }}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider",
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-caption font-bold uppercase tracking-wider",
                                         b.bg, b.border, b.color
                                     )}
                                 >
@@ -332,7 +332,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     >
                         <div className="flex items-center gap-1.5 mb-3 opacity-70">
                             <Clock size={16} className="text-brand-primary" />
-                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Duration</span>
+                            <span className="text-caption text-zinc-400 uppercase font-bold tracking-wider">Duration</span>
                         </div>
                         <div className="text-3xl font-black text-white">
                             {formatDuration(stats.duration)}
@@ -348,7 +348,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     >
                         <div className="flex items-center gap-1.5 mb-3 opacity-70">
                             <Dumbbell size={16} className="text-brand-primary" />
-                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Volume</span>
+                            <span className="text-caption text-zinc-400 uppercase font-bold tracking-wider">Volume</span>
                         </div>
                         <div>
                             <div className="text-3xl font-black text-white flex items-baseline">
@@ -391,7 +391,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     >
                         <div className="flex items-center gap-1.5 mb-3 opacity-70">
                             <Target size={16} className="text-brand-primary" />
-                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Sets</span>
+                            <span className="text-caption text-zinc-400 uppercase font-bold tracking-wider">Sets</span>
                         </div>
                         <div>
                             <div className="text-3xl font-black text-white">
@@ -422,7 +422,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     >
                         <div className="flex items-center gap-1.5 mb-3 opacity-70">
                             <Zap size={16} className="text-brand-primary" />
-                            <span className="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Exercises</span>
+                            <span className="text-caption text-zinc-400 uppercase font-bold tracking-wider">Exercises</span>
                         </div>
                         <div className="text-3xl font-black text-white">
                             <AnimatedNumber value={stats.uniqueExercises} />
@@ -478,7 +478,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                     >
                         <div className="flex items-center gap-2 mb-3">
                             <TrendingUp size={14} className="text-zinc-500" />
-                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">vs Last Session</span>
+                            <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">vs Last Session</span>
                         </div>
                         <div className="space-y-3">
                             {perExerciseDelta.map((d, i) => {
@@ -498,7 +498,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                             <div className="flex items-center gap-3">
                                                 {/* Volume Delta */}
                                                 <div className="flex flex-col items-end justify-center">
-                                                    <span className="font-bold text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Volume</span>
+                                                    <span className="font-bold text-caption-xs text-zinc-500 uppercase tracking-wider mb-0.5">Volume</span>
                                                     {d.prev.vol === 0 ? (
                                                         <span className="font-bold text-xs text-zinc-400">New</span>
                                                     ) : (
@@ -515,7 +515,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                                 {/* e1RM Delta */}
                                                 {(d.prev.maxE1RM > 0 && d.e1rmDiff !== 0) && (
                                                     <div className="flex flex-col items-end justify-center border-l border-zinc-800/80 pl-3">
-                                                        <span className="font-bold text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">e1RM</span>
+                                                        <span className="font-bold text-caption-xs text-zinc-500 uppercase tracking-wider mb-0.5">e1RM</span>
                                                         <span className={cn(
                                                             "font-bold text-xs flex items-center gap-0.5",
                                                             isE1RMUp ? "text-brand-primary" : "text-red-400"
@@ -542,7 +542,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                         transition={{ delay: 0.6 }}
                         className="px-6 py-6 border-b border-zinc-800/50 flex flex-col items-center justify-center gap-2 bg-zinc-900/10"
                     >
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">
+                        <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider block mb-1">
                             Muscles Trained
                         </span>
                         <MuscleOverlay
@@ -575,7 +575,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                 {/* Coach Insights */}
                 {insights.length > 0 && (
                     <div className="px-6 py-4 border-b border-zinc-800/50 space-y-3">
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block mb-2">
+                        <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider block mb-2">
                             Coach Insights
                         </span>
                         {insights.map((insight, idx) => {
@@ -603,7 +603,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                     )} />
                                     <div>
                                         <h4 className="text-xs font-bold text-white mb-0.5">{insight.title}</h4>
-                                        <p className="text-[11px] text-zinc-400 leading-relaxed">{insight.body}</p>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">{insight.body}</p>
                                     </div>
                                 </motion.div>
                             );
@@ -623,7 +623,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
 
                     <button
                         onClick={onDismiss}
-                        className="w-full h-12 text-zinc-400 font-bold text-sm hover:text-white transition-colors flex items-center justify-center"
+                        className="w-full h-12 text-zinc-400 font-bold text-sm hover:text-white transition-colors flex items-center justify-center tap"
                     >
                         {t('workoutSummary.doneClose')}
                     </button>
@@ -658,7 +658,7 @@ const WorkoutSummary: React.FC<WorkoutSummaryProps> = ({
                                 </button>
                                 <button
                                     onClick={handleEnableReminder}
-                                    className="flex-1 h-12 rounded-xl bg-brand-primary text-black font-bold text-sm"
+                                    className="flex-1 h-12 rounded-xl bg-brand-primary text-black font-bold text-sm tap"
                                 >
                                     Ativar Lembrete
                                 </button>

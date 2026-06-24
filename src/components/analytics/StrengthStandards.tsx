@@ -94,7 +94,7 @@ export const StrengthStandards: React.FC = () => {
                 <div className="flex items-center gap-3 px-3 py-2.5 bg-orange-500/10 border border-orange-500/20 rounded-xl">
                     <AlertTriangle size={14} className="text-orange-400 shrink-0" />
                     <div>
-                        <p className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">Focus Area</p>
+                        <p className="text-caption-xs font-bold text-orange-400 uppercase tracking-wider">Focus Area</p>
                         <p className="text-xs text-zinc-300">
                             <span className="font-bold text-white">{weakest.subject}</span> is your weakest lift — {weakest.level}
                         </p>
@@ -128,7 +128,7 @@ export const StrengthStandards: React.FC = () => {
                                     <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-2xl">
                                         <p className="text-white font-bold text-sm">{d.subject}</p>
                                         <p className={cn('text-xs font-bold mt-0.5', LEVEL_COLOR[d.level])}>{d.level}</p>
-                                        <p className="text-zinc-500 text-[10px] mt-1">e1RM: {d.e1RM} kg · {d.ratio}× BW</p>
+                                        <p className="text-zinc-500 text-caption-xs mt-1">e1RM: {d.e1RM} kg · {d.ratio}× BW</p>
                                     </div>
                                 );
                             }}
@@ -149,14 +149,14 @@ export const StrengthStandards: React.FC = () => {
                                 : 'border-white/5 bg-black/20'
                         )}
                     >
-                        <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider truncate">
+                        <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider truncate">
                             {d.subject}
                         </span>
                         <span className={cn('text-sm font-bold mt-0.5', LEVEL_COLOR[d.level])}>
                             {d.level}
                         </span>
                         {d.hasData && (
-                            <span className="text-[9px] text-zinc-600 mt-0.5">{d.e1RM} kg</span>
+                            <span className="text-caption-xs text-zinc-600 mt-0.5">{d.e1RM} kg</span>
                         )}
                     </div>
                 ))}

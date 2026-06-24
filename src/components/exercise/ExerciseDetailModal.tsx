@@ -99,7 +99,7 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-xl"
+                    className="fixed inset-0 z-modal bg-black/90 backdrop-blur-xl"
                 />
 
                 {/* Modal Card */}
@@ -107,7 +107,7 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="fixed inset-0 sm:inset-4 md:inset-10 z-[75] flex items-center justify-center pointer-events-none"
+                    className="fixed inset-0 sm:inset-4 md:inset-10 z-modal flex items-center justify-center pointer-events-none"
                 >
                     <div className="w-full max-w-lg h-full sm:h-[90vh] bg-zinc-950 border-t sm:border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl pointer-events-auto relative">
 

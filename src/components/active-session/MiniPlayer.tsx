@@ -141,15 +141,18 @@ export const MiniPlayer = () => {
                     {/* Center: exercise + timer */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                            <span className={cn(
-                                "text-[9px] font-bold uppercase tracking-widest",
-                                isResting ? "text-amber-400" : "text-brand-primary"
-                            )}>
+                            <span 
+                                aria-live="polite"
+                                className={cn(
+                                    "text-caption-xs font-bold uppercase tracking-widest tabular-nums",
+                                    isResting ? "text-amber-400" : "text-brand-primary"
+                                )}
+                            >
                                 {isResting
                                     ? `Rest ${Math.floor(restRemaining / 60)}:${String(restRemaining % 60).padStart(2, '0')}`
                                     : duration}
                             </span>
-                            <span className="text-[8px] font-medium text-zinc-600">
+                            <span className="text-caption-xs font-medium text-zinc-600">
                                 {sessionInfo.completed}/{sessionInfo.total} sets
                             </span>
                         </div>
@@ -174,12 +177,12 @@ export const MiniPlayer = () => {
                                         sessionInfo.totalExercises
                                     );
                                 }}
-                                className="w-10 h-10 rounded-full bg-brand-primary/10 hover:bg-brand-primary/20 flex items-center justify-center text-brand-primary transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-brand-primary/10 hover:bg-brand-primary/20 flex items-center justify-center text-brand-primary tap"
                             >
                                 <Check size={18} strokeWidth={3} />
                             </button>
                         )}
-                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95 hidden sm:flex">
+                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white hidden sm:flex tap">
                             <Maximize2 size={16} />
                         </button>
                     </div>

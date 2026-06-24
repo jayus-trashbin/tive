@@ -141,11 +141,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         {/* Muscle Pills */}
                         <div className="flex flex-wrap gap-1">
                             {topMuscles.length > 0 ? topMuscles.map(m => (
-                                <span key={m} className="px-2 py-0.5 bg-brand-primary text-black text-[10px] font-bold uppercase tracking-widest rounded-full">
+                                <span key={m} className="px-2 py-0.5 bg-brand-primary text-black text-caption-xs font-bold uppercase tracking-widest rounded-full">
                                     {m}
                                 </span>
                             )) : (
-                                <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
+                                <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-caption-xs font-bold uppercase tracking-widest rounded-full">
                                     General
                                 </span>
                             )}
@@ -183,7 +183,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         <h3 className="text-lg font-bold text-white leading-tight mb-1 tracking-tight truncate">
                             {routine.name}
                         </h3>
-                        <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                        <div className="flex items-center gap-3 text-caption-xs font-bold text-zinc-400 uppercase tracking-wider">
                             <span className="flex items-center gap-1">
                                 <Layers size={12} className="text-brand-primary" />
                                 {displayIds.length} EX

@@ -53,7 +53,7 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={shouldReduceMotion ? { duration: 0 } : undefined}
-                    className="fixed inset-0 z-[90] bg-black/90 backdrop-blur-sm flex items-end justify-center p-4"
+                    className="fixed inset-0 z-modal bg-black/90 backdrop-blur-sm flex items-end justify-center p-4"
                     onClick={handleSkip}
                 >
                     <motion.div
@@ -71,7 +71,7 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                             </h3>
                             <button
                                 onClick={handleSkip}
-                                className="p-1 text-zinc-500 hover:text-white transition-colors"
+                                className="p-1 text-zinc-500 hover:text-white transition-colors tap"
                             >
                                 <X size={20} />
                             </button>
@@ -104,13 +104,13 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                                             {pendingMuscleGroups.slice(0, 5).map((muscle) => (
                                                 <span
                                                     key={muscle}
-                                                    className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-medium text-[10px] text-lime-400 uppercase font-bold"
+                                                    className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-medium text-caption-xs text-lime-400 uppercase font-bold"
                                                 >
                                                     {muscle}
                                                 </span>
                                             ))}
                                             {pendingMuscleGroups.length > 5 && (
-                                                <span className="font-medium text-[10px] text-zinc-500 font-bold self-center">
+                                                <span className="font-medium text-caption-xs text-zinc-500 font-bold self-center">
                                                     +{pendingMuscleGroups.length - 5}
                                                 </span>
                                             )}
@@ -124,14 +124,14 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
                         <div className="flex border-t border-zinc-800">
                             <button
                                 onClick={handleSkip}
-                                className="flex-1 px-4 py-4 font-medium text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center"
+                                className="flex-1 px-4 py-4 font-medium text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center tap"
                             >
                                 Skip
                             </button>
                             <div className="w-px bg-zinc-800" />
                             <button
                                 onClick={handleTakePhoto}
-                                className="flex-1 px-4 py-4 bg-lime-400 font-medium text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors"
+                                className="flex-1 px-4 py-4 bg-lime-400 font-medium text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors tap"
                             >
                                 <Camera size={18} />
                                 <span>Take Photo</span>

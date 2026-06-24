@@ -145,7 +145,7 @@ export const SmartExerciseMedia: React.FC<Props> = ({ exercise, isFetchingDetail
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                             />
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Loading</span>
+                            <span className="text-caption-xs text-zinc-500 uppercase tracking-widest font-bold">Loading</span>
                         </div>
                     </motion.div>
                 )}
@@ -234,7 +234,7 @@ export const SmartExerciseMedia: React.FC<Props> = ({ exercise, isFetchingDetail
                             >
                                 <Play size={14} fill="currentColor" />
                                 Load Animation
-                                <span className="text-zinc-500 text-[10px] font-medium">~3MB</span>
+                                <span className="text-zinc-500 text-caption-xs font-medium">~3MB</span>
                             </button>
                         </div>
                     )}

@@ -51,8 +51,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(({
   return (
     <button
       ref={ref}
-      className={cn(
-        'inline-flex items-center justify-center shrink-0 transition-all duration-150',
+      className={cn('inline-flex items-center justify-center shrink-0 transition-all duration-150 tap',
         'active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-1 focus-visible:ring-offset-black',
         'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none',
         container,

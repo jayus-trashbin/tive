@@ -220,16 +220,16 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                             exit={{ opacity: 0, y: 2 }}
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900/95 backdrop-blur border border-zinc-800 p-2 rounded-lg pointer-events-none shadow-xl z-10 min-w-[90px] text-center"
                         >
-                            <div className="text-[10px] uppercase font-bold text-zinc-300 tracking-wider mb-1">
+                            <div className="text-caption-xs uppercase font-bold text-zinc-300 tracking-wider mb-1">
                                 {hoveredMuscle.name}
                             </div>
                             {hoveredMuscle.volume !== undefined && (
-                                <div className="text-[11px] font-black text-brand-primary">
+                                <div className="text-caption font-black text-brand-primary">
                                     {Math.round(hoveredMuscle.volume)}kg
                                 </div>
                             )}
                             {hoveredMuscle.score !== undefined && (
-                                <div className="text-[11px] font-black text-white">
+                                <div className="text-caption font-black text-white">
                                     Readiness: {Math.round(hoveredMuscle.score * 100)}%
                                 </div>
                             )}
@@ -243,7 +243,7 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                 <div className="flex gap-1">
                     <button
                         onClick={() => setView('front')}
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all rounded-l-lg ${view === 'front'
+                        className={`px-4 py-1.5 text-caption-xs font-black uppercase tracking-wider transition-all rounded-l-lg ${view === 'front'
                             ? 'bg-brand-primary text-black shadow-[0_0_12px_-2px] shadow-brand-primary/40'
                             : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:text-white'
                             }`}
@@ -252,7 +252,7 @@ const MuscleOverlay: React.FC<MuscleOverlayProps> = ({
                     </button>
                     <button
                         onClick={() => setView('back')}
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all rounded-r-lg ${view === 'back'
+                        className={`px-4 py-1.5 text-caption-xs font-black uppercase tracking-wider transition-all rounded-r-lg ${view === 'back'
                             ? 'bg-brand-primary text-black shadow-[0_0_12px_-2px] shadow-brand-primary/40'
                             : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:text-white'
                             }`}

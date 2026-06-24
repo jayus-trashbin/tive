@@ -130,13 +130,13 @@ const ExerciseGroup: React.FC<Props> = ({
                             </h3>
                             <div className="flex items-center gap-2.5 mt-1">
                                 <span className={cn(
-                                    "text-[10px] font-bold uppercase tracking-wider",
+                                    "text-caption-xs font-bold uppercase tracking-wider",
                                     isSuperset ? 'text-amber-500' : 'text-zinc-500'
                                 )}>
                                     {exercise.targetMuscle}
                                 </span>
                                 {exercise.personalRecord && (
-                                    <span className="flex items-center gap-1 text-[10px] font-medium">
+                                    <span className="flex items-center gap-1 text-caption-xs font-medium">
                                         <Trophy size={9} className="text-brand-warning" />
                                         <span className="text-brand-warning">{exercise.personalRecord}kg</span>
                                     </span>
@@ -148,7 +148,7 @@ const ExerciseGroup: React.FC<Props> = ({
                         <div className="flex gap-1 items-center shrink-0">
                             {/* Progress badge */}
                             <div className={cn(
-                                "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black mr-1 border",
+                                "flex items-center gap-1 px-2 py-0.5 rounded-full text-caption-xs font-black mr-1 border",
                                 allSetsCompleted
                                     ? "bg-brand-success/10 text-brand-success border-brand-success/20"
                                     : completedCount > 0
@@ -191,14 +191,14 @@ const ExerciseGroup: React.FC<Props> = ({
                     {blockNote && (
                         <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2 bg-amber-500/8 border border-amber-500/20 rounded-lg">
                             <MessageSquare size={11} className="text-amber-400 mt-0.5 shrink-0" />
-                            <span className="text-[10px] text-amber-300 font-medium leading-relaxed">{blockNote}</span>
+                            <span className="text-caption-xs text-amber-300 font-medium leading-relaxed">{blockNote}</span>
                         </div>
                     )}
 
                     {/* Contextual hint — shown only when there's a previous set to auto-fill */}
                     {previousSets.some(p => p && (p.weight > 0 || p.reps > 0)) && completedCount === 0 && (
                         <div className="px-4 pb-1">
-                            <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
+                            <p className="text-caption-xs text-zinc-600 font-medium tracking-wide">
                                 Tap previous value to auto-fill
                             </p>
                         </div>

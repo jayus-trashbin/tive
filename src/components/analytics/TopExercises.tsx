@@ -62,7 +62,7 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
                         >
                             <div className="flex items-center gap-3 p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors group">
                                 {/* Rank */}
-                                <span className="text-[10px] font-bold text-zinc-600 w-4 shrink-0">
+                                <span className="text-caption-xs font-bold text-zinc-600 w-4 shrink-0">
                                     {i + 1}
                                 </span>
 
@@ -84,11 +84,11 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-[11px] font-bold text-white truncate group-hover:text-brand-primary transition-colors">
+                                        <span className="text-caption font-bold text-white truncate group-hover:text-brand-primary transition-colors">
                                             {exercise.name}
                                         </span>
                                         <span className={cn(
-                                            'text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border shrink-0',
+                                            'text-caption-xs font-bold uppercase px-1.5 py-0.5 rounded border shrink-0',
                                             muscleClass
                                         )}>
                                             {exercise.targetMuscle}
@@ -105,8 +105,8 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
 
                                 {/* Stats */}
                                 <div className="text-right shrink-0">
-                                    <div className="text-[11px] font-bold text-white font-medium">{setCount}s</div>
-                                    <div className="text-[9px] text-zinc-600 font-medium">{formatVolume(totalVolume)}kg</div>
+                                    <div className="text-caption font-bold text-white font-medium">{setCount}s</div>
+                                    <div className="text-caption-xs text-zinc-600 font-medium">{formatVolume(totalVolume)}kg</div>
                                 </div>
 
                                 <ChevronRight size={12} className="text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />

@@ -156,7 +156,7 @@ const SetRow: React.FC<Props> = ({
                             className="flex items-center gap-1 pl-[44px] mb-1 cursor-pointer group w-fit"
                             title="Tap to auto-fill"
                         >
-                            <span className="text-[10px] font-mono text-zinc-400 group-hover:text-brand-primary transition-colors flex items-center gap-1">
+                            <span className="text-caption-xs font-mono text-zinc-400 group-hover:text-brand-primary transition-colors flex items-center gap-1">
                                 ↑ {previousSet.weight}kg × {previousSet.reps}
                             </span>
                         </div>
@@ -165,13 +165,13 @@ const SetRow: React.FC<Props> = ({
                     {/* e1RM — live estimated 1-rep max */}
                     {e1rm !== null && (
                         <div className="pl-[44px] mb-1 flex items-center gap-2">
-                            <span className="text-[10px] font-mono text-zinc-500">
+                            <span className="text-caption-xs font-mono text-zinc-500">
                                 e1RM ≈ {e1rm}kg
                             </span>
                             {/* C-02: Delta badge — shown only when set is completed */}
                             {delta !== null && (
                                 <span className={cn(
-                                    "text-[9px] font-bold font-mono px-1.5 py-0.5 rounded-md",
+                                    "text-caption-xs font-bold font-mono px-1.5 py-0.5 rounded-md",
                                     delta > 0 ? "text-brand-success bg-brand-success/10" :
                                     delta < 0 ? "text-red-400 bg-red-400/10" :
                                     "text-zinc-500 bg-zinc-800"
@@ -222,8 +222,9 @@ const SetRow: React.FC<Props> = ({
                                     </button>
                                     <input
                                         id={getInputId('weight')}
-                                        type="number"
+                                        type="text"
                                         inputMode="decimal"
+                                        pattern="[0-9.,]*"
                                         value={set.weight === 0 ? '' : set.weight}
                                         onChange={(e) => handleChange(e, 'weight')}
                                         onFocus={(e) => { handleFocus(e, 'weight'); e.target.select(); }}
@@ -234,8 +235,9 @@ const SetRow: React.FC<Props> = ({
                             ) : (
                                 <input
                                     id={getInputId('weight')}
-                                    type="number"
+                                    type="text"
                                     inputMode="decimal"
+                                    pattern="[0-9.,]*"
                                     aria-label={`Weight for set ${index + 1}`}
                                     value={set.weight === 0 ? '' : set.weight}
                                     placeholder="—"
@@ -275,8 +277,9 @@ const SetRow: React.FC<Props> = ({
                                     </button>
                                     <input
                                         id={getInputId('reps')}
-                                        type="number"
+                                        type="text"
                                         inputMode="numeric"
+                                        pattern="[0-9]*"
                                         value={set.reps === 0 ? '' : set.reps}
                                         onChange={(e) => handleChange(e, 'reps')}
                                         onFocus={(e) => { handleFocus(e, 'reps'); e.target.select(); }}
@@ -287,8 +290,9 @@ const SetRow: React.FC<Props> = ({
                             ) : (
                                 <input
                                     id={getInputId('reps')}
-                                    type="number"
+                                    type="text"
                                     inputMode="numeric"
+                                    pattern="[0-9]*"
                                     aria-label={`Reps for set ${index + 1}`}
                                     value={set.reps === 0 ? '' : set.reps}
                                     placeholder="—"
@@ -307,7 +311,7 @@ const SetRow: React.FC<Props> = ({
                             <button
                                 onClick={() => setShowRpePicker(true)}
                                 className={cn(
-                                    "w-full h-9 rounded-lg text-[11px] font-bold flex items-center justify-center transition-colors active:scale-95 border",
+                                    "w-full h-9 rounded-lg text-caption font-bold flex items-center justify-center transition-colors active:scale-95 border",
                                     set.rpe === 0 ? "text-zinc-300 hover:bg-zinc-700 hover:text-white bg-zinc-800 border-zinc-700/50" :
                                     set.rpe < 7 ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" :
                                     set.rpe < 9 ? "text-amber-300 bg-amber-300/10 border-amber-300/20" :
