@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Modal } from '../ui';
 import { Exercise } from '../../types';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { getExerciseById } from '../../services/exerciseService';
@@ -66,13 +66,23 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
         }
     }, [localExercise?.id]); // Only reset if ID changes
 
+    // Cache non-null exercise to preserve content during modal exit animation
+    const [cachedExercise, setCachedExercise] = useState<Exercise | null>(null);
+    useEffect(() => {
+        if (localExercise) {
+            setCachedExercise(localExercise);
+        }
+    }, [localExercise]);
+
+    const displayExercise = localExercise || cachedExercise;
+
     // --- RUNTIME DATA ANALYSIS ---
     const exerciseHistory = useMemo(() => {
-        if (!localExercise) return [];
+        if (!displayExercise) return [];
         const logs: { date: number; weight: number; reps: number; rpe: number; '1rm': number }[] = [];
 
         history.forEach(session => {
-            const relevantSets = session.sets.filter(s => s.exerciseId === localExercise.id && s.isCompleted);
+            const relevantSets = session.sets.filter(s => s.exerciseId === displayExercise.id && s.isCompleted);
             if (relevantSets.length > 0) {
                 // Find best set of the session
                 const bestSet = relevantSets.reduce((prev, curr) => (prev.estimated1RM > curr.estimated1RM ? prev : curr));
@@ -86,64 +96,49 @@ const ExerciseDetailModal: React.FC<Props> = ({ exercise, onClose }) => {
             }
         });
         return logs.sort((a, b) => b.date - a.date).reverse().slice(0, 10); // Last 10 sessions, newest first
-    }, [localExercise, history]);
+    }, [displayExercise, history]);
 
-    if (!localExercise) return null;
+    if (!displayExercise) return null;
 
-    const modalContent = (
-        <AnimatePresence>
-            <>
-                {/* Backdrop */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="fixed inset-0 z-modal bg-black/90 backdrop-blur-xl"
+    return (
+        <Modal
+            isOpen={!!localExercise}
+            onClose={onClose}
+            showCloseButton={false}
+            position="center"
+            className="max-w-lg h-full sm:h-[90vh] border-t sm:border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem]"
+            bodyClassName="p-0 flex flex-col h-full overflow-hidden"
+        >
+            <div className="flex flex-col h-full overflow-hidden relative">
+                <ExerciseHeader
+                    exercise={displayExercise}
+                    onClose={onClose}
+                    isFetchingDetails={isFetchingDetails}
                 />
 
-                {/* Modal Card */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="fixed inset-0 sm:inset-4 md:inset-10 z-modal flex items-center justify-center pointer-events-none"
-                >
-                    <div className="w-full max-w-lg h-full sm:h-[90vh] bg-zinc-950 border-t sm:border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl pointer-events-auto relative">
+                {/* --- CONTENT SCROLL AREA --- */}
+                <div className="flex-1 overflow-y-auto bg-zinc-950 relative no-scrollbar">
 
-                        <ExerciseHeader
-                            exercise={localExercise}
-                            onClose={onClose}
-                            isFetchingDetails={isFetchingDetails}
-                        />
+                    <ExerciseInfo exercise={displayExercise} />
 
-                        {/* --- CONTENT SCROLL AREA --- */}
-                        <div className="flex-1 overflow-y-auto bg-zinc-950 relative">
+                    <ExerciseTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                            <ExerciseInfo exercise={localExercise} />
-
-                            <ExerciseTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
-                            {/* --- TAB CONTENT --- */}
-                            <div className="px-6 pb-safe">
-                                <AnimatePresence mode="wait">
-                                    {activeTab === 'guide' ? (
-                                        <ExerciseGuide exercise={localExercise} />
-                                    ) : activeTab === 'history' ? (
-                                        <ExerciseHistory history={exerciseHistory} />
-                                    ) : (
-                                        <ExerciseAnatomy exercise={localExercise} />
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </div>
+                    {/* --- TAB CONTENT --- */}
+                    <div className="px-6 pb-safe">
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'guide' ? (
+                                <ExerciseGuide exercise={displayExercise} />
+                            ) : activeTab === 'history' ? (
+                                <ExerciseHistory history={exerciseHistory} />
+                            ) : (
+                                <ExerciseAnatomy exercise={displayExercise} />
+                            )}
+                        </AnimatePresence>
                     </div>
-                </motion.div>
-            </>
-        </AnimatePresence>
+                </div>
+            </div>
+        </Modal>
     );
-
-    return createPortal(modalContent, document.body);
 };
 
 export default ExerciseDetailModal;

@@ -113,7 +113,7 @@ export const RestTimerOverlay = () => {
                                 className="flex items-center gap-3 p-3 bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-white/5 mb-2"
                             >
                                 <div className="w-10 h-10 rounded-xl bg-black overflow-hidden shrink-0 border border-white/10">
-                                    <img src={nextExercise.staticImageUrl || (nextExercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(nextExercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" loading="lazy" alt="" />
+                                    <img src={nextExercise.staticImageUrl || (nextExercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(nextExercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80 aspect-square" loading="lazy" alt="" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-caption-xs font-bold text-brand-primary uppercase tracking-widest">Next Up</p>

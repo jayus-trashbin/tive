@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { X, Dumbbell, Save, ToggleLeft, ToggleRight, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { Exercise, MuscleGroup } from '../../types';
 import { cn } from '../../lib/utils';
+import { Modal, IconButton, Button } from '../ui';
 
 interface Props {
     onClose: () => void;
@@ -67,26 +66,32 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
         onClose();
     };
 
-    const content = (
-        <div className="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-end justify-center">
-            <motion.div
-                initial={{ y: '100%', opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: '100%', opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 340, damping: 32 }}
-                className="w-full max-w-lg bg-zinc-950 border-t border-zinc-800 rounded-t-[12px] max-h-[90vh] flex flex-col overflow-hidden"
-            >
+    return (
+        <Modal
+            isOpen={true}
+            onClose={onClose}
+            showCloseButton={false}
+            position="bottom"
+            className="w-full max-w-lg rounded-t-[12px] border-t border-zinc-800"
+            bodyClassName="p-0 flex flex-col max-h-[90vh] overflow-hidden"
+        >
+            <div className="flex flex-col overflow-hidden max-h-[90vh] bg-zinc-950">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 shrink-0">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 shrink-0 bg-zinc-950">
                     <div className="flex items-center gap-2">
                         <Dumbbell size={16} className="text-brand-primary" />
                         <h2 className="font-bold text-white uppercase tracking-tighter text-base">
                             New Exercise
                         </h2>
                     </div>
-                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors tap">
-                        <X size={16} />
-                    </button>
+                    <IconButton
+                        icon={X}
+                        onClick={onClose}
+                        aria-label="Close"
+                        variant="ghost"
+                        size="sm"
+                        className="bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                    />
                 </div>
 
                 {/* Form */}
@@ -103,7 +108,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                             value={name}
                             onChange={e => { setName(e.target.value); setError(''); }}
                             placeholder="e.g. Romanian Deadlift"
-                            className="w-full bg-zinc-900 border border-zinc-800 px-3 py-3 text-white font-bold text-sm font-medium placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-colors rounded-lg"
+                            className="w-full bg-zinc-900 border border-zinc-800 px-3 py-3 text-white font-bold text-sm font-medium placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary transition-colors rounded-lg animate-none"
                         />
                         {error && (
                             <p className="flex items-center gap-1.5 mt-1.5 text-caption-xs text-red-400 font-medium">
@@ -123,7 +128,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                     key={m}
                                     onClick={() => setTargetMuscle(m)}
                                     className={cn(
-                                        "px-2.5 py-1.5 text-caption-xs font-bold uppercase border rounded-lg transition-all",
+                                        "px-2.5 py-1.5 text-caption-xs font-bold uppercase border rounded-lg transition-all tap",
                                         targetMuscle === m
                                             ? MUSCLE_COLORS[m]
                                             : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
@@ -146,7 +151,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                     key={eq}
                                     onClick={() => setEquipment(eq)}
                                     className={cn(
-                                        "px-2.5 py-1.5 text-caption-xs font-bold border rounded-lg transition-all",
+                                        "px-2.5 py-1.5 text-caption-xs font-bold border rounded-lg transition-all tap",
                                         equipment === eq
                                             ? 'bg-brand-primary/10 border-brand-primary/30 text-brand-primary'
                                             : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
@@ -167,8 +172,9 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                                 <p className="text-caption-xs text-zinc-500">Each side individually</p>
                             </div>
                             <button
+                                lightness-mode="dark"
                                 onClick={() => setIsUnilateral(v => !v)}
-                                className={cn("transition-colors", isUnilateral ? 'text-brand-primary' : 'text-zinc-600')}
+                                className={cn("transition-colors tap", isUnilateral ? 'text-brand-primary' : 'text-zinc-600')}
                             >
                                 {isUnilateral ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
@@ -209,7 +215,7 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                         />
                         {gifUrl && (
                             <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800">
-                                <img src={gifUrl} alt="preview" className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = 'none')} />
+                                <img src={gifUrl} alt="preview" width={64} height={64} className="w-full h-full object-cover aspect-square" loading="lazy" onError={e => (e.currentTarget.style.display = 'none')} />
                             </div>
                         )}
                     </div>
@@ -230,25 +236,26 @@ const CreateExerciseModal: React.FC<Props> = ({ onClose, onCreated }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 px-5 py-4 border-t border-zinc-800 flex gap-3">
-                    <button
+                <div className="shrink-0 px-5 py-4 border-t border-zinc-800 flex gap-3 bg-zinc-950">
+                    <Button
+                        variant="secondary"
                         onClick={onClose}
-                        className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors tap"
+                        className="flex-1 h-12 text-sm font-bold uppercase tracking-wider rounded-lg"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="primary"
                         onClick={handleSave}
-                        className="flex-1 py-3 bg-brand-primary text-black font-bold text-sm uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none tap"
+                        iconLeft={Save}
+                        className="flex-1 h-12 text-sm font-bold uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                     >
-                        <Save size={14} /> Create Exercise
-                    </button>
+                        Create Exercise
+                    </Button>
                 </div>
-            </motion.div>
-        </div>
+            </div>
+        </Modal>
     );
-
-    return createPortal(content, document.body);
 };
 
 export default CreateExerciseModal;

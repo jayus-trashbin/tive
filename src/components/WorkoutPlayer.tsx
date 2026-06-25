@@ -18,7 +18,7 @@ import { getExerciseById } from '../services/exerciseService';
 import { cn } from '../lib/utils';
 import LiveMuscleHeatmap from './active-session/LiveMuscleHeatmap';
 import PRCelebration from './active-session/PRCelebration';
-import { Button, EmptyState } from './ui';
+import { Button, EmptyState, IconButton } from './ui';
 import { useTranslation } from '../i18n';
 import AutoRegulationBanner from './active-session/AutoRegulationBanner';
 import { useBackDismiss } from '../hooks/useBackDismiss';
@@ -355,12 +355,14 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
                 <div className="flex justify-between items-center mb-3">
                     {/* Left: minimize + heatmap + session name */}
                     <div className="flex items-center gap-2 min-w-0">
-                        <button
+                        <IconButton
+                            icon={ChevronDown}
+                            aria-label="Minimize workout player"
                             onClick={() => toggleMinimize(true)}
-                            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full shrink-0 tap"
-                        >
-                            <ChevronDown size={24} />
-                        </button>
+                            size="md"
+                            variant="ghost"
+                            className="text-zinc-400 hover:text-white"
+                        />
                         <LiveMuscleHeatmap
                             sets={activeSession.sets}
                             exercises={exercises}
@@ -373,16 +375,19 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
 
                     {/* Right: Plates + timer + finish */}
                     <div className="flex items-center gap-3 shrink-0">
-                        <button
+                        <IconButton
+                            icon={Calculator}
+                            aria-label={t('workoutPlayer.plateCalculator')}
                             onClick={() => setShowPlateCalc(!showPlateCalc)}
+                            size="sm"
+                            variant="ghost"
                             className={cn(
-                                "flex items-center justify-center w-8 h-8 rounded-full transition-colors tap",
-                                showPlateCalc ? "bg-brand-primary text-black" : "text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800"
+                                "rounded-full transition-colors border",
+                                showPlateCalc
+                                    ? "bg-brand-primary text-black border-brand-primary hover:bg-brand-primary/95"
+                                    : "text-zinc-400 hover:text-white bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
                             )}
-                            title={t('workoutPlayer.plateCalculator')}
-                        >
-                            <Calculator size={14} />
-                        </button>
+                        />
                         <span className="font-mono text-white tabular-nums font-bold text-base">
                             {duration}
                         </span>
@@ -531,52 +536,47 @@ const WorkoutPlayer: React.FC<Props> = ({ onFinish, onFinishWithData }) => {
             />
 
             {/* ──── FINISH MODAL ──── */}
-            <AnimatePresence>
-                {showFinishModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-modal bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                            className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 w-full max-w-sm text-center shadow-[0_0_60px_-12px] shadow-brand-primary/20"
-                        >
-                            <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-2xl animate-pulse shadow-[0_0_20px_-4px] shadow-brand-primary/20">
-                                <motion.div animate={{ scale: [0, 1.3, 1] }} transition={{ type: 'spring', delay: 0.1 }}>
-                                    <CheckCircle2 size={32} />
-                                </motion.div>
-                            </div>
-                            <h2 className="page-title text-2xl mb-2">{t('workoutPlayer.finishTitle')}</h2>
-                            <p className="text-zinc-500 mb-8 text-sm">
-                                {t('workoutPlayer.finishStatsPrefix')}{' '}
-                                <span className="text-white font-bold">
-                                    {completedSets} {completedSets === 1 ? 'série' : 'séries'}
-                                </span>{' '}
-                                {t('workoutPlayer.finishStatsSuffix')}
-                            </p>
-
-                            <div className="flex flex-col gap-3">
-                                <Button
-                                    variant="primary"
-                                    size="lg"
-                                    fullWidth
-                                    onClick={handleFinish}
-                                >
-                                    {t('workoutPlayer.finishWorkout')}
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="md"
-                                    fullWidth
-                                    onClick={() => setShowFinishModal(false)}
-                                >
-                                    {t('workoutPlayer.keepGoing')}
-                                </Button>
-                            </div>
-                        </motion.div>
+            <Modal
+                isOpen={showFinishModal}
+                onClose={() => setShowFinishModal(false)}
+                showCloseButton={false}
+                position="center"
+                className="max-w-sm border border-zinc-800"
+                bodyClassName="p-8 text-center"
+            >
+                <div className="w-16 h-16 bg-brand-primary/10 flex items-center justify-center mx-auto mb-6 text-brand-primary border border-brand-primary/30 rounded-2xl animate-pulse shadow-[0_0_20px_-4px] shadow-brand-primary/20">
+                    <motion.div animate={{ scale: [0, 1.3, 1] }} transition={{ type: 'spring', delay: 0.1 }}>
+                        <CheckCircle2 size={32} />
                     </motion.div>
-                )}
-            </AnimatePresence>
+                </div>
+                <h2 className="page-title text-2xl mb-2">{t('workoutPlayer.finishTitle')}</h2>
+                <p className="text-zinc-500 mb-8 text-sm">
+                    {t('workoutPlayer.finishStatsPrefix')}{' '}
+                    <span className="text-white font-bold">
+                        {completedSets} {completedSets === 1 ? 'série' : 'séries'}
+                    </span>{' '}
+                    {t('workoutPlayer.finishStatsSuffix')}
+                </p>
+
+                <div className="flex flex-col gap-3">
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        fullWidth
+                        onClick={handleFinish}
+                    >
+                        {t('workoutPlayer.finishWorkout')}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="md"
+                        fullWidth
+                        onClick={() => setShowFinishModal(false)}
+                    >
+                        {t('workoutPlayer.keepGoing')}
+                    </Button>
+                </div>
+            </Modal>
 
             {/* ──── DISCARD MODAL ──── */}
             <Modal

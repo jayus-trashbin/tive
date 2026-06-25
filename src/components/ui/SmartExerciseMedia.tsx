@@ -136,7 +136,7 @@ export const SmartExerciseMedia: React.FC<Props> = ({ exercise, isFetchingDetail
                             <img
                                 src={exercise.staticImageUrl}
                                 alt=""
-                                className="absolute inset-0 w-full h-full object-contain opacity-20 blur-sm"
+                                className="absolute inset-0 w-full h-full object-contain opacity-20 blur-sm aspect-[16/9]"
                             />
                         )}
                         <div className="relative z-10 flex flex-col items-center gap-3">
@@ -160,7 +160,7 @@ export const SmartExerciseMedia: React.FC<Props> = ({ exercise, isFetchingDetail
                     transition={{ duration: 0.5 }}
                     src={exercise.gifUrl}
                     alt={exercise.name}
-                    className="w-full h-full object-contain bg-zinc-950"
+                    className="w-full h-full object-contain bg-zinc-950 aspect-[16/9]"
                 />
             )}
 
@@ -217,7 +217,7 @@ export const SmartExerciseMedia: React.FC<Props> = ({ exercise, isFetchingDetail
                         <img
                             src={exercise.staticImageUrl}
                             alt={exercise.name}
-                            className="w-full h-full object-contain bg-zinc-950"
+                            className="w-full h-full object-contain bg-zinc-950 aspect-[16/9]"
                         />
                     ) : (
                         <div className="flex items-center justify-center w-full h-full bg-zinc-950">

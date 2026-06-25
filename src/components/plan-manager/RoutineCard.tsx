@@ -113,7 +113,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                                     thumbnails.length === 2 && "col-span-1 first:col-span-2",
                                     thumbnails.length === 3 && "col-span-1"
                                 )}>
-                                    <img src={url as string} loading="lazy" className="w-full h-full object-cover opacity-60" />
+                                    <img src={url as string} loading="lazy" className="w-full h-full object-cover opacity-60 aspect-square" />
                                 </div>
                             ))}
                             {thumbnails.length < 3 && Array.from({ length: 3 - thumbnails.length }).map((_, i) => (

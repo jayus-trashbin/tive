@@ -81,7 +81,7 @@ const PRCelebration: React.FC<PRCelebrationProps> = ({
                             className="absolute inset-0 rounded-full pointer-events-none"
                             style={{ background: 'radial-gradient(circle, rgba(190,242,100,0.3) 0%, transparent 70%)' }}
                         />
-                        <div className="relative bg-zinc-950 border border-brand-primary/50 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg" role="status" aria-live="polite">
+                        <div className="relative bg-zinc-950 border border-brand-primary/50 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg" role="status" aria-live="assertive">
                             <motion.div
                                 initial={{ rotate: -25, scale: 0 }}
                                 animate={{ rotate: [-25, 15, -8, 5, 0], scale: 1 }}

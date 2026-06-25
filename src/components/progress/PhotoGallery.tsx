@@ -5,7 +5,7 @@ import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { ProgressPhoto } from '../../types/photo';
 import { MuscleGroup } from '../../types/domain';
 import { cn } from '../../lib/utils';
-import EmptyState from '../ui/EmptyState';
+import { ConfirmModal, EmptyState } from '../ui';
 import { useTranslation } from '../../i18n';
 
 interface PhotoGalleryProps {
@@ -254,7 +254,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                                     src={photo.thumbnailData || photo.imageData}
                                                     alt={`Progress photo from ${new Date(photo.timestamp).toLocaleDateString()}`}
                                                     className={cn(
-                                                        "w-full h-full object-cover transition-opacity",
+                                                        "w-full h-full object-cover transition-opacity aspect-[3/4]",
                                                         isSelectedForCompare ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                                                     )}
                                                     loading="lazy"
@@ -336,7 +336,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                         <img
                                             src={photo.imageData}
                                             alt={i === 0 ? "Before progress" : "After progress"}
-                                            className="absolute inset-0 w-full h-full object-contain"
+                                            className="absolute inset-0 w-full h-full object-contain aspect-[3/4]"
                                         />
                                     </div>
                                     <div className="p-4 border-t border-zinc-900">
@@ -390,7 +390,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
                                 layoutId={`photo-${selectedPhoto.id}`}
                                 src={selectedPhoto.imageData}
                                 alt={`Full size progress photo from ${new Date(selectedPhoto.timestamp).toLocaleDateString()}`}
-                                className="max-h-full max-w-full object-contain shadow-2xl border border-zinc-900"
+                                className="max-h-full max-w-full object-contain shadow-2xl border border-zinc-900 aspect-[3/4]"
                             />
 
                             <button onClick={() => navigatePhoto('prev')} className="absolute left-4 p-4 text-white disabled:opacity-0" disabled={photos.indexOf(selectedPhoto) === 0}><ChevronLeft size={32} /></button>
@@ -419,21 +419,16 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
             </AnimatePresence>
 
             {/* DELETE MODAL */}
-            <AnimatePresence>
-                {deleteConfirm && (
-                    <div className="fixed inset-0 z-overlay bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-zinc-900 border border-zinc-800 p-8 max-w-xs w-full text-center rounded-lg">
-                            <Trash2 size={40} className="mx-auto text-red-500 mb-4" />
-                            <h3 className="font-medium text-sm font-bold text-white uppercase mb-2">Delete Record?</h3>
-                            <p className="font-medium text-caption-xs text-zinc-600 uppercase tracking-tighter mb-8">This asset will be permanently erased from local and cloud storage.</p>
-                            <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => setDeleteConfirm(null)} className="py-3 bg-zinc-800 text-zinc-400 font-medium text-caption-xs font-bold uppercase tracking-widest hover:text-white transition-colors cursor-pointer">Abort</button>
-                                <button onClick={() => handleDelete(deleteConfirm)} className="py-3 bg-red-600 text-white font-medium text-caption-xs font-bold uppercase tracking-widest shadow-[0_4px_0_0_#991b1b] cursor-pointer">Confirm</button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+            <ConfirmModal
+                open={!!deleteConfirm}
+                title="Delete Record?"
+                description="This asset will be permanently erased from local and cloud storage."
+                confirmLabel="Confirm"
+                cancelLabel="Abort"
+                variant="danger"
+                onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+                onCancel={() => setDeleteConfirm(null)}
+            />
         </div>
     );
 };

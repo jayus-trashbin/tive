@@ -89,6 +89,9 @@ export const en = {
       langPortuguese: 'Português',
       unitsKg: 'KG',
       unitsLbs: 'LBS',
+      density: 'Layout Density',
+      densityComfortable: 'Comfortable',
+      densityCompact: 'Compact',
     },
     audio: {
       appSounds: 'App Sounds',

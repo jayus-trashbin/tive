@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, ChevronRight } from 'lucide-react';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import MuscleOverlay from './MuscleOverlay';
 import { getSessionMuscleIntensity } from '../../utils/analytics';
 import { useMotion } from '../../hooks/useMotion';
+import { Modal } from '../ui';
 
 interface PostWorkoutPromptProps {
     onOpenCamera: () => void;
@@ -43,105 +43,92 @@ const PostWorkoutPrompt: React.FC<PostWorkoutPromptProps> = ({ onOpenCamera }) =
         dismissPostWorkoutPrompt();
     };
 
-    const { shouldReduceMotion } = useMotion();
-
     return (
-        <AnimatePresence>
-            {showPostWorkoutPrompt && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={shouldReduceMotion ? { duration: 0 } : undefined}
-                    className="fixed inset-0 z-modal bg-black/90 backdrop-blur-sm flex items-end justify-center p-4"
-                    onClick={handleSkip}
-                >
-                    <motion.div
-                        initial={shouldReduceMotion ? { y: 0, opacity: 0 } : { y: '100%', opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={shouldReduceMotion ? { y: 0, opacity: 0 } : { y: '100%', opacity: 0 }}
-                        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 300 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-md bg-zinc-900 border border-zinc-800 overflow-hidden"
+        <Modal
+            isOpen={showPostWorkoutPrompt}
+            onClose={handleSkip}
+            showCloseButton={false}
+            position="bottom"
+            className="w-full max-w-md border border-zinc-800 rounded-t-3xl sm:rounded-2xl"
+            bodyClassName="p-0"
+        >
+            <div className="w-full bg-zinc-900 overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+                    <h3 className="font-medium text-sm font-bold text-white uppercase tracking-wider">
+                        Workout Complete
+                    </h3>
+                    <button
+                        onClick={handleSkip}
+                        className="p-1 text-zinc-500 hover:text-white transition-colors tap"
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-                            <h3 className="font-medium text-sm font-bold text-white uppercase tracking-wider">
-                                Workout Complete
-                            </h3>
-                            <button
-                                onClick={handleSkip}
-                                className="p-1 text-zinc-500 hover:text-white transition-colors tap"
-                            >
-                                <X size={20} />
-                            </button>
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                    <div className="flex items-start gap-4">
+                        {/* Muscle Overlay Preview */}
+                        <div className="flex-shrink-0">
+                            <MuscleOverlay
+                                muscleGroups={pendingMuscleGroups}
+                                volumes={activeVolumes}
+                                size={100}
+                                showToggle={true}
+                            />
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6">
-                            <div className="flex items-start gap-4">
-                                {/* Muscle Overlay Preview */}
-                                <div className="flex-shrink-0">
-                                    <MuscleOverlay
-                                        muscleGroups={pendingMuscleGroups}
-                                        volumes={activeVolumes}
-                                        size={100}
-                                        showToggle={true}
-                                    />
-                                </div>
+                        <div className="flex-1">
+                            <h4 className="font-medium text-lg font-bold text-white mb-1">
+                                Take Progress Photo?
+                            </h4>
+                            <p className="font-medium text-xs text-zinc-400 mb-4">
+                                Capture your post-workout state. Your trained muscles will be marked on the photo.
+                            </p>
 
-                                <div className="flex-1">
-                                    <h4 className="font-medium text-lg font-bold text-white mb-1">
-                                        Take Progress Photo?
-                                    </h4>
-                                    <p className="font-medium text-xs text-zinc-400 mb-4">
-                                        Capture your post-workout state. Your trained muscles will be marked on the photo.
-                                    </p>
-
-                                    {/* Muscle Tags */}
-                                    {pendingMuscleGroups.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {pendingMuscleGroups.slice(0, 5).map((muscle) => (
-                                                <span
-                                                    key={muscle}
-                                                    className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-medium text-caption-xs text-lime-400 uppercase font-bold"
-                                                >
-                                                    {muscle}
-                                                </span>
-                                            ))}
-                                            {pendingMuscleGroups.length > 5 && (
-                                                <span className="font-medium text-caption-xs text-zinc-500 font-bold self-center">
-                                                    +{pendingMuscleGroups.length - 5}
-                                                </span>
-                                            )}
-                                        </div>
+                            {/* Muscle Tags */}
+                            {pendingMuscleGroups.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {pendingMuscleGroups.slice(0, 5).map((muscle) => (
+                                        <span
+                                            key={muscle}
+                                            className="px-2 py-1 bg-lime-400/10 border border-lime-400/30 font-medium text-caption-xs text-lime-400 uppercase font-bold"
+                                        >
+                                            {muscle}
+                                        </span>
+                                    ))}
+                                    {pendingMuscleGroups.length > 5 && (
+                                        <span className="font-medium text-caption-xs text-zinc-500 font-bold self-center">
+                                            +{pendingMuscleGroups.length - 5}
+                                        </span>
                                     )}
                                 </div>
-                            </div>
+                            )}
                         </div>
+                    </div>
+                </div>
 
-                        {/* Actions */}
-                        <div className="flex border-t border-zinc-800">
-                            <button
-                                onClick={handleSkip}
-                                className="flex-1 px-4 py-4 font-medium text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center tap"
-                            >
-                                Skip
-                            </button>
-                            <div className="w-px bg-zinc-800" />
-                            <button
-                                onClick={handleTakePhoto}
-                                className="flex-1 px-4 py-4 bg-lime-400 font-medium text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors tap"
-                            >
-                                <Camera size={18} />
-                                <span>Take Photo</span>
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                {/* Actions */}
+                <div className="flex border-t border-zinc-800">
+                    <button
+                        onClick={handleSkip}
+                        className="flex-1 px-4 py-4 font-medium text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-center tap"
+                    >
+                        Skip
+                    </button>
+                    <div className="w-px bg-zinc-800" />
+                    <button
+                        onClick={handleTakePhoto}
+                        className="flex-1 px-4 py-4 bg-lime-400 font-medium text-sm font-bold text-black flex items-center justify-center gap-2 hover:bg-lime-300 transition-colors tap"
+                    >
+                        <Camera size={18} />
+                        <span>Take Photo</span>
+                        <ChevronRight size={16} />
+                    </button>
+                </div>
+            </div>
+        </Modal>
     );
 };
 

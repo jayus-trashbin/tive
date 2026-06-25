@@ -13,6 +13,7 @@ export interface ModalProps {
     className?: string;
     showCloseButton?: boolean;
     position?: 'center' | 'bottom';
+    bodyClassName?: string;
 }
 
 const overlayVariants = {
@@ -63,7 +64,8 @@ export const Modal: React.FC<ModalProps> = ({
     children, 
     className,
     showCloseButton = true,
-    position = 'center'
+    position = 'center',
+    bodyClassName
 }) => {
     const focusRef = useFocusTrap<HTMLDivElement>(isOpen);
     useBackDismiss(isOpen, onClose);
@@ -144,7 +146,7 @@ export const Modal: React.FC<ModalProps> = ({
                         )}
 
                         {/* Body */}
-                        <div className="flex-1 overflow-y-auto no-scrollbar p-4">
+                        <div className={cn("flex-1 overflow-y-auto no-scrollbar", bodyClassName || "p-4")}>
                             {children}
                         </div>
                     </motion.div>

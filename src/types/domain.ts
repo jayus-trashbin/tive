@@ -46,6 +46,7 @@ export interface UserStats {
   // UX Preferences
   gymMode?: boolean;        // Large steppers in SetRow
   lastRecapShown?: string;  // ISO date (YYYY-MM-DD) of the last weekly recap shown
+  density?: 'comfortable' | 'compact';
 }
 
 export interface ProfileFormData {
@@ -61,6 +62,7 @@ export interface ProfileFormData {
   isAudioEnabled: boolean;
   isVibrationEnabled: boolean;
   smartAudio: boolean;
+  density: 'comfortable' | 'compact';
 }
 
 export interface Exercise {

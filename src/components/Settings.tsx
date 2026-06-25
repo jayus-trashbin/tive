@@ -28,7 +28,8 @@ import {
     Copy,
     X,
     Bell,
-    Dumbbell
+    Dumbbell,
+    Layout
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useWorkoutStore } from '../store/useWorkoutStore';
@@ -152,6 +153,10 @@ const Settings: React.FC = () => {
 
     const handleLanguageChange = (value: Language) => {
         useWorkoutStore.getState().updateUserStats({ language: value });
+    };
+
+    const handleDensityChange = (value: 'comfortable' | 'compact') => {
+        useWorkoutStore.getState().updateUserStats({ density: value });
     };
 
     const handleSaveSupabase = async () => {
@@ -365,6 +370,23 @@ const Settings: React.FC = () => {
                                     ]}
                                     value={userStats.unitSystem ?? 'metric'}
                                     onChange={(v) => handleUnitsChange(v as 'metric' | 'imperial')}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4">
+                            <div className="flex items-center gap-3">
+                                <IconBox icon={Layout} color="bg-indigo-500" />
+                                <div className="text-sm font-bold text-white">{t('settings.prefs.density')}</div>
+                            </div>
+                            <div className="w-48">
+                                <SegmentedControl
+                                    id="density"
+                                    options={[
+                                        { value: 'comfortable', label: t('settings.prefs.densityComfortable') },
+                                        { value: 'compact', label: t('settings.prefs.densityCompact') },
+                                    ]}
+                                    value={userStats.density ?? 'comfortable'}
+                                    onChange={(v) => handleDensityChange(v as 'comfortable' | 'compact')}
                                 />
                             </div>
                         </div>

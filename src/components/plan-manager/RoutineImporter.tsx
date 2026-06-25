@@ -4,7 +4,7 @@ import { X, FileJson, BookTemplate, History, Upload, Check, AlertTriangle } from
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { Routine } from '../../types/domain';
 import { cn } from '../../lib/utils';
-import { Button, IconButton } from '../ui';
+import { Button, IconButton, Modal } from '../ui';
 
 
 interface RoutineImporterProps {
@@ -192,186 +192,173 @@ const RoutineImporter: React.FC<RoutineImporterProps> = ({
         }, 1200);
     };
 
-    if (!isOpen) return null;
-
     return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-modal flex items-end justify-center"
-                onClick={onClose}
-            >
-                <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-                    className="w-full max-w-lg bg-zinc-950 border-t border-zinc-800 overflow-hidden"
-                    style={{ maxHeight: '85dvh' }}
-                    onClick={e => e.stopPropagation()}
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                        <h2 className="font-heading font-bold text-white text-lg uppercase tracking-tight">
-                            Add Routine
-                        </h2>
-                        <IconButton
-                            icon={X}
-                            onClick={onClose}
-                            variant="ghost"
-                            size="md"
-                            aria-label="Close"
-                        />
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            showCloseButton={false}
+            position="bottom"
+            className="w-full max-w-lg border-t border-zinc-800"
+            bodyClassName="p-0 max-h-[85vh] overflow-hidden"
+        >
+            <div className="flex flex-col overflow-hidden max-h-[85vh] bg-zinc-950 relative">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 pt-5 pb-3 bg-zinc-950">
+                    <h2 className="font-heading font-bold text-white text-lg uppercase tracking-tight">
+                        Add Routine
+                    </h2>
+                    <IconButton
+                        icon={X}
+                        onClick={onClose}
+                        variant="ghost"
+                        size="md"
+                        aria-label="Close"
+                    />
+                </div>
 
-                    </div>
+                {/* Tab Bar */}
+                <div className="flex px-5 gap-1 mb-4">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            role="tab"
+                            aria-selected={activeTab === tab.id}
+                            className={cn(
+                                'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-caption-xs font-bold uppercase tracking-widest transition-all tap',
+                                activeTab === tab.id
+                                    ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30'
+                                    : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
+                            )}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-                    {/* Tab Bar */}
-                    <div className="flex px-5 gap-1 mb-4">
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                role="tab"
-                                aria-selected={activeTab === tab.id}
-                                className={cn(
-                                    'flex-1 flex items-center justify-center gap-1.5 py-2 font-medium text-caption-xs font-bold uppercase tracking-widest transition-all',
-                                    activeTab === tab.id
-                                        ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30'
-                                        : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
-                                )}
-                            >
-                                {tab.icon}
-                                {tab.label}
-                            </button>
-
-                        ))}
-                    </div>
-
-                    {/* Success overlay */}
-                    <AnimatePresence>
-                        {importSuccess && (
+                {/* Success overlay */}
+                <AnimatePresence>
+                    {importSuccess && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-zinc-950/95 z-10 flex flex-col items-center justify-center gap-3"
+                        >
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-zinc-950/95 z-10 flex flex-col items-center justify-center gap-3"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', damping: 12 }}
                             >
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ type: 'spring', damping: 12 }}
-                                >
-                                    <Check size={48} className="text-brand-primary" />
-                                </motion.div>
-                                <span className="font-medium text-sm font-bold text-brand-primary uppercase">
-                                    Routine Created!
-                                </span>
+                                <Check size={48} className="text-brand-primary" />
                             </motion.div>
-                        )}
-                    </AnimatePresence>
+                            <span className="font-medium text-sm font-bold text-brand-primary uppercase">
+                                Routine Created!
+                            </span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                    {/* Content */}
-                    <div className="px-5 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(85dvh - 130px)' }}>
-                        {/* Templates Tab */}
-                        {activeTab === 'templates' && (
-                            <div className="space-y-2">
-                                {TEMPLATES.map((template, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleTemplateImport(template)}
-                                        className="w-full text-left bg-zinc-900/50 border border-zinc-800 p-4 hover:border-brand-primary/30 hover:bg-zinc-900 transition-all group"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-heading font-bold text-white text-sm uppercase">
-                                                    {template.name}
-                                                </div>
-                                                <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
-                                                    {template.category} · {template.exerciseCount} exercises
-                                                </div>
-                                            </div>
-                                            <Upload size={14} className="text-zinc-600 group-hover:text-brand-primary transition-colors" />
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* From History Tab */}
-                        {activeTab === 'history' && (
-                            <div className="space-y-2">
-                                {uniqueSessions.length === 0 ? (
-                                    <div className="text-center py-10">
-                                        <History size={32} className="text-zinc-700 mx-auto mb-2" />
-                                        <p className="font-medium text-xs text-zinc-500">
-                                            No workout history yet.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    uniqueSessions.map(session => {
-                                        const exerciseCount = new Set(session.sets.map(s => s.exerciseId)).size;
-                                        const setCount = session.sets.filter(s => s.isCompleted).length;
-                                        return (
-                                            <button
-                                                key={session.id}
-                                                onClick={() => handleHistoryImport(session)}
-                                                className="w-full text-left bg-zinc-900/50 border border-zinc-800 p-4 hover:border-brand-primary/30 hover:bg-zinc-900 transition-all group"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <div className="font-heading font-bold text-white text-sm uppercase">
-                                                            {session.name}
-                                                        </div>
-                                                        <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
-                                                            {exerciseCount} exercises · {setCount} sets · {new Date(session.date).toLocaleDateString()}
-                                                        </div>
-                                                    </div>
-                                                    <Upload size={14} className="text-zinc-600 group-hover:text-brand-primary transition-colors" />
-                                                </div>
-                                            </button>
-                                        );
-                                    })
-                                )}
-                            </div>
-                        )}
-
-                        {/* External Import Tab */}
-                        {activeTab === 'external' && (
-                            <div className="space-y-4">
-                                <p className="font-medium text-caption-xs text-zinc-400 leading-relaxed">
-                                    Paste a JSON routine or a **Hevy/Strong CSV** export.
-                                    We'll extract the exercises to create a new routine.
-                                </p>
-                                <textarea
-                                    value={jsonInput}
-                                    onChange={(e) => { setJsonInput(e.target.value); setJsonError(null); }}
-                                    placeholder='Paste JSON or CSV content here...'
-                                    className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-medium text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
-                                />
-                                {jsonError && (
-                                    <div className="flex items-center gap-2 text-red-400 font-medium text-caption-xs">
-                                        <AlertTriangle size={12} />
-                                        {jsonError}
-                                    </div>
-                                )}
-                                <Button
-                                    variant="primary"
-                                    size="lg"
-                                    fullWidth
-                                    onClick={handleExternalImport}
-                                    disabled={!jsonInput.trim()}
+                {/* Content */}
+                <div className="px-5 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 130px)' }}>
+                    {/* Templates Tab */}
+                    {activeTab === 'templates' && (
+                        <div className="space-y-2">
+                            {TEMPLATES.map((template, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleTemplateImport(template)}
+                                    className="w-full text-left bg-zinc-900/50 border border-zinc-800 p-4 hover:border-brand-primary/30 hover:bg-zinc-900 transition-all group tap"
                                 >
-                                    Parse & Create Routine
-                                </Button>
-                            </div>
-                        )}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="font-heading font-bold text-white text-sm uppercase">
+                                                {template.name}
+                                            </div>
+                                            <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
+                                                {template.category} · {template.exerciseCount} exercises
+                                            </div>
+                                        </div>
+                                        <Upload size={14} className="text-zinc-600 group-hover:text-brand-primary transition-colors" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-                    </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
+                    {/* From History Tab */}
+                    {activeTab === 'history' && (
+                        <div className="space-y-2">
+                            {uniqueSessions.length === 0 ? (
+                                <div className="text-center py-10">
+                                    <History size={32} className="text-zinc-700 mx-auto mb-2" />
+                                    <p className="font-medium text-xs text-zinc-500">
+                                        No workout history yet.
+                                    </p>
+                                </div>
+                            ) : (
+                                uniqueSessions.map(session => {
+                                    const exerciseCount = new Set(session.sets.map(s => s.exerciseId)).size;
+                                    const setCount = session.sets.filter(s => s.isCompleted).length;
+                                    return (
+                                        <button
+                                            key={session.id}
+                                            onClick={() => handleHistoryImport(session)}
+                                            className="w-full text-left bg-zinc-900/50 border border-zinc-800 p-4 hover:border-brand-primary/30 hover:bg-zinc-900 transition-all group tap"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-heading font-bold text-white text-sm uppercase">
+                                                        {session.name}
+                                                    </div>
+                                                    <div className="font-medium text-caption-xs text-zinc-500 mt-0.5">
+                                                        {exerciseCount} exercises · {setCount} sets · {new Date(session.date).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                <Upload size={14} className="text-zinc-600 group-hover:text-brand-primary transition-colors" />
+                                            </div>
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+                    )}
+
+                    {/* External Import Tab */}
+                    {activeTab === 'external' && (
+                        <div className="space-y-4">
+                            <p className="font-medium text-caption-xs text-zinc-400 leading-relaxed">
+                                Paste a JSON routine or a **Hevy/Strong CSV** export.
+                                We'll extract the exercises to create a new routine.
+                            </p>
+                            <textarea
+                                value={jsonInput}
+                                onChange={(e) => { setJsonInput(e.target.value); setJsonError(null); }}
+                                placeholder='Paste JSON or CSV content here...'
+                                className="w-full h-40 bg-zinc-900 border border-zinc-800 text-white font-medium text-xs p-3 resize-none focus:outline-none focus:border-brand-primary/50 placeholder:text-zinc-600"
+                            />
+                            {jsonError && (
+                                <div className="flex items-center gap-2 text-red-400 font-medium text-caption-xs">
+                                    <AlertTriangle size={12} />
+                                    {jsonError}
+                                </div>
+                            )}
+                            <Button
+                                variant="primary"
+                                size="lg"
+                                fullWidth
+                                onClick={handleExternalImport}
+                                disabled={!jsonInput.trim()}
+                            >
+                                Parse & Create Routine
+                            </Button>
+                        </div>
+                    )}
+
+                </div>
+            </div>
+        </Modal>
     );
 };
 

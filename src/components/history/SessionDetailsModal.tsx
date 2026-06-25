@@ -194,7 +194,7 @@ const SessionDetailsModal: React.FC<Props> = ({ session, onClose }) => {
                                         <div className="flex items-center gap-3 mb-3">
                                             <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 overflow-hidden shrink-0">
                                                 {exercise?.staticImageUrl || exercise?.gifUrl ? (
-                                                    <img src={exercise?.staticImageUrl || exercise?.gifUrl} className="w-full h-full object-cover opacity-80" loading="lazy" />
+                                                    <img src={exercise?.staticImageUrl || exercise?.gifUrl} className="w-full h-full object-cover opacity-80 aspect-square" loading="lazy" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
                                                         <Dumbbell size={16} className="text-zinc-700" />

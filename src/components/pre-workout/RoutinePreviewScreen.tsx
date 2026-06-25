@@ -126,7 +126,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
       
             {/* Header Image/Gradient */}
             <div className="relative h-64 shrink-0 overflow-hidden">
-                {coverImage && <img src={coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="Cover" loading="lazy" />}
+                {coverImage && <img src={coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30 aspect-video" alt="Cover" loading="lazy" />}
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/10 via-zinc-950/80 to-zinc-950 z-0" />
                 
                 {/* Header Controls */}
@@ -203,7 +203,7 @@ const RoutinePreviewScreen: React.FC<Props> = ({ routineId, onBack, onBegin, onE
                     >
                         <div className="w-14 h-14 rounded-xl bg-zinc-800 overflow-hidden shrink-0 border border-white/5 relative">
                             {item.exercise && (item.exercise.staticImageUrl || item.exercise.gifUrl) ? (
-                                <img src={item.exercise.staticImageUrl || `https://wsrv.nl/?url=${encodeURIComponent(item.exercise.gifUrl!)}&n=1&output=png`} className="w-full h-full object-cover opacity-80" loading="lazy" />
+                                <img src={item.exercise.staticImageUrl || `https://wsrv.nl/?url=${encodeURIComponent(item.exercise.gifUrl!)}&n=1&output=png`} className="w-full h-full object-cover opacity-80 aspect-square" loading="lazy" />
                             ) : (
                                 <div className={cn(
                                     "w-full h-full flex items-center justify-center",

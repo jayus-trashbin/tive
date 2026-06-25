@@ -108,7 +108,7 @@ const ExerciseGroup: React.FC<Props> = ({
                         <div className="relative w-16 h-16 rounded-2xl bg-black overflow-hidden border border-white/10 shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform">
                             <img
                                 src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')}
-                                className="w-full h-full object-cover opacity-80 mix-blend-screen"
+                                className="w-full h-full object-cover opacity-80 mix-blend-screen aspect-square"
                                 loading="lazy"
                             />
                             {/* Accent strip */}

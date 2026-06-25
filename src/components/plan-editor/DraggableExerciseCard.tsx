@@ -177,7 +177,7 @@ const DraggableExerciseCard: React.FC<Props> = ({ block, exercise, index, onUpda
 
           {/* Thumbnail */}
           <div className="w-10 h-10 rounded bg-black overflow-hidden shrink-0">
-            <img src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80" />
+            <img src={exercise.staticImageUrl || (exercise.gifUrl ? `https://wsrv.nl/?url=${encodeURIComponent(exercise.gifUrl)}&n=1&output=png` : '')} className="w-full h-full object-cover opacity-80 aspect-square" />
           </div>
 
           <div className="flex-1 min-w-0">

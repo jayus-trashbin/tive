@@ -106,6 +106,16 @@ const App: React.FC = () => {
     }
   }, [userStats.theme]);
 
+  // Apply layout density class to <html> based on density setting
+  useEffect(() => {
+    const html = document.documentElement;
+    if (userStats.density === 'compact') {
+      html.classList.add('density-compact');
+    } else {
+      html.classList.remove('density-compact');
+    }
+  }, [userStats.density]);
+
   // U-03: Cmd+K / Ctrl+K opens global search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

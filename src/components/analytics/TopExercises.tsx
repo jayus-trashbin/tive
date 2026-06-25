@@ -71,7 +71,7 @@ const TopExercises: React.FC<{ limit?: number }> = ({ limit = 8 }) => {
                                     {exercise.staticImageUrl || exercise.gifUrl ? (
                                         <img
                                             src={exercise.staticImageUrl || exercise.gifUrl}
-                                            className="w-full h-full object-cover opacity-70"
+                                            className="w-full h-full object-cover opacity-70 aspect-square"
                                             loading="lazy"
                                         />
                                     ) : (

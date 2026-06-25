@@ -9,6 +9,7 @@ import { cn } from '../../lib/utils';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import CreateExerciseModal from './CreateExerciseModal';
 import { logger } from '../../utils/logger';
+import { Modal, IconButton, Button } from '../ui';
 
 interface Props {
   isOpen: boolean;
@@ -156,232 +157,227 @@ const ExercisePicker: React.FC<Props> = ({ isOpen, onClose, onSelect, multiSelec
 
   return (
     <>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-modal"
-          />
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: '0%' }}
-            exit={{ y: '100%' }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 top-8 z-modal bg-zinc-950 border-t border-zinc-800 flex flex-col shadow-2xl overflow-hidden"
-          >
-            {/* Header */}
-            <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-b border-white/5 z-10">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Add Exercise</h2>
-                <button onClick={onClose} className="p-2 bg-zinc-900 rounded-full text-zinc-400 hover:text-white tap">
-                  <X size={20} />
-                </button>
-              </div>
+      <Modal
+        isOpen={isOpen}
+      onClose={onClose}
+      showCloseButton={false}
+      position="bottom"
+      className="top-8 max-w-lg mx-auto border-t border-zinc-800 rounded-t-3xl h-[calc(100vh-2rem)] max-h-none sm:max-h-[90vh]"
+      bodyClassName="p-0 flex flex-col h-full overflow-hidden"
+    >
+      <div className="flex flex-col h-full overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-b border-white/5 z-10 shrink-0">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold text-white">Add Exercise</h2>
+            <IconButton
+              icon={X}
+              onClick={onClose}
+              aria-label="Close"
+              variant="ghost"
+              size="sm"
+              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+            />
+          </div>
 
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                <input
-                  autoFocus
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search (e.g. Squat)..."
-                  aria-label="Buscar exercícios"
-                  aria-autocomplete="list"
-                  aria-controls="exercise-results"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:outline-none transition-colors placeholder:text-zinc-600"
-                />
-                {loading && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Loader2 className="animate-spin text-brand-primary" size={16} />
-                  </div>
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+            <input
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search (e.g. Squat)..."
+              aria-label="Buscar exercícios"
+              aria-autocomplete="list"
+              aria-controls="exercise-results"
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:outline-none transition-colors placeholder:text-zinc-600"
+            />
+            {loading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <Loader2 className="animate-spin text-brand-primary" size={16} />
+              </div>
+            )}
+          </div>
+
+          {/* Muscle Chips */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {MUSCLE_FILTERS.map(filter => (
+              <button
+                key={filter.value}
+                onClick={() => {
+                  setActiveFilter(filter.value);
+                  setNextCursor(null); // Reset cursor immediately on click
+                }}
+                className={cn(
+                  "whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all border tap",
+                  activeFilter === filter.value
+                    ? "bg-brand-primary text-white border-brand-primary shadow-glow"
+                    : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"
                 )}
-              </div>
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-              {/* Muscle Chips */}
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                {MUSCLE_FILTERS.map(filter => (
-                  <button
-                    key={filter.value}
-                    onClick={() => {
-                      setActiveFilter(filter.value);
-                      setNextCursor(null); // Reset cursor immediately on click
-                    }}
-                    className={cn(
-                      "whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all border",
-                      activeFilter === filter.value
-                        ? "bg-brand-primary text-white border-brand-primary shadow-glow"
-                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-                    )}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
-              </div>
+        {/* Results List */}
+        <div className="flex-1 overflow-y-auto p-2 pb-32" id="exercise-results">
+          {loading && results.length === 0 ? (
+            <div className="space-y-3 p-2">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-16 bg-zinc-900 rounded-xl animate-pulse" />
+              ))}
             </div>
-
-            {/* Results List */}
-            <div className="flex-1 overflow-y-auto p-2 pb-32" id="exercise-results">
-              {loading && results.length === 0 ? (
-                <div className="space-y-3 p-2">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} className="h-16 bg-zinc-900 rounded-xl animate-pulse" />
-                  ))}
+          ) : (
+            <div className="space-y-1">
+              {results.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-50">
+                  <Dumbbell size={40} className="text-zinc-700 mb-2" />
+                  <span className="text-zinc-500 font-medium">No exercises found.</span>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  {results.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-50">
-                      <Dumbbell size={40} className="text-zinc-700 mb-2" />
-                      <span className="text-zinc-500 font-medium">No exercises found.</span>
-                    </div>
-                  ) : (
-                    <>
-                      {results.map(ex => {
-                        const isSelected = selectedIds.includes(ex.id);
-                        const isExisting = existingExerciseIds.includes(ex.id);
-                        const isExpanded = expandedId === ex.id;
-                        
-                        return (
-                          <div key={ex.id} className="flex flex-col mb-1">
-                            <div
-                              onClick={() => setExpandedId(isExpanded ? null : ex.id)}
-                              className={cn(
-                                "flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer active:scale-[0.99]",
-                                isSelected
-                                  ? "bg-brand-primary/10 border-brand-primary"
-                                  : "bg-transparent border-transparent hover:bg-zinc-900",
-                                isExisting && !isSelected ? "opacity-60" : ""
+                <>
+                  {results.map(ex => {
+                    const isSelected = selectedIds.includes(ex.id);
+                    const isExisting = existingExerciseIds.includes(ex.id);
+                    const isExpanded = expandedId === ex.id;
+                    
+                    return (
+                      <div key={ex.id} className="flex flex-col mb-1">
+                        <div
+                          onClick={() => setExpandedId(isExpanded ? null : ex.id)}
+                          className={cn(
+                            "flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer active:scale-[0.99]",
+                            isSelected
+                              ? "bg-brand-primary/10 border-brand-primary"
+                              : "bg-transparent border-transparent hover:bg-zinc-900",
+                            isExisting && !isSelected ? "opacity-60" : ""
+                          )}
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden shrink-0 border border-white/5">
+                            <ImageWithFallback
+                              src={getThumbUrl(ex)}
+                              alt={ex.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-brand-primary" : "text-white")}>
+                              {ex.name}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">
+                                {ex.targetMuscle}
+                              </span>
+                              {isExisting && (
+                                <span className="text-caption-xs bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                                  Added
+                                </span>
                               )}
+                            </div>
+                          </div>
+                          <div 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggle(ex);
+                            }}
+                            className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center border transition-all shrink-0",
+                              isSelected
+                                ? "bg-brand-primary border-brand-primary text-white"
+                                : "border-zinc-700 text-transparent hover:border-zinc-500"
+                            )}>
+                            <Check size={16} strokeWidth={3} />
+                          </div>
+                        </div>
+                        
+                        {/* Expanded Preview Inline */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
                             >
-                              <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden shrink-0 border border-white/5">
-                                <ImageWithFallback
-                                  src={getThumbUrl(ex)}
-                                  alt={ex.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-brand-primary" : "text-white")}>
-                                  {ex.name}
-                                </h4>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">
-                                    {ex.targetMuscle}
-                                  </span>
-                                  {isExisting && (
-                                    <span className="text-caption-xs bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
-                                      Added
-                                    </span>
+                              <div className="mx-2 mb-2 p-3 bg-zinc-900/50 rounded-lg border border-white/5 flex gap-3">
+                                <div className="w-24 h-24 rounded bg-zinc-950 overflow-hidden shrink-0 border border-white/5">
+                                  <ImageWithFallback src={ex.gifUrl || getThumbUrl(ex)} alt={ex.name} className="w-full h-full object-cover mix-blend-screen" />
+                                </div>
+                                <div className="flex-1 flex flex-col justify-center gap-2">
+                                  {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
+                                    <div>
+                                      <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Secondary</span>
+                                      <p className="text-xs text-zinc-300 capitalize">{ex.secondaryMuscles.join(', ')}</p>
+                                    </div>
+                                  )}
+                                  {ex.equipment && (
+                                    <div>
+                                      <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Equipment</span>
+                                      <p className="text-xs text-zinc-300 capitalize">{ex.equipment}</p>
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                              <div 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggle(ex);
-                                }}
-                                className={cn(
-                                  "w-8 h-8 rounded-full flex items-center justify-center border transition-all shrink-0",
-                                  isSelected
-                                    ? "bg-brand-primary border-brand-primary text-white"
-                                    : "border-zinc-700 text-transparent hover:border-zinc-500"
-                                )}>
-                                <Check size={16} strokeWidth={3} />
-                              </div>
-                            </div>
-                            
-                            {/* Expanded Preview Inline */}
-                            <AnimatePresence>
-                              {isExpanded && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="mx-2 mb-2 p-3 bg-zinc-900/50 rounded-lg border border-white/5 flex gap-3">
-                                    <div className="w-24 h-24 rounded bg-zinc-950 overflow-hidden shrink-0 border border-white/5">
-                                      <ImageWithFallback src={ex.gifUrl || getThumbUrl(ex)} alt={ex.name} className="w-full h-full object-cover mix-blend-screen" />
-                                    </div>
-                                    <div className="flex-1 flex flex-col justify-center gap-2">
-                                      {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
-                                        <div>
-                                          <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Secondary</span>
-                                          <p className="text-xs text-zinc-300 capitalize">{ex.secondaryMuscles.join(', ')}</p>
-                                        </div>
-                                      )}
-                                      {ex.equipment && (
-                                        <div>
-                                          <span className="text-caption-xs text-zinc-500 uppercase font-bold tracking-wider">Equipment</span>
-                                          <p className="text-xs text-zinc-300 capitalize">{ex.equipment}</p>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        );
-                      })}
-
-                      {/* Load More Button */}
-                      {nextCursor && (
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={loadingMore}
-                          className="w-full py-4 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50 tap"
-                        >
-                          {loadingMore ? (
-                            <Loader2 className="animate-spin" size={16} />
-                          ) : (
-                            <ChevronDown size={16} />
+                            </motion.div>
                           )}
-                          {loadingMore ? 'Loading...' : 'Load More'}
-                        </button>
-                      )}
-                    </>
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+
+                  {/* Load More Button */}
+                  {nextCursor && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleLoadMore}
+                      loading={loadingMore}
+                      iconLeft={ChevronDown}
+                      className="w-full mt-2 font-bold uppercase tracking-widest text-xs h-12 rounded-xl"
+                    >
+                      Load More
+                    </Button>
                   )}
-                </div>
+                </>
               )}
             </div>
+          )}
+        </div>
 
-            {/* R-03: Create Custom Exercise */}
-            <div className="shrink-0 px-4 pb-3 border-t border-zinc-900 pt-3">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-caption font-bold uppercase tracking-widest transition-all rounded-lg"
+        {/* R-03: Create Custom Exercise */}
+        <div className="shrink-0 px-4 pb-3 border-t border-zinc-900 pt-3 bg-zinc-950 z-10">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-zinc-800 hover:border-brand-primary/40 text-zinc-600 hover:text-brand-primary text-caption font-bold uppercase tracking-widest transition-all rounded-lg tap"
+          >
+            <PenLine size={12} /> Create Custom Exercise
+          </button>
+        </div>
+
+        {/* Floating Action Button */}
+        <AnimatePresence>
+          {selectedIds.length > 0 && (
+            <motion.div
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-12 pb-safe z-20"
+            >
+              <Button
+                variant="primary"
+                onClick={handleConfirm}
+                iconLeft={Plus}
+                className="w-full bg-white hover:bg-zinc-100 text-black font-bold h-12 shadow-glow"
               >
-                <PenLine size={12} /> Create Custom Exercise
-              </button>
-            </div>
-
-            {/* Floating Action Button */}
-            <AnimatePresence>
-              {selectedIds.length > 0 && (
-                <motion.div
-                  initial={{ y: 100 }}
-                  animate={{ y: 0 }}
-                  exit={{ y: 100 }}
-                  className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-12 pb-safe z-20"
-                >
-                  <button
-                    onClick={handleConfirm}
-                    className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-glow active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-                  >
-                    <Plus size={20} className="text-black" />
-                    ADD {selectedIds.length} EXERCISES
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </>
-      )}
+                ADD {selectedIds.length} EXERCISES
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </Modal>
 
     {/* R-03: Create Custom Exercise modal */}
     <AnimatePresence>

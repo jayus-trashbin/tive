@@ -342,6 +342,10 @@ const SetRow: React.FC<Props> = ({
                         </motion.button>
                     </div>
                     </div>
+                    {/* Accessible notification for screen readers when set is completed */}
+                    <span className="sr-only" aria-live="polite">
+                        {isCompleted ? `Série ${index + 1} concluída.` : ''}
+                    </span>
                 </motion.div>
             </div>
 

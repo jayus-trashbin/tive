@@ -91,6 +91,9 @@ export const ptBR: Dictionary = {
       langPortuguese: 'Português',
       unitsKg: 'KG',
       unitsLbs: 'LBS',
+      density: 'Densidade do Layout',
+      densityComfortable: 'Confortável',
+      densityCompact: 'Compacto',
     },
     audio: {
       appSounds: 'Sons do App',
