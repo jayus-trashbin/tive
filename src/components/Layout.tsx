@@ -33,7 +33,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
         { id: 'dashboard', icon: Home, label: t('tabs.home') },
         { id: 'plans', icon: ClipboardList, label: t('tabs.routines') },
         { id: 'analytics', icon: BarChart3, label: t('tabs.lab') },
-        { id: 'library', icon: BookOpen, label: t('tabs.library') },
         { id: 'history', icon: History, label: t('tabs.history') },
     ];
 
@@ -148,10 +147,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                         {/* "More" tab */}
                         <MoreTab
                             isPhotosActive={activeTab === 'photos'}
+                            isLibraryActive={activeTab === 'library'}
                             onNavigatePhotos={() => { if (navigator.vibrate) navigator.vibrate(5); onTabChange('photos'); }}
+                            onNavigateLibrary={() => { if (navigator.vibrate) navigator.vibrate(5); onTabChange('library'); }}
                             onOpenSettings={() => { if (navigator.vibrate) navigator.vibrate(5); setSettingsOpen(true); }}
                             moreLabel={t('tabs.more')}
                             photosLabel={t('tabs.photos')}
+                            libraryLabel={t('tabs.library')}
                         />
                     </nav>
                 </motion.div>
@@ -162,21 +164,24 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
 
 interface MoreTabProps {
     isPhotosActive: boolean;
+    isLibraryActive: boolean;
     onNavigatePhotos: () => void;
+    onNavigateLibrary: () => void;
     onOpenSettings: () => void;
     moreLabel: string;
     photosLabel: string;
+    libraryLabel: string;
 }
 
 const MoreTab: React.FC<MoreTabProps> = ({
-    isPhotosActive, onNavigatePhotos, onOpenSettings, moreLabel, photosLabel
+    isPhotosActive, isLibraryActive, onNavigatePhotos, onNavigateLibrary, onOpenSettings, moreLabel, photosLabel, libraryLabel
 }) => {
     const [open, setOpen] = React.useState(false);
     const { shouldReduceMotion } = useMotion();
 
-    React.useEffect(() => { if (isPhotosActive) setOpen(false); }, [isPhotosActive]);
+    React.useEffect(() => { if (isPhotosActive || isLibraryActive) setOpen(false); }, [isPhotosActive, isLibraryActive]);
 
-    const isHighlighted = isPhotosActive;
+    const isHighlighted = isPhotosActive || isLibraryActive;
 
     return (
         <>
@@ -228,6 +233,13 @@ const MoreTab: React.FC<MoreTabProps> = ({
                         style={{ paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 51 }}
                     >
                         <div className="w-full max-w-lg md:max-w-2xl bg-zinc-900 border-t border-zinc-800/60 p-4 flex gap-3">
+                            <MoreSheetCard
+                                id="more-sheet-library"
+                                icon={<BookOpen size={20} />}
+                                label={libraryLabel}
+                                isActive={isLibraryActive}
+                                onClick={() => { setOpen(false); onNavigateLibrary(); }}
+                            />
                             <MoreSheetCard
                                 id="more-sheet-photos"
                                 icon={<Image size={20} />}

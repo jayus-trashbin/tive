@@ -106,7 +106,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
         <div className="flex flex-col h-full overflow-hidden bg-black">
 
             {/* PREMIUM HEADER */}
-            <header className="shrink-0 pt-safe px-4 pb-2 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-20 flex flex-col gap-4">
+            <header className="shrink-0 pt-safe px-page pb-2 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-20 flex flex-col gap-4">
                 <div className="flex items-center justify-between gap-2">
                     {/* Title — can shrink so buttons never get clipped */}
                     <div className="min-w-0 shrink">
@@ -206,7 +206,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onAddPhoto, onUploadPhoto }
             </header>
 
             {/* CONTENT */}
-            <div className="flex-1 overflow-y-auto px-4 pb-32 no-scrollbar scroll-smooth">
+            <div className="flex-1 overflow-y-auto px-page pb-32 no-scrollbar scroll-smooth">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-xs font-bold text-zinc-700 animate-pulse tracking-[0.3em] uppercase">Loading Gallery...</div>

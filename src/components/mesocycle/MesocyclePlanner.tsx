@@ -84,7 +84,7 @@ const DroppableDay: React.FC<DroppableDayProps> = ({
         <div
             ref={setNodeRef}
             className={cn(
-                'relative flex flex-col items-center justify-center rounded-lg border transition-all min-h-[48px] min-w-[40px]',
+                'relative flex flex-col items-center justify-center rounded-lg border transition-all min-h-[48px] min-w-0',
                 isDeload
                     ? 'border-zinc-800 bg-zinc-900/30 opacity-40'
                     : isOver

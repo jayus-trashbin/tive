@@ -13,6 +13,7 @@ import RecoveryTimeline from './RecoveryTimeline';
 import { useWorkoutStore } from '../../store/useWorkoutStore';
 import { exportToCSV, downloadCSV, downloadJSON, parseBackupJSON, parseHevyCSV, parseStrongCSV } from '../../utils/exportImport';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Page } from '../ui/Page';
 
 /**
  * Premium Analytics Dashboard — BLOCO 3 complete.
@@ -102,7 +103,7 @@ const AnalyticsDashboard: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col space-y-6">
+        <Page className="flex flex-col space-y-6">
             {/* Header */}
             <header className="shrink-0">
                 <div className="flex items-center justify-between mb-4">
@@ -320,7 +321,7 @@ const AnalyticsDashboard: React.FC = () => {
                     </p>
                 </div>
             </div>
-        </div>
+        </Page>
     );
 };
 
